@@ -13,6 +13,7 @@ class Subnet : public QObject
     Q_OBJECT
 public:
     explicit Subnet(QObject *parent = 0);
+    ~Subnet();
     
     void setIP(quint32 &ip);
     void setNM(quint32 &nm);
@@ -22,14 +23,27 @@ public:
     void setColor(QColor &color);
     void setNotes(QString &notes);
 
-    quint32 &getIP();
-    quint32 &getNM();
-    QString &getDescription();
-    QString &getIdentifier();
-    QString &getNotes();
-    bool    &getSelected();
-    QColor  &getColor();
+    quint32& getIP();
+    quint32 getLastUsableIP();
+    quint32 getFirstUsableIP();
+    quint32 getWildcard();
+    quint32 getBroadcast();
+    quint32 getSize();
+    quint32 getCIDR();
+    quint32& getNM();
+    QString& getDescription();
+    QString& getIdentifier();
+    QString& getNotes();
+    bool&    getSelected();
+    QColor&  getColor();
 
+    static QString IP2String(quint32 &ip);
+
+    QString toString();
+
+    bool    containsHost(quint32 &host);
+
+    QString dumpAll();
 
 signals:
     
@@ -37,16 +51,18 @@ public slots:
 
 protected:
 
-    quint32 _ip_address_int;
-    quint32 _netmask_int;
+    void normalize();
 
-    QString _identifier;
-    QString _description;
+    quint32 *_ip_address;
+    quint32 *_netmask;
 
-    QColor  _color;
-    QString _notes;
+    QString *_identifier;
+    QString *_description;
 
-    bool    _selected;
+    QColor  *_color;
+    QString *_notes;
+
+    bool    *_selected;
 };
 
 #endif // SUBNET_H
