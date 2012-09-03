@@ -12,9 +12,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    ttsubnetview.cpp
+    ttsubnetview.cpp \
+    subnet.cpp \
+    subnet_v6.cpp
 
 HEADERS  += mainwindow.h \
-    ttsubnetview.h
+    ttsubnetview.h \
+    subnet.h \
+    subnet_v6.h
 
 FORMS    += mainwindow.ui
