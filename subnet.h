@@ -16,7 +16,9 @@ public:
     ~Subnet();
     
     void setIP(quint32 &ip);
+    void setIP(QString &ip);
     void setNM(quint32 &nm);
+    void setNM(QString &nm);
     void setDescription(QString &description);
     void setIdentifier(QString &identifier);
     void setSelected(bool &selected);
@@ -30,6 +32,7 @@ public:
     quint32 getBroadcast();
     quint32 getSize();
     quint32 getCIDR();
+    quint32 getCIDR24Blocks();
     quint32& getNM();
     QString& getDescription();
     QString& getIdentifier();
@@ -38,12 +41,13 @@ public:
     QColor&  getColor();
 
     static QString IP2String(quint32 &ip);
+    static quint32 String2IP(QString &str_ip);
 
     QString toString();
 
     bool    containsHost(quint32 &host);
 
-    QString dumpAll();
+    void dumpAll();
 
 signals:
     

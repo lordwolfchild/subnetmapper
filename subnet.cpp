@@ -22,6 +22,8 @@ Subnet::Subnet(QObject *parent) :
     setDescription(mom);
     setIdentifier(mom);
     setNotes(mom);
+
+    normalize();
 }
 
 Subnet::~Subnet()
@@ -38,17 +40,30 @@ Subnet::~Subnet()
 void Subnet::setIP(quint32 &ip)
 {
     *_ip_address=ip;
+    normalize();
+}
+
+void Subnet::setIP(QString &ip)
+{
+    *_ip_address = String2IP(ip);
+    normalize();
 }
 
 void Subnet::setNM(quint32 &nm)
 {
     *_netmask=nm;
+    normalize();
+}
+
+void Subnet::setNM(QString &nm)
+{
+    *_netmask = String2IP(nm);
+    normalize();
 }
 
 void Subnet::setDescription(QString &description)
 {
     *_description=description;
-    printf("%p\n",(void*)_description);
 }
 
 void Subnet::setIdentifier(QString &identifier)
@@ -76,34 +91,59 @@ quint32& Subnet::getIP()
     return *_ip_address;
 }
 
+
+// TODO
 quint32 Subnet::getLastUsableIP()
 {
-    return *_ip_address;
+    if (getCIDR()<31)
+            return (getBroadcast()-1);
+    else
+            return 0;
 }
 
+// TODO
 quint32 Subnet::getFirstUsableIP()
 {
-    return *_ip_address;
+    if (getCIDR()<31)
+            return (getIP()+1);
+    else
+            return 0;
 }
 
+// TODO
 quint32 Subnet::getWildcard()
 {
-    return *_ip_address;
+    return ~(*_netmask);
 }
 
+// TODO
 quint32 Subnet::getBroadcast()
 {
-    return *_ip_address;
+    return (getIP()|getWildcard());
 }
 
+// TODO
 quint32 Subnet::getSize()
 {
-    return *_ip_address;
+    quint32 nm = getNM();
+    quint32 wc = (~nm)+1;
+
+    return wc;
 }
 
+// TODO
 quint32 Subnet::getCIDR()
 {
-    return *_ip_address;
+    unsigned char cidr=32;
+    unsigned long wildcard=~getNM();
+
+    while (wildcard>0) {
+            cidr--;
+            wildcard>>=1;
+    };
+
+    return cidr;
+
 }
 
 quint32& Subnet::getNM()
@@ -138,16 +178,105 @@ QColor&  Subnet::getColor()
 
 QString Subnet::IP2String(quint32 &ip)
 {
-    ip++;
-    return QString("Hey.");
+    QString outp;
+
+    // I'm using pointer aritmethics to calculate the netmask octets...
+    // get the ip into something we cannot destroy by accident. ;)
+    unsigned long int ul_ip = ip;
+    // Now we do the bad stuff. Get the ptr to the first byte of the ulong above.
+    unsigned char* ptr = (unsigned char*)&ul_ip;
+    // now use this address as an offset to select the subsequent bytes from the long.
+    // Don't forget to use clean casting, or the compiler will get unhappy.
+    unsigned char oct1 = *(unsigned char*)(ptr+3);
+    unsigned char oct2 = *(unsigned char*)(ptr+2);
+    unsigned char oct3 = *(unsigned char*)(ptr+1);
+    unsigned char oct4 = *(unsigned char*)(ptr);
+
+    // Now put it in the string which we will return afterwards.
+    outp.sprintf("%u.%u.%u.%u",oct1,oct2,oct3,oct4);
+
+    // finished!
+    return outp;
+}
+
+quint32 Subnet::getCIDR24Blocks()
+{
+    quint32 nm = getNM();
+
+    // complement the netmask and shift it 8 bits to the right and you get the number of /24
+    // nets in the subnet (-1, because the zero counts a a net again).
+    quint32 numberOfCIDRBlocks=(((~nm)>>8)+1);
+
+    return numberOfCIDRBlocks;
+}
+
+
+// returns zero if string is not parseable. Attention: returns zero, if IP reads 0.0.0.0, too! :)
+quint32 Subnet::String2IP(QString &str_ip)
+{
+    // clean up the input
+    QString inp_str=str_ip.trimmed();
+
+    // check via regular expression if the string is in std. 4 byte dotted notation
+    if (inp_str.contains(QRegExp("([0-9]{1,3}[.]){,3}[0-9]{1,3}")))
+    {
+        // Ok, the string seems to be allright. So we split.
+        QStringList strlist = inp_str.split('.');
+
+        // If there are more or less than 4 parts of the splitted string, something
+        // is not right and we just reject.
+        if (strlist.count()!=4) return 0;
+        else
+        {
+            // Ok, now it seems we can do some actual conversion work. Convert the
+            // single bytes to unsigned integers.
+            unsigned int mom_b4 = strlist.at(0).toUInt();
+            unsigned int mom_b3 = strlist.at(1).toUInt();
+            unsigned int mom_b2 = strlist.at(2).toUInt();
+            unsigned int mom_b1 = strlist.at(3).toUInt();
+
+            // if one of the parsed numbers is higher than 255, it cannot be a valid IP.
+            if ((mom_b4>255)|(mom_b3>255)|(mom_b2>255)|(mom_b1>255)) return 0;
+
+            // in this variable we will save the calculated numerical ip
+            quint32 mom_ip;
+
+            // prepare soome helper pointer, so we can save the discrete bytes into
+            // mom_ip conveniently and without too much casting horror
+            unsigned char *b0 = ((unsigned char*)&mom_ip);
+            unsigned char *b1 = ((unsigned char*)&mom_ip)+1;
+            unsigned char *b2 = ((unsigned char*)&mom_ip)+2;
+            unsigned char *b3 = ((unsigned char*)&mom_ip)+3;
+
+
+            // save the parsed bytes into the dereferences helper pointers,
+            // and therefore bytewise into the integer mom_ip.
+            *b0 = *(((unsigned char*)&mom_b1)+0);
+            *b1 = *(((unsigned char*)&mom_b2)+0);
+            *b2 = *(((unsigned char*)&mom_b3)+0);
+            *b3 = *(((unsigned char*)&mom_b4)+0);
+
+            // return our hard earned result.
+            return mom_ip;
+        }
+    } else return 0;
 }
 
 QString Subnet::toString()
 {
-    QString outp="Jo.";
+    QString outp;
+
+    outp+=IP2String(getIP());
+    outp+="/";
+
+    QString cidr;
+    cidr.setNum(getCIDR());
+    outp+=cidr;
+
     return outp;
 }
 
+// TODO
 bool   Subnet::containsHost(quint32 &host)
 {
     host++;
@@ -156,11 +285,39 @@ bool   Subnet::containsHost(quint32 &host)
 
 void Subnet::normalize()
 {
+    // as we want to specify a subnet here, we actually have to make sure, that the ip entered is the network address,
+    // not one of the network's host addresses. Just AND IP and NM like we learned in ancient times at school.
+    *_ip_address=getIP()&getNM();
+    qDebug("Normalizing Subnet IP to %s.",qPrintable(this->toString()));
+
 }
 
-QString dumpAll()
+void Subnet::dumpAll()
 {
-    QString outp="Jo.";
-    return outp;
-}
+     quint32 wildcard=getWildcard();
+     quint32 first = getFirstUsableIP();
+     quint32 last = getLastUsableIP();
+     quint32 broadcast = getBroadcast();
+     quint32 cidr24 = getCIDR24Blocks();
 
+     qDebug("---DUMP START-------------------------------");
+     qDebug(" Object Address:         %p",this);
+     qDebug("--------------------------------------------");
+     qDebug(" Network:                %s",qPrintable(this->toString()));
+     qDebug(" Netmask:                %s",qPrintable(IP2String(getNM())));
+     qDebug(" Wildcard Bits:          %s",qPrintable(IP2String(wildcard)));
+     qDebug(" Size:                   %u",getSize());
+     qDebug(" First Usable IP:        %s",qPrintable(IP2String(first)));
+     qDebug(" Last Usable IP:         %s",qPrintable(IP2String(last)));
+     qDebug(" Broadcast Address:      %s",qPrintable(IP2String(broadcast)));
+     qDebug(" CIDR24 Blocks:          %u",cidr24);
+     qDebug("--------------------------------------------");
+     qDebug(" Identifier:");
+     qDebug("   %s",qPrintable(getIdentifier()));
+     qDebug(" Description:");
+     qDebug("   %s",qPrintable(getDescription()));
+     qDebug("--------------------------------------------");
+     qDebug(" Notes dump:");
+     qDebug("   %s",qPrintable(getNotes()));
+     qDebug("---------------------------------DUMP END---");
+}
