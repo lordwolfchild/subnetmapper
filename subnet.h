@@ -14,7 +14,10 @@ class Subnet : public QObject
 public:
     explicit Subnet(QObject *parent = 0);
     ~Subnet();
-    
+
+    explicit Subnet(quint32 ip, quint32 nm = ~0, QString id = "n/a", QString description = "n/a", QString notes = "n/a", QObject *parent = 0);
+    explicit Subnet(QString ip, QString nm = "255.255.255.255", QString id = "n/a", QString description = "n/a", QString notes = "n/a", QObject *parent = 0);
+
     void setIP(quint32 &ip);
     void setIP(QString &ip);
     void setNM(quint32 &nm);

@@ -26,11 +26,14 @@ int main(int argc, char *argv[])
     delete mom1;
     delete mom3;
     momSubnet->dumpAll();
-
-    QString momIP="121.255.123.124";
-    quint32 mom=momSubnet->String2IP(momIP);
-    qDebug("%s\n",qPrintable(momSubnet->IP2String(mom)));
     delete momSubnet;
+
+
+    Subnet *smom2 = new Subnet("131.220.149.6","255.255.255.224");
+
+    smom2->dumpAll();
+
+    delete smom2;
 
     return 0;
 }

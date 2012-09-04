@@ -26,6 +26,54 @@ Subnet::Subnet(QObject *parent) :
     normalize();
 }
 
+Subnet::Subnet(quint32 ip, quint32 nm, QString id, QString description, QString notes, QObject *parent) :
+    QObject(parent)
+{
+
+    _ip_address=new(quint32);
+    _netmask=new(quint32);
+    _description=new(QString);
+    _notes=new(QString);
+    _identifier=new(QString);
+    _selected=new(bool);
+    _color=new(QColor);
+
+    setIP(ip);
+    setNM(nm);
+    normalize();
+    setDescription(description);
+    setIdentifier(id);
+    setNotes(notes);
+
+    normalize();
+
+}
+
+Subnet::Subnet(QString ip, QString nm, QString id, QString description, QString notes, QObject *parent) :
+    QObject(parent)
+{
+
+    _ip_address=new(quint32);
+    _netmask=new(quint32);
+    _description=new(QString);
+    _notes=new(QString);
+    _identifier=new(QString);
+    _selected=new(bool);
+    _color=new(QColor);
+
+    quint32 momip = String2IP(ip);
+    quint32 momnm = String2IP(nm);
+    setIP(momip);
+    setNM(momnm);
+    normalize();
+    setDescription(description);
+    setIdentifier(id);
+    setNotes(notes);
+
+    normalize();
+
+}
+
 Subnet::~Subnet()
 {
     delete(_ip_address);
