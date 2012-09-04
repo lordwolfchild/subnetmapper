@@ -18,7 +18,6 @@ Subnet::Subnet(QObject *parent) :
 
     *_ip_address=momIp;
     *_netmask=momNm;
-    normalize();
     setDescription(mom);
     setIdentifier(mom);
     setNotes(mom);
@@ -40,7 +39,6 @@ Subnet::Subnet(quint32 ip, quint32 nm, QString id, QString description, QString 
 
     *_ip_address=ip;
     *_netmask=nm;
-    normalize();
     setDescription(description);
     setIdentifier(id);
     setNotes(notes);
@@ -65,7 +63,6 @@ Subnet::Subnet(QString ip, QString nm, QString id, QString description, QString 
     quint32 momnm = String2IP(nm);
     *_ip_address=momip;
     *_netmask=momnm;
-    normalize();
     setDescription(description);
     setIdentifier(id);
     setNotes(notes);
@@ -336,8 +333,6 @@ void Subnet::normalize()
     // as we want to specify a subnet here, we actually have to make sure, that the ip entered is the network address,
     // not one of the network's host addresses. Just AND IP and NM like we learned in ancient times at school.
     *_ip_address=getIP()&getNM();
-    qDebug("Normalizing Subnet IP to %s.",qPrintable(this->toString()));
-
 }
 
 void Subnet::dumpAll()
