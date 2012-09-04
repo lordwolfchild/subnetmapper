@@ -16,8 +16,8 @@ Subnet::Subnet(QObject *parent) :
     quint32 momNm = ~0;
     QString mom = "n/a";
 
-    setIP(momIp);
-    setNM(momNm);
+    *_ip_address=momIp;
+    *_netmask=momNm;
     normalize();
     setDescription(mom);
     setIdentifier(mom);
@@ -38,8 +38,8 @@ Subnet::Subnet(quint32 ip, quint32 nm, QString id, QString description, QString 
     _selected=new(bool);
     _color=new(QColor);
 
-    setIP(ip);
-    setNM(nm);
+    *_ip_address=ip;
+    *_netmask=nm;
     normalize();
     setDescription(description);
     setIdentifier(id);
@@ -63,8 +63,8 @@ Subnet::Subnet(QString ip, QString nm, QString id, QString description, QString 
 
     quint32 momip = String2IP(ip);
     quint32 momnm = String2IP(nm);
-    setIP(momip);
-    setNM(momnm);
+    *_ip_address=momip;
+    *_netmask=momnm;
     normalize();
     setDescription(description);
     setIdentifier(id);
