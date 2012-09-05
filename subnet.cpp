@@ -312,7 +312,7 @@ quint32 Subnet::String2IP(QString &str_ip)
     } else return 0;
 }
 
-QString Subnet::toString()
+QString Subnet::toStr()
 {
     QString outp;
 
@@ -352,7 +352,7 @@ void Subnet::dumpAll()
      else qDebug("---DUMP START----------------------[IPv6]---");
      qDebug(" Object Address:         %p",this);
      qDebug("--------------------------------------------");
-     qDebug(" Network:                %s",qPrintable(this->toString()));
+     qDebug(" Network:                %s",qPrintable(this->toStr()));
      qDebug(" Netmask:                %s",qPrintable(IP2String(getNM())));
      qDebug(" Wildcard Bits:          %s",qPrintable(IP2String(wildcard)));
      qDebug(" Size:                   %u",getSize());

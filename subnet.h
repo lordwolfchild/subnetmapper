@@ -49,7 +49,7 @@ public:
     static QString IP2String(quint32 &ip);
     static quint32 String2IP(QString &str_ip);
 
-    QString toString();
+    QString toStr();
 
     bool    containsHost(quint32 &host);
 
