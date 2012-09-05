@@ -1,7 +1,7 @@
 #include <QtGui/QApplication>
 #include "mainwindow.h"
 #include <stdio.h>
-#include "subnet.h"
+#include "subnet_v6.h"
 #include <iostream>
 #include <QtGlobal>
 
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     QString* mom3 = new QString("255.255.253.0");
     QString mom2="Back to Moinmoin!";
 
-    Subnet* momSubnet = new Subnet();
+    Subnet_v6* momSubnet = new Subnet_v6();
     momSubnet->setIP(*mom1);
     momSubnet->setNM(*mom3);
     momSubnet->setDescription(mom2);

@@ -191,6 +191,11 @@ quint32 Subnet::getCIDR()
 
 }
 
+Subnet::IPversion Subnet::getIPversion()
+{
+    return Subnet::IPv4;
+}
+
 quint32& Subnet::getNM()
 {
     return *_netmask;
@@ -343,7 +348,8 @@ void Subnet::dumpAll()
      quint32 broadcast = getBroadcast();
      quint32 cidr24 = getCIDR24Blocks();
 
-     qDebug("---DUMP START-------------------------------");
+     if (getIPversion()==IPv4) qDebug("---DUMP START----------------------[IPv4]---");
+     else qDebug("---DUMP START----------------------[IPv6]---");
      qDebug(" Object Address:         %p",this);
      qDebug("--------------------------------------------");
      qDebug(" Network:                %s",qPrintable(this->toString()));
