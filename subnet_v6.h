@@ -5,7 +5,7 @@
 
 /*
 
- TODO: Implement this. at the time, this class is just a copy of the IPv4 Subnet Class.
+ TODO: Implement this. At the time, this class is just a copy of the IPv4 Subnet Class.
  I do not even think, that this is a very good idea to inherit Subnet like this. Maybe
  a restructurization would be in order? Maybe when issuing a model which uses polymorpic
  methods for storing and/or accessing its data...
@@ -20,7 +20,13 @@
  two 64bit quint64 variables and do the calculations twice for each part of the ip
  address string. This should work pretty well, reducing the big problem to writing
  parser routines for parsing a readbale IPv6 address to our variables even in reduced
- form.
+ form. Other variatons come in mind, such as a 16 unsinded chars in an array or a
+ record of the same content, like Q_IPV6ADDR. But the method of the two quint64 vars
+ should be quicker to implement, because we already have the methods with calculations
+ for one quint32 in the IPv4 implementation. This method should be faster too, because
+ the calculations are not atomic, but broader in nature - eight byte in one tick instead
+ of one byte per tick - that is of course a line of thought without taking the compiler
+ optimizations into consideration.
 
  I would say there should be three steps involved:
 
