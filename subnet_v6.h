@@ -2,6 +2,7 @@
 #define SUBNET_V6_H
 
 #include "subnet.h"
+#include <QPair>
 
 /*
 
@@ -40,8 +41,81 @@
 
 class Subnet_v6 : public Subnet
 {
+    Q_OBJECT
 public:
     explicit Subnet_v6(QObject *parent = 0);
+    ~Subnet_v6();
+
+    explicit Subnet_v6(QPair<quint64,quint64> ip, QPair<quint64,quint64> nm, QString id = "n/a", QString description = "n/a", QString notes = "n/a", QObject *parent = 0);
+    explicit Subnet_v6(QString ip, QString nm = "255.255.255.255", QString id = "n/a", QString description = "n/a", QString notes = "n/a", QObject *parent = 0);
+
+    void setIP(QPair<quint64,quint64> &ip);
+    void setIP(QString &ip);
+    void setNM(QPair<quint64,quint64> &nm);
+    void setNM(QString &nm);
+    void setDescription(QString &description);
+    void setIdentifier(QString &identifier);
+    void setSelected(bool &selected);
+    void setColor(QColor &color);
+    void setNotes(QString &notes);
+
+    enum IPversion { IPv4, IPv6 };
+
+    IPversion getIPversion();
+    QPair<quint64,quint64> getIP();
+    QPair<quint64,quint64> getLastUsableIP();
+    QPair<quint64,quint64> getFirstUsableIP();
+    QPair<quint64,quint64> getWildcard();
+    QPair<quint64,quint64> getBroadcast();
+    quint64 getSize();
+    quint64 getCIDR();
+    quint64 getCIDR24Blocks();
+    QPair<quint64,quint64> getNM();
+    QString& getDescription();
+    QString& getIdentifier();
+    QString& getNotes();
+    bool&    getSelected();
+    QColor&  getColor();
+
+    static QString IP2String(QPair<quint64,quint64> &ip);
+    static QPair<quint64,quint64> String2IP(QString &str_ip);
+    static QString normalizeIP(QString &ip);
+
+    QString toStr();
+
+    bool    containsHost(QPair<quint64,quint64> &host);
+
+    void dumpAll();
+
+signals:
+
+public slots:
+
+protected:
+
+    void normalize();
+
+    // these two will be obsolete soon...
+    quint32 *_ip_address;
+    quint32 *_netmask;
+
+    // instead those four will be relevant:
+    // low and high part of ip address/netmask
+    quint64 *_ip_address_lo;
+    quint64 *_ip_address_hi;
+    quint64 *_netmask_lo;
+    quint64 *_netmask_hi;
+
+
+    QString *_identifier;
+    QString *_description;
+
+    QColor  *_color;
+    QString *_notes;
+
+    bool    *_selected;
+
+
 };
 
 #endif // SUBNET_V6_H

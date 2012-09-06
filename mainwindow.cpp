@@ -1,9 +1,13 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "sm_datamodel.h"
 #include <QSplitter>
 #include <QTableView>
 #include <QToolBar>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
+#include <QHeaderView>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -24,9 +28,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(openAction, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFile()));
-    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
 
-    menuBar()->addMenu(fileMenu);
+    this->menuBar()->addMenu(fileMenu);
     statusBar();
 
     QToolBar *toolbar = new QToolBar("Main Toolbar",this);
@@ -81,13 +85,13 @@ void MainWindow::setupViews()
 
 void MainWindow::openFile(const QString &path)
 {
-/*    QString fileName;
+    QString fileName;
     if (path.isNull())
         fileName = QFileDialog::getOpenFileName(this, tr("Choose a data file"),
                                                 "", "*.cht");
     else
         fileName = path;
-
+/*
     if (!fileName.isEmpty()) {
         QFile file(fileName);
 
@@ -123,10 +127,10 @@ void MainWindow::openFile(const QString &path)
 
 void MainWindow::saveFile()
 {
-/*    QString fileName = QFileDialog::getSaveFileName(this,
+    QString fileName = QFileDialog::getSaveFileName(this,
         tr("Save file as"), "", "*.cht");
 
-    if (!fileName.isEmpty()) {
+/*    if (!fileName.isEmpty()) {
         QFile file(fileName);
         QTextStream stream(&file);
 

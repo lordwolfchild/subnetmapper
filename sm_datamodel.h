@@ -2,7 +2,7 @@
 #define SM_DATAMODEL_H
 
 #include <QAbstractTableModel>
-#include "subnet.h"
+#include "subnet_v4.h"
 #include "subnet_v6.h"
 
 class SM_DataModel : public QAbstractTableModel
@@ -22,15 +22,13 @@ public:
 
     // mandatory functions for resizable model subclasses:
     bool insertRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
-    bool insertColumns ( int column, int count, const QModelIndex & parent = QModelIndex() );
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
-    bool removeColumns ( int column, int count, const QModelIndex & parent = QModelIndex() );
 
     void addDemos();
 
 protected:
 
-    QList<Subnet*>     SubnetList;
+    QList<Subnet_v4*>  SubnetV4List;
     QList<Subnet_v6*>  SubnetV6List;
 
 };

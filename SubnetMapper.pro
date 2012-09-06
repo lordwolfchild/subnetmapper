@@ -15,13 +15,15 @@ SOURCES += main.cpp\
     ttsubnetview.cpp \
     subnet.cpp \
     subnet_v6.cpp \
-    sm_datamodel.cpp
+    sm_datamodel.cpp \
+    subnet_v4.cpp
 
 HEADERS  += mainwindow.h \
     ttsubnetview.h \
     subnet.h \
     subnet_v6.h \
-    sm_datamodel.h
+    sm_datamodel.h \
+    subnet_v4.h
 
 FORMS    +=
 
