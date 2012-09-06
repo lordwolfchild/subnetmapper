@@ -425,12 +425,12 @@ QString Subnet_v6::normalizeIP(QString &ip)
         QString token = tokens.first();
         tokens.removeFirst();
 
-        if (token.isNull()) {
+        if (token.isEmpty()) {
             int i=7-colon_count;
-            while (i>=0) { outp+="0000:"; i--; };
+            while (i>=0) { outp+="0000:"; i--; qDebug("0000: (formerly reduced)"); };
         } else {
             while (token.length()<4) token.prepend('0');
-            token.append(':');
+            if (!tokens.isEmpty()) token.append(':');
             outp+=token;
         };
 

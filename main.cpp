@@ -17,9 +17,10 @@ int main(int argc, char *argv[])
 
     momsubnet.dumpAll();
 
-    QString Test = "      2001:db8:a3::8a2e:0370:44   ";
+    QString Test = "      ::   ";
     QPair<quint64,quint64> momip = qMakePair(~(quint64)0,~(quint64)0);
 
+    qDebug("-%s- Original",qPrintable(Test));
     qDebug("-%s-\n",qPrintable(momsubnet.normalizeIP(Test)));
 
     return 0;
