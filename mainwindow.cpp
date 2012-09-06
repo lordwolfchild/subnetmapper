@@ -5,19 +5,32 @@
 #include <QTableView>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    QMainWindow(parent)
 {
-    ui->setupUi(this);
+    QMenu *fileMenu = new QMenu(tr("&File"), this);
+    QAction *openAction = fileMenu->addAction(tr("&Open..."));
+    openAction->setShortcuts(QKeySequence::Open);
+    QAction *saveAction = fileMenu->addAction(tr("&Save As..."));
+    saveAction->setShortcuts(QKeySequence::SaveAs);
+    QAction *quitAction = fileMenu->addAction(tr("E&xit"));
+    quitAction->setShortcuts(QKeySequence::Quit);
 
     setupModel();
     setupViews();
+
+    connect(openAction, SIGNAL(triggered()), this, SLOT(openFile()));
+    connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFile()));
+    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+
+    menuBar()->addMenu(fileMenu);
+    statusBar();
+
+    setWindowTitle(tr("SubnetMapper V0.0"));
 
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
 }
 
 

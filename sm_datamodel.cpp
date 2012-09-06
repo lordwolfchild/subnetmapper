@@ -11,6 +11,7 @@ Qt::ItemFlags SM_DataModel::flags ( const QModelIndex & index ) const
 
 QVariant SM_DataModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
+    if ((section>0)&(section<5)) return QString("Test");
 }
 
 QVariant SM_DataModel::data(const QModelIndex &index, int role) const

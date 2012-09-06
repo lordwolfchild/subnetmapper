@@ -6,10 +6,6 @@
 #include <QAbstractItemView>
 #include <QItemSelectionModel>
 
-namespace Ui {
-class MainWindow;
-}
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -30,7 +26,6 @@ private:
     QAbstractItemView *map;
     QItemSelectionModel *selectionModel;
 
-    Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H

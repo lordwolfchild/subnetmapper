@@ -23,4 +23,4 @@ HEADERS  += mainwindow.h \
     subnet_v6.h \
     sm_datamodel.h
 
-FORMS    += mainwindow.ui
+FORMS    +=
