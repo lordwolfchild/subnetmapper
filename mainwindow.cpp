@@ -3,6 +3,7 @@
 #include "sm_datamodel.h"
 #include <QSplitter>
 #include <QTableView>
+#include <QToolBar>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -10,10 +11,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QMenu *fileMenu = new QMenu(tr("&File"), this);
     QAction *openAction = fileMenu->addAction(tr("&Open..."));
     openAction->setShortcuts(QKeySequence::Open);
+    openAction->setIcon(QIcon(":/open.svg"));
     QAction *saveAction = fileMenu->addAction(tr("&Save As..."));
     saveAction->setShortcuts(QKeySequence::SaveAs);
+    saveAction->setIcon(QIcon(":/save.svg"));
     QAction *quitAction = fileMenu->addAction(tr("E&xit"));
     quitAction->setShortcuts(QKeySequence::Quit);
+    quitAction->setIcon(QIcon(":/quit.svg"));
 
     setupModel();
     setupViews();
@@ -24,6 +28,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     menuBar()->addMenu(fileMenu);
     statusBar();
+
+    QToolBar *toolbar = new QToolBar("Main Toolbar",this);
+    this->addToolBar(Qt::LeftToolBarArea,toolbar);
+    toolbar->setOrientation(Qt::Vertical);
+    toolbar->addAction(openAction);
+    toolbar->addAction(saveAction);
+    toolbar->addAction(quitAction);
+    toolbar->insertSeparator(quitAction);
 
     setWindowTitle(tr("SubnetMapper V0.0"));
 
@@ -58,7 +70,11 @@ void MainWindow::setupViews()
     //pieChart->setSelectionModel(selectionModel);
 
     QHeaderView *headerView = table->horizontalHeader();
+    headerView->setResizeMode(QHeaderView::ResizeToContents);
     headerView->setStretchLastSection(true);
+
+    QHeaderView *headerSideView = table->verticalHeader();
+    headerSideView->hide();
 
     setCentralWidget(splitter);
 }

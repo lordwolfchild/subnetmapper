@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="quit.svg">images/quit.svg</file>
+        <file alias="save.svg">images/floppy.svg</file>
+        <file alias="open.svg">images/document-open.svg</file>
+    </qresource>
+</RCC>

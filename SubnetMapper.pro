@@ -24,3 +24,6 @@ HEADERS  += mainwindow.h \
     sm_datamodel.h
 
 FORMS    +=
+
+RESOURCES += \
+    sm_res.qrc
