@@ -388,30 +388,7 @@ QString Subnet_v6::normalizeIP(QString &ip)
 {
     // takes the input ip, slashes whitespaces of the end and start, expands reduced
     // parts of the ip and makes sure everything is in order with the ip. returns a
-    // normalized zeroed ip if anything goes wrong.
-
-    unsigned char mombytes[16] = {0,1,2,3,4,
-                                  5,112,7,8,
-                                  9,10,11,233,
-                                  131,14,15};
-
-    /*qDebug("%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x\n",
-           mombytes[0],
-           mombytes[1],
-           mombytes[2],
-           mombytes[3],
-           mombytes[4],
-           mombytes[5],
-           mombytes[6],
-           mombytes[7],
-           mombytes[8],
-           mombytes[9],
-           mombytes[10],
-           mombytes[11],
-           mombytes[12],
-           mombytes[13],
-           mombytes[14],
-           mombytes[15]);*/
+    // normalized zeroed ip in string representation if anything goes wrong.
 
     QString mom=ip.trimmed();
 
@@ -420,21 +397,37 @@ QString Subnet_v6::normalizeIP(QString &ip)
     QStringList tokens = mom.split(":",QString::KeepEmptyParts,Qt::CaseSensitive);
 
     QString outp="";
+    int counter=0;
 
     while (!tokens.isEmpty())  {
         QString token = tokens.first();
         tokens.removeFirst();
 
-        if (token.isEmpty()) {
+/*        if (token.isEmpty()&(counter>=1)) {
             int i=7-colon_count;
-            while (i>=0) { outp+="0000:"; i--; qDebug("0000: (formerly reduced)"); };
+            while (i>=0) { outp+="0000"; i--; qDebug("0000: (formerly reduced)"); if (i>=0) outp.append(':'); };
         } else {
             while (token.length()<4) token.prepend('0');
             if (!tokens.isEmpty()) token.append(':');
             outp+=token;
-        };
+        };*/
 
+        if (token.isEmpty()&(counter>0)&!tokens.empty())
+        {
+            int reducement_cnt=8-colon_count;
+            for (int i=0;i<reducement_cnt;i++)
+            {
+                token.append("0000:");
+                counter++;
+            };
+        } else {
+            while (token.length()<4) token.prepend('0');
+            if (counter<=7) token.append(':');
+        }
+
+        counter++;
         qDebug("%s",qPrintable(token));
+        outp+=token;
     }
 
     return outp;
