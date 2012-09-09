@@ -35,8 +35,10 @@ Subnet_v6::Subnet_v6(QPair<quint64,quint64> ip, QPair<quint64,quint64> nm, QStri
     Subnet(parent)
 {
 
-    _ip_address=new(quint32);
-    _netmask=new(quint32);
+    _ip_address_lo=new(quint64);
+    _netmask_lo=new(quint64);
+    _ip_address_hi=new(quint64);
+    _netmask_hi=new(quint64);
     _description=new(QString);
     _notes=new(QString);
     _identifier=new(QString);
@@ -59,8 +61,10 @@ Subnet_v6::Subnet_v6(QString ip, QString nm, QString id, QString description, QS
     Subnet(parent)
 {
 
-    _ip_address=new(quint32);
-    _netmask=new(quint32);
+    _ip_address_lo=new(quint64);
+    _netmask_lo=new(quint64);
+    _ip_address_hi=new(quint64);
+    _netmask_hi=new(quint64);
     _description=new(QString);
     _notes=new(QString);
     _identifier=new(QString);
@@ -333,55 +337,43 @@ quint64 Subnet_v6::getCIDR24Blocks()
 }
 
 
-// returns zero if string is not parseable. Attention: returns zero, if IP reads 0.0.0.0, too! :)
+// returns ::/128 if string is not parseable. Attention: returns ::/128, if IP reads ::/128 too! :)
+// Throws away the CIDR Information.
 QPair<quint64,quint64> Subnet_v6::String2IP(QString &str_ip)
 {
- /*   // clean up the input
-    QString inp_str=str_ip.trimmed();
+    // QPair to store result in:
+    QPair<quint64,quint64> resulting_ip;
 
-    // check via regular expression if the string is in std. 4 byte dotted notation
-    if (inp_str.contains(QRegExp("([0-9]{1,3}[.]){,3}[0-9]{1,3}")))
+    // normalize the IP and make sure it is valid and stuff. Will make sure that invalid input returns as ::/128.
+    QString inp = normalizeIP(str_ip);
+
+    // Because of normalization we do know inp a valid address. Now make sure there is a CIDR notation at the end. If so, split it off and
+    // store it away for later reattachment.
+    if (inp.contains(QRegExp("^([0-9a-f]{4,4}[:]){7,7}[0-9a-f]{4,4}(/[1-9][0-9]{0,2})$",Qt::CaseSensitive)))
     {
-        // Ok, the string seems to be allright. So we split.
-        QStringList strlist = inp_str.split('.');
+        QStringList cidrsplit = inp.split("/",QString::KeepEmptyParts,Qt::CaseSensitive);
 
-        // If there are more or less than 4 parts of the splitted string, something
-        // is not right and we just reject.
-        if (strlist.count()!=4) return 0;
-        else
-        {
-            // Ok, now it seems we can do some actual conversion work. Convert the
-            // single bytes to unsigned integers.
-            unsigned int mom_b4 = strlist.at(0).toUInt();
-            unsigned int mom_b3 = strlist.at(1).toUInt();
-            unsigned int mom_b2 = strlist.at(2).toUInt();
-            unsigned int mom_b1 = strlist.at(3).toUInt();
+        inp=cidrsplit.at(0);
+    };
 
-            // if one of the parsed numbers is higher than 255, it cannot be a valid IP.
-            if ((mom_b4>255)|(mom_b3>255)|(mom_b2>255)|(mom_b1>255)) return 0;
+    QStringList syllableList = inp.split(':',QString::KeepEmptyParts,Qt::CaseSensitive);
 
-            // in this variable we will save the calculated numerical ip
-            quint32 mom_ip;
+    for (int i=0;i<8;i++) {
 
-            // prepare soome helper pointer, so we can save the discrete bytes into
-            // mom_ip conveniently and without too much casting horror
-            unsigned char *b0 = ((unsigned char*)&mom_ip);
-            unsigned char *b1 = ((unsigned char*)&mom_ip)+1;
-            unsigned char *b2 = ((unsigned char*)&mom_ip)+2;
-            unsigned char *b3 = ((unsigned char*)&mom_ip)+3;
+        //fetch syllable from List. so we iterate from first to last syllable through this loop.
+        QString syllable = syllableList.at(i);
 
+        bool conv_result;
 
-            // save the parsed bytes into the dereferences helper pointers,
-            // and therefore bytewise into the integer mom_ip.
-            *b0 = *(((unsigned char*)&mom_b1)+0);
-            *b1 = *(((unsigned char*)&mom_b2)+0);
-            *b2 = *(((unsigned char*)&mom_b3)+0);
-            *b3 = *(((unsigned char*)&mom_b4)+0);
+        // we have to split it up to two variables. so a littel index magic is necessary.
+        // furtheron, we use the conversion function from QString to base16-convert the
+        // string to numerical values and cast them into our designated result bytes.
+        if (i<4) *(((quint16*)&(resulting_ip.first))+i)=syllable.toUInt(&conv_result,16);
+        else *(((quint16*)&(resulting_ip.second))+(i-4))=syllable.toUInt(&conv_result,16);
 
-            // return our hard earned result.
-            return mom_ip;
-        }
-    } else return 0;*/
+    }
+
+    return resulting_ip;
 }
 
 QString Subnet_v6::normalizeIP(QString &ip)
@@ -390,46 +382,87 @@ QString Subnet_v6::normalizeIP(QString &ip)
     // parts of the ip and makes sure everything is in order with the ip. returns a
     // normalized zeroed ip in string representation if anything goes wrong.
 
-    QString mom=ip.trimmed();
 
-    int colon_count=mom.count(":");
+    // take the input string, cut off the trailing/prepending whitespaces and convert to lowercase.
+    QString preinp=ip.trimmed().toLower();
 
-    QStringList tokens = mom.split(":",QString::KeepEmptyParts,Qt::CaseSensitive);
+    // stores the string that is going to be normalized after CIDR processing
+    QString inp;
 
+    // stores the normalized version of the string for output.
     QString outp="";
+
+    // stores the info if CIDR notation is used and of course the CIDR itself
+    bool isCIDR=false;
+    uint CIDR=0;
+
+    // check for validity of the input. we are sort of nice to the user, so we accept
+    // multiple input formats. We take whitespace polluted strings in normal, reduced and CIDR notations.
+    // This regexpr checks, if the already cleaned up, lowercased string contains a valid IPv6 address.
+    // If not, just return a zeroed address (no address, ::/128, http://de.wikipedia.org/wiki/IPv6#Besondere_Adressen)
+    if (!preinp.contains(QRegExp("^([0-9a-f]{0,4}[:]){2,7}[0-9a-f]{0,4}(/[1-9][0-9]{0,2}){0,1}$",Qt::CaseSensitive)))
+    {
+        outp="0000:0000:0000:0000:0000:0000:0000:0000";
+        return outp;
+    }
+
+    // Ok, now we know its a valid address. Now make sure there is a CIDR notation at the end. If so, split it off and
+    // store it away for later reattachment.
+    if (preinp.contains(QRegExp("^([0-9a-f]{0,4}[:]){2,7}[0-9a-f]{0,4}(/[1-9][0-9]{0,2})$",Qt::CaseSensitive)))
+    {
+        QStringList cidrsplit = preinp.split("/",QString::KeepEmptyParts,Qt::CaseSensitive);
+
+        inp=cidrsplit.at(0);
+        CIDR=cidrsplit.at(1).toUInt();
+        isCIDR=true;
+
+    } else inp=preinp;
+
+    // count the number of colons in our address. This will be important for expansion of reduced parts of the IP.
+    int colon_count=inp.count(":");
+
+    // now split the IP into parts that are parted by colons.
+    QStringList tokens = inp.split(":",QString::KeepEmptyParts,Qt::CaseSensitive);
+
+    // a little helper, stores the active 'syllable' of the IP that we will construct.
     int counter=0;
 
+    // as long as there is a remaining part of the input ip...
     while (!tokens.isEmpty())  {
+
+        // ...get the next syllable...
         QString token = tokens.first();
         tokens.removeFirst();
 
-/*        if (token.isEmpty()&(counter>=1)) {
-            int i=7-colon_count;
-            while (i>=0) { outp+="0000"; i--; qDebug("0000: (formerly reduced)"); if (i>=0) outp.append(':'); };
-        } else {
-            while (token.length()<4) token.prepend('0');
-            if (!tokens.isEmpty()) token.append(':');
-            outp+=token;
-        };*/
-
+        // ...and if it is empty, expand the reduced part of the IP.
         if (token.isEmpty()&(counter>0)&!tokens.empty())
         {
             int reducement_cnt=8-colon_count;
+            // for each skipped syllable we have to append a zeroed one and increment the syllable counter.
             for (int i=0;i<reducement_cnt;i++)
             {
                 token.append("0000:");
                 counter++;
             };
+
+        // if there is something in this syllable, fill it up to four octets.
         } else {
             while (token.length()<4) token.prepend('0');
-            if (counter<=7) token.append(':');
+            if (counter<7) token.append(':');
         }
 
+        // append it to the output and increment the syllable counter.
         counter++;
-        qDebug("%s",qPrintable(token));
         outp+=token;
     }
 
+    // now append the cidr part if there is one.
+    if (isCIDR) outp+=(QString("/")+QString::number(CIDR));
+
+    // Check for consitency a last time
+    if (!(outp.count(':')==7)) outp="0000:0000:0000:0000:0000:0000:0000:0000";
+
+    // ...finished!
     return outp;
 }
 
