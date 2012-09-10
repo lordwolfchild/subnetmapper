@@ -57,9 +57,25 @@ Subnet_v6::Subnet_v6(QPair<quint64,quint64> ip, QPair<quint64,quint64> nm, QStri
 
 }
 
-Subnet_v6::Subnet_v6(QString ip, QString nm, QString id, QString description, QString notes, QObject *parent) :
+Subnet_v6::Subnet_v6(QString cidr, QString id, QString description, QString notes, QObject *parent) :
     Subnet(parent)
 {
+
+    // normalize and clean up input
+    QString inp=normalizeIP(cidr);
+
+    // stores the info if CIDR notation is used and of course the CIDR itself. Setting it to 128 guarantees a valid object even if cidr notation is ommited.
+    quint32 CIDR=128;
+
+    // Ok, we know its a valid address (through normalizeIP()). Now make sure there is a CIDR notation at the end. Split it off and
+    // store it away for later reattachment.
+    if (inp.contains(QRegExp("^([0-9a-f]{0,4}[:]){2,7}[0-9a-f]{0,4}(/[1-9][0-9]{0,2})$",Qt::CaseSensitive)))
+    {
+        QStringList cidrsplit = inp.split("/",QString::KeepEmptyParts,Qt::CaseSensitive);
+
+        inp=cidrsplit.at(0);
+        CIDR=cidrsplit.at(1).toUInt();
+    }
 
     _ip_address_lo=new(quint64);
     _netmask_lo=new(quint64);
@@ -71,17 +87,16 @@ Subnet_v6::Subnet_v6(QString ip, QString nm, QString id, QString description, QS
     _selected=new(bool);
     _color=new(QColor);
 
-    QPair<quint64,quint64> momip = String2IP(ip);
-    QPair<quint64,quint64> momnm = String2IP(nm);
+    QPair<quint64,quint64> momip = String2IP(inp);
+
     *_ip_address_hi=momip.first;
     *_ip_address_lo=momip.second;
-    *_netmask_hi=momnm.first;
-    *_netmask_lo=momnm.second;
     setDescription(description);
     setIdentifier(id);
     setNotes(notes);
 
-    normalize();
+    setNM(CIDR);
+
 
 }
 
@@ -128,6 +143,28 @@ void Subnet_v6::setNM(QString &nm)
     normalize();
 }
 
+void Subnet_v6::setNM(quint32 cidr)
+{
+    // Ok, the splitting in two 64 bit vars makes this special.
+
+    // if nm is higher than 64, set all higher bits 1, and shift your way through the lower bits...
+    if (cidr>64)
+    {
+        *_netmask_hi=~((quint64)0);
+        *_netmask_lo=~((quint64)0);
+        *_netmask_lo=*_netmask_lo<<(64-(cidr-64));
+
+    // if not, just zero our the lower bits and shift the higher bits.
+    } else  {
+        *_netmask_hi=~((quint64)0);
+        *_netmask_hi=*_netmask_hi<<(64-(cidr));
+        *_netmask_lo=0;
+    }
+
+    // now we can normalize the network address.
+    normalize();
+}
+
 void Subnet_v6::setDescription(QString &description)
 {
     *_description=description;
@@ -159,10 +196,10 @@ QPair<quint64, quint64> Subnet_v6::getIP()
 }
 
 
-// TODO
 QPair<quint64,quint64> Subnet_v6::getLastUsableIP()
 {
-    if (getCIDR()<31)
+    // If Network is big enough to hold at least two regular IPs, return last one by subtracting one from the broadcast IP.
+    if (getCIDR()<127)
     {
         QPair<quint64,quint64> mombc = getBroadcast();
         mombc.second-=1;
@@ -172,22 +209,26 @@ QPair<quint64,quint64> Subnet_v6::getLastUsableIP()
         return qMakePair((quint64)0,(quint64)0);
 }
 
-// TODO
+
 QPair<quint64,quint64> Subnet_v6::getFirstUsableIP()
 {
-    if (getCIDR()<31)
+
+    //  If Network is big enough to hold at least two regular IPs, return first one by adding one to the network address.
+    if (getCIDR()<127)
     {
         QPair<quint64,quint64> momfirst = getIP();
         momfirst.second+=1;
         return momfirst;
     }
     else
-            return qMakePair((quint64)0,(quint64)0);
+        return qMakePair((quint64)0,(quint64)0);
  }
 
-// TODO
+
 QPair<quint64,quint64> Subnet_v6::getWildcard()
 {
+
+    // Wildcard is NOT Netmask.
     QPair<quint64,quint64> momnm = getNM();
     momnm.first=(~momnm.first);
     momnm.second=(~momnm.second);
@@ -195,46 +236,40 @@ QPair<quint64,quint64> Subnet_v6::getWildcard()
     return momnm;
 }
 
-// TODO
+
 QPair<quint64,quint64> Subnet_v6::getBroadcast()
 {
     QPair<quint64,quint64> momip = getIP();
     QPair<quint64,quint64> momwc = getWildcard();
     QPair<quint64,quint64> mombc;
 
+    // broadcast is ip bitwise-OR wildcard. Return.
     mombc.first=momip.first|momwc.first;
     mombc.second=momip.second|momwc.second;
 
     return mombc;
 }
 
-// TODO
-quint64 Subnet_v6::getSize()
-{
-    // Ok, everybody who knows what they are doing is aware of the dragon here.
-    // for the rest: this function is only valid for 64bit return values, which
-    // is not nearly enough to display the biggest possible number of IP addresses
-    // in a v6 block. But this would not be pratcical anyway in this program,
-    // so we live with it.
-
-    QPair<quint64,quint64> momnm= getNM();
-    return (~momnm.second)+1;
-
-}
-
-// TODO
 quint64 Subnet_v6::getCIDR()
 {
-    // same thing as above, not perfect for all possible nets of IPv6.
-    // but we live with it.
+    // stores the return value.
+    unsigned char cidr=0;
 
-    unsigned char cidr=64;
-    quint64 wildcard= (getNM()).second;
+    QPair<quint64,quint64> momNM = getNM();
 
-    while (wildcard>0) {
-            cidr--;
-            wildcard>>=1;
-    };
+    // Principle: Store a temp copy of netmask.
+    // now left shift both parts of the netmask
+    // until both are zero. count the steps.
+    // After all bits have been reset, the count of steps
+    // equals the CIDR.
+    while (momNM.first>0) {
+        cidr++;
+        momNM.first=momNM.first<<1;
+    }
+    while (momNM.second>0) {
+        cidr++;
+        momNM.second=momNM.second<<1;
+    }
 
     return cidr;
 
@@ -276,17 +311,23 @@ QColor&  Subnet_v6::getColor()
     return *_color;
 }
 
+
 QString Subnet_v6::IP2String(QPair<quint64,quint64> &ip)
 {
+    // stores output String
     QString outp;
 
+    // a byte array for conversion
     unsigned char mombytes[16] = {0,0,0,0,
                                   0,0,0,0,
                                   0,0,0,0,
                                   0,0,0,0};
+    // temp ip storage for conversion convenience
     quint64 hi = ip.first;
     quint64 lo = ip.second;
 
+
+    // some casting magic for bytewise conversion. I know this could be done with more style, but we leave optimization stuff to the compiler for now.
     mombytes[0]=*(((unsigned char*)&hi)+7);
     mombytes[1]=*(((unsigned char*)&hi)+6);
     mombytes[2]=*(((unsigned char*)&hi)+5);
@@ -304,6 +345,7 @@ QString Subnet_v6::IP2String(QPair<quint64,quint64> &ip)
     mombytes[14]=*(((unsigned char*)&lo)+1);
     mombytes[15]=*((unsigned char*)&lo);
 
+    // now use this stuff to output the string representation.
     outp.sprintf("%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
                  mombytes[0],
                  mombytes[1],
@@ -331,7 +373,7 @@ quint64 Subnet_v6::getCIDR24Blocks()
 
     // complement the netmask and shift it 8 bits to the right and you get the number of /24
     // nets in the Subnet_v6 (-1, because the zero counts a a net again).
-    quint32 numberOfCIDRBlocks=(((~momnm.first)>>8)+1);
+    quint64 numberOfCIDRBlocks=(((~momnm.second)>>8)+1);
 
     return numberOfCIDRBlocks;
 }
@@ -466,7 +508,7 @@ QString Subnet_v6::normalizeIP(QString &ip)
     return outp;
 }
 
-QString Subnet_v6::toStr()
+QString Subnet_v6::toString()
 {
     QString outp;
     QPair<quint64,quint64> momip = getIP();
@@ -480,14 +522,16 @@ QString Subnet_v6::toStr()
     return outp;
 }
 
-// TODO
+
 bool   Subnet_v6::containsHost(QPair<quint64,quint64> &host)
 {
+    // make sure the network is noralized, otherwise this function will not give correct answers.
     normalize();
 
     QPair<quint64,quint64> momip = getIP();
     QPair<quint64,quint64> momnm = getNM();
 
+    // a host ip ANDed with the netmask of its network equals its network address. If so, return true, else false.
     if (((host.first&momnm.first)==momip.first)&((host.second&momnm.second)==momip.second))
          return true;
     else
@@ -505,31 +549,35 @@ void Subnet_v6::normalize()
 
 void Subnet_v6::dumpAll()
 {
-/*     quint64 wildcard=getWildcard();
-     quint64 first = getFirstUsableIP();
-     quint64 last = getLastUsableIP();
-     quint64 broadcast = getBroadcast();*/
+
+    // Just receive object data and output for debugging purposes.
+     QPair<quint64,quint64>  wildcard=getWildcard();
+     QPair<quint64,quint64>  netmask=getNM();
+     QPair<quint64,quint64>  first = getFirstUsableIP();
+     QPair<quint64,quint64>  last = getLastUsableIP();
+     QPair<quint64,quint64>  broadcast = getBroadcast();
      quint64 cidr24 = getCIDR24Blocks();
 
-     qDebug("---DUMP START----------------------[IPv4]---");
+
+     qDebug("---DUMP START----------------------------------------------[IPv6]---");
      qDebug(" Object Address:         %p",this);
-     qDebug("--------------------------------------------");
-     qDebug(" Network:                %s",qPrintable(this->toStr()));
-//     qDebug(" Netmask:                %s",qPrintable(IP2String(getNM())));
-//     qDebug(" Wildcard Bits:          %s",qPrintable(IP2String(wildcard)));
-     qDebug(" Size:                   %llu",getSize());
-//     qDebug(" First Usable IP:        %s",qPrintable(IP2String(first)));
-//     qDebug(" Last Usable IP:         %s",qPrintable(IP2String(last)));
-//     qDebug(" Broadcast Address:      %s",qPrintable(IP2String(broadcast)));
+     qDebug("--------------------------------------------------------------------");
+     qDebug(" Network:                %s",qPrintable(this->toString()));
+     qDebug(" Netmask:                %s",qPrintable(IP2String(netmask)));
+     qDebug(" Wildcard Bits:          %s",qPrintable(IP2String(wildcard)));
+     qDebug(" Size: (only up to /64!) %llu",wildcard.second);
+     qDebug(" First Usable IP:        %s",qPrintable(IP2String(first)));
+     qDebug(" Last Usable IP:         %s",qPrintable(IP2String(last)));
+     qDebug(" Broadcast Address:      %s",qPrintable(IP2String(broadcast)));
      qDebug(" CIDR24 Blocks:          %llu",cidr24);
-     qDebug("--------------------------------------------");
+     qDebug("--------------------------------------------------------------------");
      qDebug(" Identifier:");
      qDebug("   %s",qPrintable(getIdentifier()));
      qDebug(" Description:");
      qDebug("   %s",qPrintable(getDescription()));
-     qDebug("--------------------------------------------");
+     qDebug("--------------------------------------------------------------------");
      qDebug(" Notes dump:");
      qDebug("   %s",qPrintable(getNotes()));
-     qDebug("---------------------------------DUMP END---");
+     qDebug("---------------------------------------------------------DUMP END---");
 }
 

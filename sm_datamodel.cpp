@@ -56,16 +56,16 @@ QVariant SM_DataModel::data(const QModelIndex &index, int role) const
 
         switch(index.column()) {
             case 0:
-                return ((Subnet_v6*)(SubnetV6List.at(index.row()-SubnetV4List.count())))->toStr();
+                return ((Subnet_v6*)(SubnetV6List.at(index.row()-SubnetV4List.count())))->toString();
                 break;
             case 1:
-                return ((Subnet_v6*)(SubnetV6List.at(index.row()-SubnetV4List.count())))->toStr();
+                return ((Subnet_v6*)(SubnetV6List.at(index.row()-SubnetV4List.count())))->toString();
                 break;
             case 2:
-                return ((Subnet_v6*)(SubnetV6List.at(index.row()-SubnetV4List.count())))->toStr();
+                return ((Subnet_v6*)(SubnetV6List.at(index.row()-SubnetV4List.count())))->toString();
                 break;
             case 3:
-                return ((Subnet_v6*)(SubnetV6List.at(index.row()-SubnetV4List.count())))->toStr();
+                return ((Subnet_v6*)(SubnetV6List.at(index.row()-SubnetV4List.count())))->toString();
                 break;
             default:
                 return QVariant();
@@ -80,7 +80,7 @@ QVariant SM_DataModel::data(const QModelIndex &index, int role) const
                 return ((Subnet_v4*)(SubnetV4List.at(index.row())))->getIdentifier();
                 break;
             case 1:
-                return ((Subnet_v4*)(SubnetV4List.at(index.row())))->toStr();
+                return ((Subnet_v4*)(SubnetV4List.at(index.row())))->toString();
                 break;
             case 2:
                 return ((Subnet_v4*)(SubnetV4List.at(index.row())))->getSize();

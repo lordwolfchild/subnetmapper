@@ -29,7 +29,7 @@ public:
     void setColor(QColor &color);
     void setNotes(QString &notes);
 
-    enum IPversion { IPv4, IPv6 };
+    //enum IPversion { IPv4, IPv6 };
 
     IPversion getIPversion();
     quint32& getIP();
@@ -50,7 +50,7 @@ public:
     static QString IP2String(quint32 &ip);
     static quint32 String2IP(QString &str_ip);
 
-    QString toStr();
+    QString toString();
 
     bool    containsHost(quint32 &host);
 

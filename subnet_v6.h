@@ -47,19 +47,20 @@ public:
     ~Subnet_v6();
 
     explicit Subnet_v6(QPair<quint64,quint64> ip, QPair<quint64,quint64> nm, QString id = "n/a", QString description = "n/a", QString notes = "n/a", QObject *parent = 0);
-    explicit Subnet_v6(QString ip, QString nm = "255.255.255.255", QString id = "n/a", QString description = "n/a", QString notes = "n/a", QObject *parent = 0);
+    explicit Subnet_v6(QString cidr = "::/128", QString id = "n/a", QString description = "n/a", QString notes = "n/a", QObject *parent = 0);
 
     void setIP(QPair<quint64,quint64> &ip);
     void setIP(QString &ip);
     void setNM(QPair<quint64,quint64> &nm);
     void setNM(QString &nm);
+    void setNM(quint32 cidr);
     void setDescription(QString &description);
     void setIdentifier(QString &identifier);
     void setSelected(bool &selected);
     void setColor(QColor &color);
     void setNotes(QString &notes);
 
-    enum IPversion { IPv4, IPv6 };
+    //enum IPversion { IPv4, IPv6 };
 
     IPversion getIPversion();
     QPair<quint64,quint64> getIP();
@@ -67,7 +68,6 @@ public:
     QPair<quint64,quint64> getFirstUsableIP();
     QPair<quint64,quint64> getWildcard();
     QPair<quint64,quint64> getBroadcast();
-    quint64 getSize();
     quint64 getCIDR();
     quint64 getCIDR24Blocks();
     QPair<quint64,quint64> getNM();
@@ -81,7 +81,7 @@ public:
     static QPair<quint64,quint64> String2IP(QString &str_ip);
     static QString normalizeIP(QString &ip);
 
-    QString toStr();
+    QString toString();
 
     bool    containsHost(QPair<quint64,quint64> &host);
 
