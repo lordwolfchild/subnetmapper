@@ -1,4 +1,5 @@
 #include "subnet_v6.h"
+#include <QRegExp>
 
 Subnet_v6::Subnet_v6(QObject *parent) :
     Subnet(parent)
@@ -335,7 +336,7 @@ QString Subnet_v6::IP2String(QPair<quint64,quint64> &ip)
     mombytes[4]=*(((unsigned char*)&hi)+3);
     mombytes[5]=*(((unsigned char*)&hi)+2);
     mombytes[6]=*(((unsigned char*)&hi)+1);
-    mombytes[7]=*((unsigned char*)&hi);
+    mombytes[7]=*(((unsigned char*)&hi));
     mombytes[8]=*(((unsigned char*)&lo)+7);
     mombytes[9]=*(((unsigned char*)&lo)+6);
     mombytes[10]=*(((unsigned char*)&lo)+5);
@@ -343,7 +344,7 @@ QString Subnet_v6::IP2String(QPair<quint64,quint64> &ip)
     mombytes[12]=*(((unsigned char*)&lo)+3);
     mombytes[13]=*(((unsigned char*)&lo)+2);
     mombytes[14]=*(((unsigned char*)&lo)+1);
-    mombytes[15]=*((unsigned char*)&lo);
+    mombytes[15]=*(((unsigned char*)&lo));
 
     // now use this stuff to output the string representation.
     outp.sprintf("%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
@@ -407,11 +408,12 @@ QPair<quint64,quint64> Subnet_v6::String2IP(QString &str_ip)
 
         bool conv_result;
 
-        // we have to split it up to two variables. so a littel index magic is necessary.
+        // we have to split it up to two variables. so a little index magic is necessary.
         // furtheron, we use the conversion function from QString to base16-convert the
         // string to numerical values and cast them into our designated result bytes.
-        if (i<4) *(((quint16*)&(resulting_ip.first))+i)=syllable.toUInt(&conv_result,16);
-        else *(((quint16*)&(resulting_ip.second))+(i-4))=syllable.toUInt(&conv_result,16);
+        // We have to care about endianess here! So this works only on little endian CPUs.
+        if (i<4) *(((quint16*)&(resulting_ip.first))+(3-i))=syllable.toUInt(&conv_result,16);
+        else *(((quint16*)&(resulting_ip.second))+(3-(i-4)))=syllable.toUInt(&conv_result,16);
 
     }
 
@@ -508,6 +510,89 @@ QString Subnet_v6::normalizeIP(QString &ip)
     return outp;
 }
 
+// reduces zero repetitions according to standard. At least tries to be efficient in doing so.
+QString Subnet_v6::reduceIP(QString ip)
+{
+
+    // take the input string, cut off the trailing/prepending whitespaces and convert to lowercase.
+    QString inp=ip.trimmed().toLower();
+
+    // stores the normalized version of the string for output.
+    QString outp="";
+
+    // stores the info if CIDR notation is used and of course the CIDR itself
+    bool isCIDR=false;
+    uint CIDR=0;
+
+    // check for validity of the input. we are sort of nice to the user, so we accept
+    // multiple input formats. We take whitespace polluted strings in normal, reduced and CIDR notations.
+    // This regexpr checks, if the already cleaned up, lowercased string contains a valid IPv6 address.
+    // If not, just return a zeroed address (no address, ::/128, http://de.wikipedia.org/wiki/IPv6#Besondere_Adressen)
+    if (!inp.contains(QRegExp("^([0-9a-f]{4,4}[:]){7,7}[0-9a-f]{4,4}(/[1-9][0-9]{0,2}){0,1}$",Qt::CaseSensitive)))
+    {
+        outp="0000:0000:0000:0000:0000:0000:0000:0000";
+        return outp;
+    }
+
+    // Ok, now we know its a valid address. Now make sure there is a CIDR notation at the end. If so, split it off and
+    // store it away for later reattachment.
+    if (inp.contains(QRegExp("^([0-9a-f]{4,4}[:]){7,7}[0-9a-f]{4,4}(/[1-9][0-9]{0,2})$",Qt::CaseSensitive)))
+    {
+        QStringList cidrsplit = inp.split("/",QString::KeepEmptyParts,Qt::CaseSensitive);
+
+        CIDR=cidrsplit.at(1).toUInt();
+        isCIDR=true;
+        inp=cidrsplit.at(0);
+
+    };
+
+    // Ok, we have a valid address without CIDR now. time to reduce it. first we have to split it up.
+    QStringList syllables = inp.split(":",QString::KeepEmptyParts,Qt::CaseSensitive);
+
+    for (int i=0;i<syllables.count();i++) {
+        QString syllable=syllables.at(i);
+
+        while ((syllable.at(0)=='0')&(syllable.length()>1)) syllable.remove(0,1);
+
+        outp+=syllable;
+        if (i<7) outp+=":";
+
+    }
+
+    QRegExp re = QRegExp("(0[:]){1,7}[0]{0,1}");
+    bool foundSome = outp.contains(re);
+
+
+    uint indexOfLongestMatch=0;
+    uint lengthOfLongestMatch=0;
+    bool foundReducableString=false;
+
+    QStringList matches = re.capturedTexts();
+    if (foundSome) {
+
+        foundReducableString=true;
+
+        for (int i=0;i<matches.count();i++) {
+            if ((matches.at(i).length())>lengthOfLongestMatch) {
+                lengthOfLongestMatch=matches.at(i).length();
+                indexOfLongestMatch=i;
+            }
+        }
+    }
+
+    if (foundReducableString) {
+        outp.replace(matches.at(indexOfLongestMatch),":");
+    }
+
+    if (outp==":") outp="::";
+
+    // now append the cidr part if there is one.
+    if (isCIDR) outp+=(QString("/")+QString::number(CIDR));
+
+    return outp;
+
+}
+
 QString Subnet_v6::toString()
 {
     QString outp;
@@ -562,7 +647,7 @@ void Subnet_v6::dumpAll()
      qDebug("---DUMP START----------------------------------------------[IPv6]---");
      qDebug(" Object Address:         %p",this);
      qDebug("--------------------------------------------------------------------");
-     qDebug(" Network:                %s",qPrintable(this->toString()));
+     qDebug(" Network:                %s",qPrintable(reduceIP(this->toString())));
      qDebug(" Netmask:                %s",qPrintable(IP2String(netmask)));
      qDebug(" Wildcard Bits:          %s",qPrintable(IP2String(wildcard)));
      qDebug(" Size: (only up to /64!) %llu",wildcard.second);

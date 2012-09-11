@@ -80,6 +80,7 @@ public:
     static QString IP2String(QPair<quint64,quint64> &ip);
     static QPair<quint64,quint64> String2IP(QString &str_ip);
     static QString normalizeIP(QString &ip);
+    static QString reduceIP(QString ip);
 
     QString toString();
 
