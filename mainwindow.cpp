@@ -8,20 +8,39 @@
 #include <QMenuBar>
 #include <QHeaderView>
 #include <QFileDialog>
+#include <QListView>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
     QMenu *fileMenu = new QMenu(tr("&File"), this);
+    QMenu *editMenu = new QMenu(tr("&Edit"), this);
+
+    // Open File
     QAction *openAction = fileMenu->addAction(tr("&Open..."));
     openAction->setShortcuts(QKeySequence::Open);
     openAction->setIcon(QIcon(":/open.svg"));
+
+    // Save File
     QAction *saveAction = fileMenu->addAction(tr("&Save As..."));
     saveAction->setShortcuts(QKeySequence::SaveAs);
     saveAction->setIcon(QIcon(":/save.svg"));
+
+    // Quit Program
     QAction *quitAction = fileMenu->addAction(tr("E&xit"));
     quitAction->setShortcuts(QKeySequence::Quit);
     quitAction->setIcon(QIcon(":/quit.svg"));
+
+    // Add IPv4 Subnet
+    QAction *addIPv4Action = editMenu->addAction(tr("Add IPv&4 Subnet"));
+    addIPv4Action->setShortcut(QKeySequence(tr("Ctrl+N")));
+    addIPv4Action->setIcon(QIcon(":/addipv4.svg"));
+
+    // Add IPv6 Subnet
+    QAction *addIPv6Action = editMenu->addAction(tr("Add IPv&6 Subnet"));
+    addIPv6Action->setShortcut(QKeySequence(tr("Ctrl+Shift+N")));
+    addIPv6Action->setIcon(QIcon(":/addipv6.svg"));
+
 
     setupModel();
     setupViews();
@@ -29,8 +48,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(openAction, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFile()));
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
+    connect(addIPv4Action, SIGNAL(triggered()), this, SLOT(addIPv4Subnet()));
+    connect(addIPv6Action, SIGNAL(triggered()), this, SLOT(addIPv6Subnet()));
 
     this->menuBar()->addMenu(fileMenu);
+    this->menuBar()->addMenu(editMenu);
     statusBar();
 
     QToolBar *toolbar = new QToolBar("Main Toolbar",this);
@@ -38,6 +60,9 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbar->setOrientation(Qt::Vertical);
     toolbar->addAction(openAction);
     toolbar->addAction(saveAction);
+    toolbar->addAction(addIPv4Action);
+    toolbar->insertSeparator(addIPv4Action);
+    toolbar->addAction(addIPv6Action);
     toolbar->addAction(quitAction);
     toolbar->insertSeparator(quitAction);
 
@@ -59,18 +84,25 @@ void MainWindow::setupModel()
 void MainWindow::setupViews()
 {
     QSplitter *splitter = new QSplitter;
+    splitter->setOrientation(Qt::Vertical);
     QTableView *table = new QTableView;
+    QListView *list = new QListView;
+
     //map = new SM_mapView;
+    splitter->addWidget(list);
     splitter->addWidget(table);
     //splitter->addWidget(pieChart);
     splitter->setStretchFactor(0, 1);
-    //splitter->setStretchFactor(1, 1);
+    splitter->setStretchFactor(1, 1);
 
     table->setModel(model);
+    list->setModel(model);
+
     //pieChart->setModel(model);
 
     QItemSelectionModel *selectionModel = new QItemSelectionModel(model);
     table->setSelectionModel(selectionModel);
+    list->setSelectionModel(selectionModel);
     //pieChart->setSelectionModel(selectionModel);
 
     QHeaderView *headerView = table->horizontalHeader();
@@ -153,4 +185,15 @@ void MainWindow::saveFile()
         file.close();
         statusBar()->showMessage(tr("Saved %1").arg(fileName), 2000);
     }*/
+}
+
+void MainWindow::addIPv4Subnet()
+{
+    qDebug("new ipv4");
+}
+
+void MainWindow::addIPv6Subnet()
+{
+    qDebug("new ipv6");
+
 }

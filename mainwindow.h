@@ -18,6 +18,10 @@ private slots:
     void openFile(const QString &path = QString());
     void saveFile();
 
+    void addIPv4Subnet();
+    void addIPv6Subnet();
+
+
 private:
     void setupModel();
     void setupViews();
