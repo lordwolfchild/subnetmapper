@@ -28,8 +28,7 @@ public:
 
 protected:
 
-    QList<Subnet_v4*>  SubnetV4List;
-    QList<Subnet_v6*>  SubnetV6List;
+    QList<Subnet*>  SubnetList;
 
 };
 

@@ -60,8 +60,6 @@ public:
     void setColor(QColor &color);
     void setNotes(QString &notes);
 
-    //enum IPversion { IPv4, IPv6 };
-
     IPversion getIPversion();
     QPair<quint64,quint64> getIP();
     QPair<quint64,quint64> getLastUsableIP();
@@ -76,6 +74,9 @@ public:
     QString& getNotes();
     bool&    getSelected();
     QColor&  getColor();
+
+    QString getStrNM();
+    QString getStrWC();
 
     static QString IP2String(QPair<quint64,quint64> &ip);
     static QPair<quint64,quint64> String2IP(QString &str_ip);

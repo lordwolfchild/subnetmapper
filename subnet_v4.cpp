@@ -371,3 +371,15 @@ void Subnet_v4::dumpAll()
      qDebug("   %s",qPrintable(getNotes()));
      qDebug("---------------------------------DUMP END---");
 }
+
+QString Subnet_v4::getStrWC()
+{
+    quint32 momWC = getWildcard();
+    return IP2String(momWC);
+}
+
+QString Subnet_v4::getStrNM()
+{
+    quint32 momNM = getNM();
+    return IP2String(momNM);
+}

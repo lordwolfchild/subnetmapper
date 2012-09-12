@@ -29,8 +29,6 @@ public:
     void setColor(QColor &color);
     void setNotes(QString &notes);
 
-    //enum IPversion { IPv4, IPv6 };
-
     IPversion getIPversion();
     quint32& getIP();
     quint32 getLastUsableIP();
@@ -46,6 +44,9 @@ public:
     QString& getNotes();
     bool&    getSelected();
     QColor&  getColor();
+
+    QString getStrNM();
+    QString getStrWC();
 
     static QString IP2String(quint32 &ip);
     static quint32 String2IP(QString &str_ip);

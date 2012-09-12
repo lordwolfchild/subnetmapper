@@ -312,7 +312,6 @@ QColor&  Subnet_v6::getColor()
     return *_color;
 }
 
-
 QString Subnet_v6::IP2String(QPair<quint64,quint64> &ip)
 {
     // stores output String
@@ -590,7 +589,7 @@ QString Subnet_v6::toString()
 {
     QString outp;
     QPair<quint64,quint64> momip = getIP();
-    outp+=IP2String(momip);
+    outp+=reduceIP(IP2String(momip));
     outp+="/";
 
     QString cidr;
@@ -656,4 +655,17 @@ void Subnet_v6::dumpAll()
      qDebug("   %s",qPrintable(getNotes()));
      qDebug("---------------------------------------------------------DUMP END---");
 }
+
+QString Subnet_v6::getStrWC()
+{
+    QPair<quint64,quint64> momWC = getWildcard();
+    return IP2String(momWC);
+}
+
+QString Subnet_v6::getStrNM()
+{
+    QPair<quint64,quint64> momNM = getNM();
+    return IP2String(momNM);
+}
+
 

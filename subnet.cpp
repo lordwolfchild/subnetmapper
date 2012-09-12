@@ -6,3 +6,15 @@ Subnet::Subnet(QObject *parent) :
 {
 }
 
+bool Subnet::isV4()
+{
+    if (getIPversion()==Subnet::IPv4) return true;
+    return false;
+}
+
+bool Subnet::isV6()
+{
+    if (getIPversion()==Subnet::IPv6) return true;
+    return false;
+}
+

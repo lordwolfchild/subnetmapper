@@ -16,16 +16,22 @@ SOURCES += main.cpp\
     subnet.cpp \
     subnet_v6.cpp \
     sm_datamodel.cpp \
-    subnet_v4.cpp
+    subnet_v4.cpp \
+    sm_ipv4editdialog.cpp \
+    sm_ipv6editdialog.cpp
 
 HEADERS  += mainwindow.h \
     ttsubnetview.h \
     subnet.h \
     subnet_v6.h \
     sm_datamodel.h \
-    subnet_v4.h
+    subnet_v4.h \
+    sm_ipv4editdialog.h \
+    sm_ipv6editdialog.h
 
-FORMS    +=
+FORMS    += \
+    sm_ipv4editdialog.ui \
+    sm_ipv6editdialog.ui
 
 RESOURCES += \
     sm_res.qrc
