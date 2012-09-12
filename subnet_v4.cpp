@@ -350,7 +350,6 @@ void Subnet_v4::dumpAll()
      quint32 first = getFirstUsableIP();
      quint32 last = getLastUsableIP();
      quint32 broadcast = getBroadcast();
-     quint32 cidr24 = getCIDR24Blocks();
 
      qDebug("---DUMP START----------------------[IPv4]---");
      qDebug(" Object Address:         %p",this);
@@ -362,7 +361,6 @@ void Subnet_v4::dumpAll()
      qDebug(" First Usable IP:        %s",qPrintable(IP2String(first)));
      qDebug(" Last Usable IP:         %s",qPrintable(IP2String(last)));
      qDebug(" Broadcast Address:      %s",qPrintable(IP2String(broadcast)));
-     qDebug(" CIDR24 Blocks:          %u",cidr24);
      qDebug("--------------------------------------------");
      qDebug(" Identifier:");
      qDebug("   %s",qPrintable(getIdentifier()));

@@ -12,12 +12,6 @@ int main(int argc, char *argv[])
    MainWindow w;
    w.show();
 
-   Subnet *momsubnet = new Subnet_v6("1:2:3::7:8/124");
-
-   momsubnet->dumpAll();
-
-   delete momsubnet;
-
    return a.exec();
 
 }

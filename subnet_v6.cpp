@@ -462,48 +462,37 @@ QString Subnet_v6::normalizeIP(QString &ip)
 
     } else inp=preinp;
 
-    // count the number of colons in our address. This will be important for expansion of reduced parts of the IP.
-    int colon_count=inp.count(":");
+    // fetch the number of valid syllables, we will overwrite this later with a mor ecomplete set of syllables.
+    QStringList tokens = inp.split(":",QString::SkipEmptyParts,Qt::CaseSensitive);
 
-    // now split the IP into parts that are parted by colons.
-    QStringList tokens = inp.split(":",QString::KeepEmptyParts,Qt::CaseSensitive);
+    QString expansionHelper=":";
+    for (int i=0;i<8-tokens.count();i++) expansionHelper+="0:";
 
-    // a little helper, stores the active 'syllable' of the IP that we will construct.
-    int counter=0;
+    inp.replace("::",expansionHelper);
+    if (inp.at(0)==':') inp.remove(0,1);
+    if (inp.at(inp.length()-1)==':') inp.remove(inp.length()-1,1);
+
+    // split it up again so we can expand the single syllables.
+    tokens = inp.split(":",QString::SkipEmptyParts,Qt::CaseSensitive);
 
     // as long as there is a remaining part of the input ip...
-    while (!tokens.isEmpty())  {
+    for (int i=0;i<tokens.count();i++) {
 
         // ...get the next syllable...
-        QString token = tokens.first();
-        tokens.removeFirst();
-
-        // ...and if it is empty, expand the reduced part of the IP.
-        if (token.isEmpty()&(counter>0)&!tokens.empty())
-        {
-            int reducement_cnt=8-colon_count;
-            // for each skipped syllable we have to append a zeroed one and increment the syllable counter.
-            for (int i=0;i<reducement_cnt;i++)
-            {
-                token.append("0000:");
-                counter++;
-            };
+        QString token = tokens.at(i);
 
         // if there is something in this syllable, fill it up to four octets.
-        } else {
-            while (token.length()<4) token.prepend('0');
-            if (counter<7) token.append(':');
-        }
+        while (token.length()<4) token.prepend('0');
+        if (i<tokens.count()-1) token.append(':');
 
         // append it to the output and increment the syllable counter.
-        counter++;
         outp+=token;
     }
 
     // now append the cidr part if there is one.
     if (isCIDR) outp+=(QString("/")+QString::number(CIDR));
 
-    // Check for consitency a last time
+    // Check for consistency a last time
     if (!(outp.count(':')==7)) outp="0000:0000:0000:0000:0000:0000:0000:0000";
 
     // ...finished!
@@ -641,7 +630,6 @@ void Subnet_v6::dumpAll()
      QPair<quint64,quint64>  first = getFirstUsableIP();
      QPair<quint64,quint64>  last = getLastUsableIP();
      QPair<quint64,quint64>  broadcast = getBroadcast();
-     quint64 cidr24 = getCIDR24Blocks();
 
 
      qDebug("---DUMP START----------------------------------------------[IPv6]---");
@@ -654,7 +642,6 @@ void Subnet_v6::dumpAll()
      qDebug(" First Usable IP:        %s",qPrintable(IP2String(first)));
      qDebug(" Last Usable IP:         %s",qPrintable(IP2String(last)));
      qDebug(" Broadcast Address:      %s",qPrintable(IP2String(broadcast)));
-     qDebug(" CIDR24 Blocks:          %llu",cidr24);
      qDebug("--------------------------------------------------------------------");
      qDebug(" Identifier:");
      qDebug("   %s",qPrintable(getIdentifier()));
