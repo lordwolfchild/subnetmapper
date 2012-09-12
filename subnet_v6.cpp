@@ -327,6 +327,10 @@ QString Subnet_v6::IP2String(QPair<quint64,quint64> &ip)
     quint64 hi = ip.first;
     quint64 lo = ip.second;
 
+// Lets tell those guys out there that we did unholy stuff with pointers which garbles their IPv6 address display
+#ifndef __ORDER_LITTLE_ENDIAN__
+#warning "SubnetMapper only works well on litte endian Systems. Reimplement conversion functions of Subnet_v6 for big endian systems. Display of IPv6 Addresses will be false."
+#endif
 
     // some casting magic for bytewise conversion. I know this could be done with more style, but we leave optimization stuff to the compiler for now.
     mombytes[0]=*(((unsigned char*)&hi)+7);

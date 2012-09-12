@@ -5,6 +5,7 @@
 #include "subnet_v4.h"
 #include <iostream>
 #include <QtGlobal>
+#include <QSysInfo>
 
 int main(int argc, char *argv[])
 {
@@ -13,5 +14,4 @@ int main(int argc, char *argv[])
    w.show();
 
    return a.exec();
-
 }
