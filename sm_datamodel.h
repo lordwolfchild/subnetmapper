@@ -4,6 +4,8 @@
 #include <QAbstractTableModel>
 #include "subnet_v4.h"
 #include "subnet_v6.h"
+#include "subnet.h"
+#include <QXmlStreamWriter>
 
 class SM_DataModel : public QAbstractTableModel
 {
@@ -25,6 +27,9 @@ public:
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
 
     void addDemos();
+    void addSubnet(Subnet *subnet);
+
+    bool saveToXmlStream(QXmlStreamWriter &stream);
 
 protected:
 

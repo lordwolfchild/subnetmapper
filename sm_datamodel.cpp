@@ -44,9 +44,12 @@ QVariant SM_DataModel::headerData(int section, Qt::Orientation orientation, int 
 
 QVariant SM_DataModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || role != Qt::DisplayRole)
+    if (!index.isValid() || role != (Qt::DisplayRole|Qt::UserRole))
           return QVariant();
-    //qDebug("Data called at (%u/%u)",index.row(),index.column());
+
+    if (role==Qt::UserRole) {
+        return SubnetList.at(index.row());
+    } else {
 
         switch(index.column()) {
             case 0:
@@ -63,6 +66,7 @@ QVariant SM_DataModel::data(const QModelIndex &index, int role) const
                 break;
 
         }
+    }
 
 }
 
@@ -145,4 +149,57 @@ void SM_DataModel::addDemos()
     SubnetList.append(mom7);
     SubnetList.append(mom8);
 
+}
+
+void SM_DataModel::addSubnet(Subnet *subnet)
+{
+    SubnetList.append(subnet);
+    insertRows(rowCount(),1);
+
+    // I should emit dataChanged(), but the default implementation of QTableView will not update after this call, so I have to refresh all data for the views through reset().
+    reset();
+}
+
+bool SM_DataModel::saveToXmlStream(QXmlStreamWriter &stream)
+{
+    stream.setAutoFormatting(true);
+    stream.writeStartDocument();
+
+    stream.writeStartElement("SubnetMapper2");
+    stream.writeAttribute("version", "2.0.0");
+    stream.writeAttribute("fileformat", "2");
+    stream.writeTextElement("TEST", "Inhalt");
+    stream.writeEndElement();
+
+    for (int row = 0; row < SubnetList.count(); ++row) {
+
+        Subnet *subnet = SubnetList.at(row);
+        stream.writeStartElement("subnet");
+
+        if (getIPversion()==Subnet::IPv4) {
+
+            stream.writeAttribute("version","IPv4");
+            stream.writeTextElement("identifier",((Subnet_v4*)->getIdentifier());
+            stream.writeEndElement();
+            stream.writeTextElement("address",(Subnet_v4::IP2String((Subnet_v4*)model->data(model->index(row, 0, QModelIndex()),Qt::UserRole))->getIP()));
+            stream.writeTextElement("netmask",((Subnet_v4*)model->data(model->index(row, 0, QModelIndex()),Qt::UserRole))->getIPversion());
+            stream.writeTextElement("description",((Subnet_v4*)model->data(model->index(row, 0, QModelIndex()),Qt::UserRole))->getIPversion());
+            stream.writeTextElement("notes",((Subnet_v4*)model->data(model->index(row, 0, QModelIndex()),Qt::UserRole))->getIPversion());
+
+
+
+        } else {
+            stream.writeAttribute("version","IPv6");
+
+
+        }
+
+        stream.writeEndElement(); // Element: subnet
+    }
+
+    stream.writeEndElement(); // Element: SubnetMapper2
+    stream.writeEndDocument();
+
+
+    return true;
 }

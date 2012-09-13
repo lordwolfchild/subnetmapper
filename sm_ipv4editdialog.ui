@@ -7,21 +7,81 @@
     <x>0</x>
     <y>0</y>
     <width>681</width>
-    <height>380</height>
+    <height>459</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_4">
+  <layout class="QGridLayout" name="gridLayout_5">
    <item row="0" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout_5">
+    <layout class="QVBoxLayout" name="verticalLayout_7">
+     <item>
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Please specify the Subnet Name and Description:</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QLabel" name="label_17">
+              <property name="text">
+               <string>Identifier/Name:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="identifier"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>Description:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="description"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
           <widget class="QGroupBox" name="groupBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="title">
             <string>Please specify IPv4 Network Information:</string>
            </property>
@@ -48,7 +108,7 @@
                      <enum>QLayout::SetFixedSize</enum>
                     </property>
                     <item>
-                     <widget class="QSpinBox" name="ip_byte1_2">
+                     <widget class="QSpinBox" name="ip_byte1">
                       <property name="maximum">
                        <number>255</number>
                       </property>
@@ -68,7 +128,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QSpinBox" name="ip_byte2_2">
+                     <widget class="QSpinBox" name="ip_byte2">
                       <property name="maximum">
                        <number>255</number>
                       </property>
@@ -88,7 +148,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QSpinBox" name="ip_byte3_2">
+                     <widget class="QSpinBox" name="ip_byte3">
                       <property name="maximum">
                        <number>255</number>
                       </property>
@@ -105,7 +165,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QSpinBox" name="ip_byte4_2">
+                     <widget class="QSpinBox" name="ip_byte4">
                       <property name="maximum">
                        <number>255</number>
                       </property>
@@ -263,6 +323,12 @@
          </item>
          <item>
           <widget class="QGroupBox" name="groupBox_3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="title">
             <string>Size:</string>
            </property>
@@ -313,12 +379,21 @@
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>The specified network would have these characteristics:</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0">
            <layout class="QFormLayout" name="formLayout">
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_12">
               <property name="text">
@@ -328,11 +403,66 @@
             </item>
             <item row="0" column="1">
              <widget class="QLineEdit" name="networkAddress">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>212</red>
+                    <green>215</green>
+                    <blue>208</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>212</red>
+                    <green>215</green>
+                    <blue>208</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>230</red>
+                    <green>229</green>
+                    <blue>227</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="acceptDrops">
+               <bool>false</bool>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="locale">
+               <locale language="English" country="UnitedStates"/>
+              </property>
               <property name="text">
                <string>192.168.0.1/32</string>
               </property>
+              <property name="frame">
+               <bool>false</bool>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="dragEnabled">
+               <bool>true</bool>
               </property>
               <property name="readOnly">
                <bool>true</bool>
@@ -348,11 +478,66 @@
             </item>
             <item row="1" column="1">
              <widget class="QLineEdit" name="broadcastAddress">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>212</red>
+                    <green>215</green>
+                    <blue>208</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>212</red>
+                    <green>215</green>
+                    <blue>208</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>230</red>
+                    <green>229</green>
+                    <blue>227</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="acceptDrops">
+               <bool>false</bool>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="locale">
+               <locale language="English" country="UnitedStates"/>
+              </property>
               <property name="text">
                <string>192.168.0.1</string>
               </property>
+              <property name="frame">
+               <bool>false</bool>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="dragEnabled">
+               <bool>true</bool>
               </property>
               <property name="readOnly">
                <bool>true</bool>
@@ -368,11 +553,66 @@
             </item>
             <item row="2" column="1">
              <widget class="QLineEdit" name="wildcardAddress">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>212</red>
+                    <green>215</green>
+                    <blue>208</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>212</red>
+                    <green>215</green>
+                    <blue>208</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>230</red>
+                    <green>229</green>
+                    <blue>227</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="acceptDrops">
+               <bool>false</bool>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="locale">
+               <locale language="English" country="UnitedStates"/>
+              </property>
               <property name="text">
                <string>0.0.0.0</string>
               </property>
+              <property name="frame">
+               <bool>false</bool>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="dragEnabled">
+               <bool>true</bool>
               </property>
               <property name="readOnly">
                <bool>true</bool>
@@ -388,11 +628,66 @@
             </item>
             <item row="3" column="1">
              <widget class="QLineEdit" name="firstUsableAddress">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>212</red>
+                    <green>215</green>
+                    <blue>208</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>212</red>
+                    <green>215</green>
+                    <blue>208</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>230</red>
+                    <green>229</green>
+                    <blue>227</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="acceptDrops">
+               <bool>false</bool>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="locale">
+               <locale language="English" country="UnitedStates"/>
+              </property>
               <property name="text">
                <string>192.168.0.1</string>
               </property>
+              <property name="frame">
+               <bool>false</bool>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="dragEnabled">
+               <bool>true</bool>
               </property>
               <property name="readOnly">
                <bool>true</bool>
@@ -408,11 +703,66 @@
             </item>
             <item row="4" column="1">
              <widget class="QLineEdit" name="lastUsableAddress">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>212</red>
+                    <green>215</green>
+                    <blue>208</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>212</red>
+                    <green>215</green>
+                    <blue>208</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>230</red>
+                    <green>229</green>
+                    <blue>227</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="acceptDrops">
+               <bool>false</bool>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="locale">
+               <locale language="English" country="UnitedStates"/>
+              </property>
               <property name="text">
                <string>192.168.0.1</string>
               </property>
+              <property name="frame">
+               <bool>false</bool>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="dragEnabled">
+               <bool>true</bool>
               </property>
               <property name="readOnly">
                <bool>true</bool>
@@ -439,6 +789,8 @@
     </layout>
    </item>
   </layout>
+  <zorder>buttonBox</zorder>
+  <zorder>groupBox_4</zorder>
  </widget>
  <resources/>
  <connections>
@@ -449,8 +801,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>258</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -465,8 +817,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>326</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -474,5 +826,153 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>ip_byte1</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sm_IPv4EditDialog</receiver>
+   <slot>updateFields()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>90</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ip_byte2</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sm_IPv4EditDialog</receiver>
+   <slot>updateFields()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>231</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>7</x>
+     <y>123</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ip_byte3</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sm_IPv4EditDialog</receiver>
+   <slot>updateFields()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>66</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>156</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ip_byte4</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sm_IPv4EditDialog</receiver>
+   <slot>updateFields()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>337</x>
+     <y>67</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>208</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nm_byte1</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sm_IPv4EditDialog</receiver>
+   <slot>updateFields()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>161</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>47</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nm_byte2</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sm_IPv4EditDialog</receiver>
+   <slot>updateFields()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>212</x>
+     <y>112</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1</x>
+     <y>26</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nm_byte3</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sm_IPv4EditDialog</receiver>
+   <slot>updateFields()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>283</x>
+     <y>110</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>58</x>
+     <y>6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nm_byte4</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sm_IPv4EditDialog</receiver>
+   <slot>updateFields()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>330</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>309</x>
+     <y>6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CIDRSuffix</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sm_IPv4EditDialog</receiver>
+   <slot>updateCIDR()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>435</x>
+     <y>66</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>427</x>
+     <y>9</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>updateFields()</slot>
+  <slot>updateCIDR()</slot>
+ </slots>
 </ui>

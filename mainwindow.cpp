@@ -6,9 +6,14 @@
 #include <QMenu>
 #include <QAction>
 #include <QMenuBar>
+#include <QStatusBar>
 #include <QHeaderView>
 #include <QFileDialog>
 #include <QListView>
+#include <QXmlStreamWriter>
+#include <QXmlSimpleReader>
+#include "sm_ipv4editdialog.h"
+#include "sm_ipv6editdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -160,40 +165,50 @@ void MainWindow::openFile(const QString &path)
 void MainWindow::saveFile()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save file as"), "", "*.cht");
+        tr("Save file as"), "", "*.smap");
 
-/*    if (!fileName.isEmpty()) {
+    if (!fileName.isEmpty()) {
         QFile file(fileName);
-        QTextStream stream(&file);
+        // QTextStream stream(&file);
+        QXmlStreamWriter stream(&file);
 
         if (file.open(QFile::WriteOnly | QFile::Text)) {
-            for (int row = 0; row < model->rowCount(QModelIndex()); ++row) {
 
-                QStringList pieces;
 
-                pieces.append(model->data(model->index(row, 0, QModelIndex()),
-                                          Qt::DisplayRole).toString());
-                pieces.append(model->data(model->index(row, 1, QModelIndex()),
-                                          Qt::DisplayRole).toString());
-                pieces.append(model->data(model->index(row, 0, QModelIndex()),
-                                          Qt::DecorationRole).toString());
-
-                stream << pieces.join(",") << "\n";
-            }
         }
 
         file.close();
         statusBar()->showMessage(tr("Saved %1").arg(fileName), 2000);
-    }*/
+    }
 }
 
 void MainWindow::addIPv4Subnet()
 {
-    qDebug("new ipv4");
+    sm_IPv4EditDialog editor(this);
+
+    editor.setDescription("n/a");
+    editor.setIdentifier("n/a");
+
+    editor.setModal(true);
+    if (editor.exec()==QDialog::Accepted) {
+
+        QString momdesc = editor.getDescription();
+        QString momid = editor.getIdentifier();
+
+        Subnet *newSubnet = new Subnet_v4(editor.getIP(),editor.getNM());
+        newSubnet->setDescription(momdesc);
+        newSubnet->setIdentifier(momid);
+        ((SM_DataModel*)model)->addSubnet(newSubnet);
+
+    }
+
 }
 
 void MainWindow::addIPv6Subnet()
 {
-    qDebug("new ipv6");
+    SM_IPv6EditDialog editor(this);
+
+    editor.setModal(true);
+    editor.exec();
 
 }
