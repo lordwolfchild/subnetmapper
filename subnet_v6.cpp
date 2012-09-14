@@ -12,7 +12,7 @@ Subnet_v6::Subnet_v6(QObject *parent) :
     _notes=new(QString);
     _identifier=new(QString);
     _selected=new(bool);
-    _color=new(QColor);
+    _color=new QColor("lightblue");
 
     quint64 momIp_lo = 1;
     quint64 momNm_lo = ~0;
@@ -44,7 +44,7 @@ Subnet_v6::Subnet_v6(QPair<quint64,quint64> ip, QPair<quint64,quint64> nm, QStri
     _notes=new(QString);
     _identifier=new(QString);
     _selected=new(bool);
-    _color=new(QColor);
+    _color=new QColor("lightblue");
 
     *_ip_address_hi=ip.first;
     *_ip_address_lo=ip.second;
@@ -86,7 +86,7 @@ Subnet_v6::Subnet_v6(QString cidr, QString id, QString description, QString note
     _notes=new(QString);
     _identifier=new(QString);
     _selected=new(bool);
-    _color=new(QColor);
+    _color=new QColor("lightblue");
 
     QPair<quint64,quint64> momip = String2IP(inp);
 
@@ -181,11 +181,6 @@ void Subnet_v6::setSelected(bool &selected)
         *_selected=selected;
 }
 
-void Subnet_v6::setColor(QColor &color)
-{
-        *_color=color;
-}
-
 void Subnet_v6::setNotes(QString &notes)
 {
         *_notes=notes;
@@ -207,7 +202,7 @@ QPair<quint64,quint64> Subnet_v6::getLastUsableIP()
         return mombc;
     }
     else
-        return qMakePair((quint64)0,(quint64)0);
+        return getIP();
 }
 
 
@@ -222,7 +217,7 @@ QPair<quint64,quint64> Subnet_v6::getFirstUsableIP()
         return momfirst;
     }
     else
-        return qMakePair((quint64)0,(quint64)0);
+        return getIP();
  }
 
 
@@ -305,11 +300,6 @@ QString& Subnet_v6::getNotes()
 bool&    Subnet_v6::getSelected()
 {
     return *_selected;
-}
-
-QColor&  Subnet_v6::getColor()
-{
-    return *_color;
 }
 
 QString Subnet_v6::IP2String(QPair<quint64,quint64> &ip)
@@ -573,7 +563,7 @@ QString Subnet_v6::reduceIP(QString ip)
     }
 
     if (foundReducableString) {
-        outp.replace(matches.at(indexOfLongestMatch),":");
+        outp.replace(matches.at(indexOfLongestMatch),"::");
     }
 
     if (outp==":") outp="::";
@@ -638,13 +628,13 @@ void Subnet_v6::dumpAll()
      qDebug("---DUMP START----------------------------------------------[IPv6]---");
      qDebug(" Object Address:         %p",this);
      qDebug("--------------------------------------------------------------------");
-     qDebug(" Network:                %s",qPrintable(reduceIP(this->toString())));
-     qDebug(" Netmask:                %s",qPrintable(IP2String(netmask)));
-     qDebug(" Wildcard Bits:          %s",qPrintable(IP2String(wildcard)));
+     qDebug(" Network:                %s",qPrintable(this->toString()));
+     qDebug(" Netmask:                %s",qPrintable(reduceIP(IP2String(netmask))));
+     qDebug(" Wildcard Bits:          %s",qPrintable(reduceIP(IP2String(wildcard))));
      qDebug(" Size: (only up to /64!) %llu",wildcard.second);
-     qDebug(" First Usable IP:        %s",qPrintable(IP2String(first)));
-     qDebug(" Last Usable IP:         %s",qPrintable(IP2String(last)));
-     qDebug(" Broadcast Address:      %s",qPrintable(IP2String(broadcast)));
+     qDebug(" First Usable IP:        %s",qPrintable(reduceIP(IP2String(first))));
+     qDebug(" Last Usable IP:         %s",qPrintable(reduceIP(IP2String(last))));
+     qDebug(" Broadcast Address:      %s",qPrintable(reduceIP(IP2String(broadcast))));
      qDebug("--------------------------------------------------------------------");
      qDebug(" Identifier:");
      qDebug("   %s",qPrintable(getIdentifier()));
@@ -653,6 +643,8 @@ void Subnet_v6::dumpAll()
      qDebug("--------------------------------------------------------------------");
      qDebug(" Notes dump:");
      qDebug("   %s",qPrintable(getNotes()));
+     qDebug("--------------------------------------------------------------------");
+     qDebug(" Subnet color:           %s",qPrintable(_color->name()));
      qDebug("---------------------------------------------------------DUMP END---");
 }
 

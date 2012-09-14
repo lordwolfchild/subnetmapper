@@ -26,7 +26,6 @@ public:
     void setDescription(QString &description);
     void setIdentifier(QString &identifier);
     void setSelected(bool &selected);
-    void setColor(QColor &color);
     void setNotes(QString &notes);
 
     IPversion getIPversion();
@@ -43,7 +42,6 @@ public:
     QString& getIdentifier();
     QString& getNotes();
     bool&    getSelected();
-    QColor&  getColor();
 
     QString getStrNM();
     QString getStrWC();
@@ -71,7 +69,6 @@ protected:
     QString *_identifier;
     QString *_description;
 
-    QColor  *_color;
     QString *_notes;
 
     bool    *_selected;

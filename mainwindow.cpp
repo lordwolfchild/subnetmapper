@@ -125,41 +125,24 @@ void MainWindow::openFile(const QString &path)
     QString fileName;
     if (path.isNull())
         fileName = QFileDialog::getOpenFileName(this, tr("Choose a data file"),
-                                                "", "*.cht");
+                                                "", "*.smap");
     else
         fileName = path;
-/*
+
     if (!fileName.isEmpty()) {
         QFile file(fileName);
 
         if (file.open(QFile::ReadOnly | QFile::Text)) {
-            QTextStream stream(&file);
-            QString line;
+            QXmlStreamReader stream(&file);
+            bool result;
 
-            model->removeRows(0, model->rowCount(QModelIndex()), QModelIndex());
-
-            int row = 0;
-            do {
-                line = stream.readLine();
-                if (!line.isEmpty()) {
-
-                    model->insertRows(row, 1, QModelIndex());
-
-                    QStringList pieces = line.split(",", QString::SkipEmptyParts);
-                    model->setData(model->index(row, 0, QModelIndex()),
-                                   pieces.value(0));
-                    model->setData(model->index(row, 1, QModelIndex()),
-                                   pieces.value(1));
-                    model->setData(model->index(row, 0, QModelIndex()),
-                                   QColor(pieces.value(2)), Qt::DecorationRole);
-                    row++;
-                }
-            } while (!line.isEmpty());
+            result=((SM_DataModel*)model)->loadFromXmlStream(stream);
 
             file.close();
-            statusBar()->showMessage(tr("Loaded %1").arg(fileName), 2000);
+            if (result) statusBar()->showMessage(tr("Loaded %1").arg(fileName), 5000);
+            else statusBar()->showMessage(tr("Failed to parse SubnetMap %1").arg(fileName),5000);
         }
-    } */
+    }
 }
 
 void MainWindow::saveFile()
@@ -174,11 +157,11 @@ void MainWindow::saveFile()
 
         if (file.open(QFile::WriteOnly | QFile::Text)) {
 
-
+            ((SM_DataModel*)model)->saveToXmlStream(stream);
         }
 
         file.close();
-        statusBar()->showMessage(tr("Saved %1").arg(fileName), 2000);
+        statusBar()->showMessage(tr("Saved %1").arg(fileName), 5000);
     }
 }
 
@@ -209,6 +192,21 @@ void MainWindow::addIPv6Subnet()
     SM_IPv6EditDialog editor(this);
 
     editor.setModal(true);
-    editor.exec();
+
+    editor.setDescription("n/a");
+    editor.setIdentifier("n/a");
+
+    if (editor.exec()==QDialog::Accepted) {
+
+        QString momdesc = editor.getDescription();
+        QString momid = editor.getIdentifier();
+
+        Subnet *newSubnet = new Subnet_v6(editor.getIP(),editor.getNM());
+        newSubnet->setDescription(momdesc);
+        newSubnet->setIdentifier(momid);
+        ((SM_DataModel*)model)->addSubnet(newSubnet);
+
+    }
+
 
 }

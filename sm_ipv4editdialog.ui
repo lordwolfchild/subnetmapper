@@ -357,7 +357,7 @@
               <item>
                <widget class="QLabel" name="label_11">
                 <property name="text">
-                 <string>useable Adresses in this network (excl. network address, broadcast address etc.)</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt; font-style:italic;&quot;&gt;(excluding broadcast and network addresses)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="scaledContents">
                  <bool>false</bool>

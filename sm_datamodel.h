@@ -11,6 +11,7 @@ class SM_DataModel : public QAbstractTableModel
 {
 public:
     SM_DataModel(QObject *parent = 0);
+    ~SM_DataModel();
 
     // mandatory read-only functions for a model subclass:
     Qt::ItemFlags flags ( const QModelIndex & index ) const;
@@ -28,6 +29,9 @@ public:
 
     void addDemos();
     void addSubnet(Subnet *subnet);
+
+    void clearData();
+    bool loadFromXmlStream (QXmlStreamReader &stream);
 
     bool saveToXmlStream(QXmlStreamWriter &stream);
 

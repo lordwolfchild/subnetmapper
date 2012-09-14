@@ -4,6 +4,11 @@ SM_DataModel::SM_DataModel(QObject *parent) : QAbstractTableModel(parent)
 {
 }
 
+SM_DataModel::~SM_DataModel()
+{
+    clearData();
+}
+
 Qt::ItemFlags SM_DataModel::flags ( const QModelIndex & index ) const
 {
     switch (index.column()) {
@@ -44,13 +49,9 @@ QVariant SM_DataModel::headerData(int section, Qt::Orientation orientation, int 
 
 QVariant SM_DataModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || role != (Qt::DisplayRole|Qt::UserRole))
+    if (!index.isValid() || role != (Qt::DisplayRole))
           return QVariant();
-
-    if (role==Qt::UserRole) {
-        return SubnetList.at(index.row());
-    } else {
-
+    else {
         switch(index.column()) {
             case 0:
                 return ((Subnet*)(SubnetList.at(index.row())))->getIdentifier();
@@ -67,7 +68,6 @@ QVariant SM_DataModel::data(const QModelIndex &index, int role) const
 
         }
     }
-
 }
 
 int SM_DataModel::rowCount(const QModelIndex& /* parent */ ) const
@@ -113,22 +113,29 @@ bool SM_DataModel::setData(const QModelIndex &index, const QVariant &value, int 
     } else return false;
 }
 
-bool SM_DataModel::insertRows(int row, int count, const QModelIndex &parent)
+bool SM_DataModel::insertRows(int /*row*/, int /*count*/, const QModelIndex& /*parent*/)
 {
     return false;
 }
 
-bool SM_DataModel::removeRows(int row, int count, const QModelIndex &parent)
+bool SM_DataModel::removeRows(int row, int count, const QModelIndex& /*parent*/)
 {
+
+    for (int i=0;i<count;i++) {
 
         Subnet* mom = (Subnet*)(SubnetList.at(row));
         SubnetList.removeAt(row);
         delete mom;
-        return true;
+    }
+
+    reset();
+
+    return true;
 }
 
 void SM_DataModel::addDemos()
 {
+
     Subnet *mom1 = new Subnet_v4("131.220.149.0","255.255.255.224","sgbit1","sgbit VLAN1");
     Subnet *mom2 = new Subnet_v4("131.220.150.0","255.255.255.224","sgbit2","sgbit VLAN2");
     Subnet *mom3 = new Subnet_v4("131.220.151.0","255.255.255.224","sgbit3","sgbit VLAN3");
@@ -160,37 +167,159 @@ void SM_DataModel::addSubnet(Subnet *subnet)
     reset();
 }
 
+
+void SM_DataModel::clearData()
+{
+    // removes all subnets from datastorage and releases the reserved heap memory.
+    int count=SubnetList.count();
+
+    for (int i=0;i<count;i++) {
+        Subnet *subnet = SubnetList.at(0);
+        SubnetList.removeAt(0);
+        delete subnet;
+    }
+
+    // Tell the widgets the data has changed.
+    reset();
+
+}
+
+bool SM_DataModel::loadFromXmlStream(QXmlStreamReader &stream)
+{
+    // remove existing Map from memory
+    clearData();
+    stream.setNamespaceProcessing(false);
+
+    bool foundMap=false;
+
+    stream.readNext();
+    while((!stream.name().toString().compare("SubnetMap"))&(!stream.atEnd())) stream.readNext();
+
+    if (!stream.atEnd()) {
+        foundMap=true;
+        qDebug("XML: Found SubnetMap Tag at line %llu...",stream.lineNumber());
+    }
+
+    // parse it all!!
+    while (!stream.atEnd()&foundMap) {
+
+        stream.readNext();
+
+        // subnet starts
+        if ((stream.name()=="subnet")&(!stream.isEndElement())) {
+
+            QXmlStreamAttributes attrs=stream.attributes();
+            if (attrs.hasAttribute("ipversion")) {
+
+                QStringRef ver = attrs.value("ipversion");
+
+                qDebug("subnet found! (%s)",qPrintable(ver.toString()));
+
+                Subnet *newSubnet=NULL;
+
+                if (ver=="IPv4") newSubnet = new Subnet_v4(this);
+                if (ver=="IPv6") newSubnet = new Subnet_v6(this);
+
+                QString currentSection="";
+
+                stream.readNext();
+
+                while ((!stream.atEnd())&((!(stream.name()=="subnet")))) {
+
+                    // check for Elememtn start. if yes, store the current element in currentSection.
+                    if (stream.isStartElement()) {
+
+                        qDebug("XML parser: Found %s section in line: %llu",qPrintable(stream.name().toString()),stream.lineNumber());
+
+                        currentSection=stream.name().toString();
+
+                    // If notan element start, parse the data into the fitting variable specified by currentSection.
+                    } else if ((stream.isCharacters())&!(stream.isWhitespace())) {
+
+                        qDebug("Data: %s (%s)",qPrintable(stream.text().toString()),qPrintable(stream.name().toString()));
+
+                        QString momData=stream.text().toString();
+
+                        if (currentSection=="identifier") newSubnet->setIdentifier(momData);
+                        if (currentSection=="description") newSubnet->setDescription(momData);
+                        if (currentSection=="notes") newSubnet->setDescription(momData);
+                        if (currentSection=="color") {
+                            QColor newcolor = QColor(momData);
+                            newSubnet->setColor(newcolor);
+                        }
+
+                        if (ver=="IPv4") {
+                            if (currentSection=="address") ((Subnet_v4*)newSubnet)->setIP(momData);
+                            if (currentSection=="netmask") ((Subnet_v4*)newSubnet)->setNM(momData);
+                        } else if (ver=="IPv6") {
+                            if (currentSection=="address") ((Subnet_v6*)newSubnet)->setIP(momData);
+                            if (currentSection=="netmask") ((Subnet_v6*)newSubnet)->setNM(momData);
+                        }
+
+                    }
+
+                    stream.readNext();
+                }
+
+                qDebug("XML Parser: End of Subnet Element. Saving object To Model. Dumping final object data:");
+                SubnetList.append(newSubnet);
+                newSubnet->dumpAll();
+
+            }
+
+        // subnet ends
+        }
+
+    };
+
+    reset();
+
+    if (foundMap) return true;
+    else return false;
+}
+
 bool SM_DataModel::saveToXmlStream(QXmlStreamWriter &stream)
 {
     stream.setAutoFormatting(true);
     stream.writeStartDocument();
 
-    stream.writeStartElement("SubnetMapper2");
-    stream.writeAttribute("version", "2.0.0");
+    stream.writeStartElement("SubnetMap");
     stream.writeAttribute("fileformat", "2");
-    stream.writeTextElement("TEST", "Inhalt");
-    stream.writeEndElement();
+    stream.writeAttribute("writer", "SubnetMapper");
+    stream.writeAttribute("version", "2.0.0");
 
     for (int row = 0; row < SubnetList.count(); ++row) {
 
         Subnet *subnet = SubnetList.at(row);
         stream.writeStartElement("subnet");
 
-        if (getIPversion()==Subnet::IPv4) {
+        if (subnet->getIPversion()==Subnet::IPv4) {
 
-            stream.writeAttribute("version","IPv4");
-            stream.writeTextElement("identifier",((Subnet_v4*)->getIdentifier());
-            stream.writeEndElement();
-            stream.writeTextElement("address",(Subnet_v4::IP2String((Subnet_v4*)model->data(model->index(row, 0, QModelIndex()),Qt::UserRole))->getIP()));
-            stream.writeTextElement("netmask",((Subnet_v4*)model->data(model->index(row, 0, QModelIndex()),Qt::UserRole))->getIPversion());
-            stream.writeTextElement("description",((Subnet_v4*)model->data(model->index(row, 0, QModelIndex()),Qt::UserRole))->getIPversion());
-            stream.writeTextElement("notes",((Subnet_v4*)model->data(model->index(row, 0, QModelIndex()),Qt::UserRole))->getIPversion());
+            quint32 momip = ((Subnet_v4*)subnet)->getIP();
+            quint32 momnm = ((Subnet_v4*)subnet)->getNM();
+            QColor momcol = subnet->getColor();
 
-
+            stream.writeAttribute("ipversion","IPv4");
+            stream.writeTextElement("identifier",subnet->getIdentifier());
+            stream.writeTextElement("address",((Subnet_v4*)subnet)->IP2String(momip));
+            stream.writeTextElement("netmask",((Subnet_v4*)subnet)->IP2String(momnm));
+            stream.writeTextElement("description",subnet->getDescription());
+            stream.writeTextElement("notes",subnet->getNotes());
+            stream.writeTextElement("color",momcol.name());
 
         } else {
-            stream.writeAttribute("version","IPv6");
 
+            QPair<quint64,quint64> momip = ((Subnet_v6*)subnet)->getIP();
+            QPair<quint64,quint64> momnm = ((Subnet_v6*)subnet)->getNM();
+            QColor momcol = subnet->getColor();
+
+            stream.writeAttribute("ipversion","IPv6");
+            stream.writeTextElement("identifier",((Subnet_v6*)subnet)->getIdentifier());
+            stream.writeTextElement("address",((Subnet_v6*)subnet)->IP2String(momip));
+            stream.writeTextElement("netmask",((Subnet_v6*)subnet)->IP2String(momnm));
+            stream.writeTextElement("description",((Subnet_v6*)subnet)->getDescription());
+            stream.writeTextElement("notes",((Subnet_v6*)subnet)->getNotes());
+            stream.writeTextElement("color",momcol.name());
 
         }
 
@@ -199,7 +328,6 @@ bool SM_DataModel::saveToXmlStream(QXmlStreamWriter &stream)
 
     stream.writeEndElement(); // Element: SubnetMapper2
     stream.writeEndDocument();
-
 
     return true;
 }

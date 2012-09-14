@@ -6,6 +6,16 @@ Subnet::Subnet(QObject *parent) :
 {
 }
 
+QColor Subnet::getColor()
+{
+    return *_color;
+}
+
+void Subnet::setColor(QColor &color)
+{
+    *_color=color;
+}
+
 bool Subnet::isV4()
 {
     if (getIPversion()==Subnet::IPv4) return true;

@@ -49,7 +49,7 @@ void sm_IPv4EditDialog::updateFields()
     helperSubnet.setNM(momNM);
 
     ui->CIDRSuffix->setValue(helperSubnet.getCIDR());
-    ui->networkSize->display((int)helperSubnet.getSize());
+    ui->networkSize->display((int)helperSubnet.getSize()-2);
 
     quint32 momwc=helperSubnet.getWildcard();
     quint32 mombc=helperSubnet.getBroadcast();

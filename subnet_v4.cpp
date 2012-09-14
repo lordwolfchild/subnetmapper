@@ -10,7 +10,7 @@ Subnet_v4::Subnet_v4(QObject *parent) :
     _notes=new(QString);
     _identifier=new(QString);
     _selected=new(bool);
-    _color=new(QColor);
+    _color=new QColor("lightgrey");
 
     quint32 momIp = 1;
     quint32 momNm = ~0;
@@ -35,7 +35,7 @@ Subnet_v4::Subnet_v4(quint32 ip, quint32 nm, QString id, QString description, QS
     _notes=new(QString);
     _identifier=new(QString);
     _selected=new(bool);
-    _color=new(QColor);
+    _color=new QColor("lightgrey");
 
     *_ip_address=ip;
     *_netmask=nm;
@@ -57,7 +57,7 @@ Subnet_v4::Subnet_v4(QString ip, QString nm, QString id, QString description, QS
     _notes=new(QString);
     _identifier=new(QString);
     _selected=new(bool);
-    _color=new(QColor);
+    _color=new QColor("lightgrey");
 
     quint32 momip = String2IP(ip);
     quint32 momnm = String2IP(nm);
@@ -119,11 +119,6 @@ void Subnet_v4::setIdentifier(QString &identifier)
 void Subnet_v4::setSelected(bool &selected)
 {
         *_selected=selected;
-}
-
-void Subnet_v4::setColor(QColor &color)
-{
-        *_color=color;
 }
 
 void Subnet_v4::setNotes(QString &notes)
@@ -219,11 +214,6 @@ QString& Subnet_v4::getNotes()
 bool&    Subnet_v4::getSelected()
 {
     return *_selected;
-}
-
-QColor&  Subnet_v4::getColor()
-{
-    return *_color;
 }
 
 QString Subnet_v4::IP2String(quint32 &ip)
@@ -369,6 +359,8 @@ void Subnet_v4::dumpAll()
      qDebug("--------------------------------------------");
      qDebug(" Notes dump:");
      qDebug("   %s",qPrintable(getNotes()));
+     qDebug("--------------------------------------------");
+     qDebug(" Subnet color:           %s",qPrintable(_color->name()));
      qDebug("---------------------------------DUMP END---");
 }
 

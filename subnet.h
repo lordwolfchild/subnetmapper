@@ -18,7 +18,6 @@ public:
     virtual void setDescription(QString &description) = 0;
     virtual void setIdentifier(QString &identifier) = 0;
     virtual void setSelected(bool &selected) = 0;
-    virtual void setColor(QColor &color) = 0;
     virtual void setNotes(QString &notes) = 0;
 
     virtual QString getStrNM() = 0;
@@ -28,6 +27,8 @@ public:
     virtual QString& getIdentifier() = 0;
     virtual QString& getNotes() = 0;
 
+    QColor getColor();
+    void setColor(QColor &color);
 
     virtual void dumpAll() = 0;
     virtual QString toString() = 0;
@@ -38,6 +39,10 @@ public:
 
     bool isV4();
     bool isV6();
+
+protected:
+
+    QColor *_color;
 };
 
 #endif // SUBNET_H
