@@ -138,7 +138,7 @@ quint32 Subnet_v4::getLastUsableIP()
     if (getCIDR()<31)
             return (getBroadcast()-1);
     else
-            return 0;
+        return getBroadcast();
 }
 
 // TODO
@@ -147,7 +147,7 @@ quint32 Subnet_v4::getFirstUsableIP()
     if (getCIDR()<31)
             return (getIP()+1);
     else
-            return 0;
+        return getIP();
 }
 
 // TODO

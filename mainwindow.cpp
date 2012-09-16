@@ -73,6 +73,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowTitle(tr("SubnetMapper V0.0"));
 
+    resize(1000,600);
+
 }
 
 MainWindow::~MainWindow()
@@ -103,12 +105,16 @@ void MainWindow::setupViews()
     table->setModel(model);
     list->setModel(model);
 
+    SM_DataModel *mommodel=((SM_DataModel*)model);
+
     //pieChart->setModel(model);
 
     QItemSelectionModel *selectionModel = new QItemSelectionModel(model);
     table->setSelectionModel(selectionModel);
+    table->setSortingEnabled(true);
     list->setSelectionModel(selectionModel);
     //pieChart->setSelectionModel(selectionModel);
+    QObject::connect(table->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(sortByColumn(int)));
 
     QHeaderView *headerView = table->horizontalHeader();
     headerView->setResizeMode(QHeaderView::ResizeToContents);
@@ -210,3 +216,8 @@ void MainWindow::addIPv6Subnet()
 
 
 }
+
+void MainWindow::sortByColumn(int &i)
+{
+    model->sort(i);
+};
