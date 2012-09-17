@@ -18,6 +18,7 @@ signals:
 public slots:
 
 protected:
+    void paintEvent(QPaintEvent *event);
 
     QModelIndex moveCursor(QAbstractItemView::CursorAction cursorAction,
                             Qt::KeyboardModifiers modifiers);

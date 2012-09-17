@@ -1,4 +1,5 @@
 #include "sm_datamodel.h"
+#include <QBrush>
 
 SM_DataModel::SM_DataModel(QObject *parent) : QAbstractTableModel(parent)
 {
@@ -49,6 +50,41 @@ QVariant SM_DataModel::headerData(int section, Qt::Orientation orientation, int 
 
 QVariant SM_DataModel::data(const QModelIndex &index, int role) const
 {
+    if ((index.isValid())&(role==Qt::BackgroundRole)) {
+        if ((index.row()%2)==1) {
+            QBrush whiteBackground(Qt::white);
+            return whiteBackground;
+        } else {
+            QBrush greyBackground(Qt::gray);
+            return greyBackground;
+        }
+    }
+
+    if ((index.isValid())&(role==Qt::ForegroundRole)) {
+        QBrush subnetColor(((Subnet*)SubnetList.at(index.row()))->getColor());
+        return subnetColor;
+    }
+
+    if ((index.isValid())&(role==Qt::UserRole)) {
+
+        switch (index.column()) {
+        case 0:
+            if (((Subnet*)SubnetList.at(index.row()))->getIPversion()==Subnet::IPv4) return QString("IPv4");
+            else return QString("IPv6");
+        case 1:
+            if (((Subnet*)SubnetList.at(index.row()))->getIPversion()==Subnet::IPv4) return ((Subnet_v4*)SubnetList.at(index.row()))->getIP();
+            else {
+                QPair<quint64,quint64> momip = ((Subnet_v6*)SubnetList.at(index.row()))->getIP();
+                return Subnet_v6::IP2String(momip);
+            };
+        case 2:
+            if (((Subnet*)SubnetList.at(index.row()))->getIPversion()==Subnet::IPv4) return QString("IPv4");
+            else return QString("IPv6");
+        default:
+            return QVariant();
+        }
+    }
+
     if (!index.isValid() || role != (Qt::DisplayRole))
           return QVariant();
     else {
