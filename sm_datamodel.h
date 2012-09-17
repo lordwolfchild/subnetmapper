@@ -35,8 +35,6 @@ public:
 
     bool saveToXmlStream(QXmlStreamWriter &stream);
 
-    void sortByColumn(int col);
-
 protected:
 
     QList<Subnet*>  SubnetList;

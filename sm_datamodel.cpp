@@ -332,7 +332,3 @@ bool SM_DataModel::saveToXmlStream(QXmlStreamWriter &stream)
     return true;
 }
 
-void SM_DataModel::sortByColumn(int col)
-{
-    qDebug("Sorting called on col %u",col);
-}

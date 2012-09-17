@@ -14,6 +14,7 @@
 #include <QXmlSimpleReader>
 #include "sm_ipv4editdialog.h"
 #include "sm_ipv6editdialog.h"
+#include "sm_subnetview.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -93,28 +94,25 @@ void MainWindow::setupViews()
     QSplitter *splitter = new QSplitter;
     splitter->setOrientation(Qt::Vertical);
     QTableView *table = new QTableView;
-    QListView *list = new QListView;
+    SM_SubnetView *map = new SM_SubnetView(this);
 
     //map = new SM_mapView;
-    splitter->addWidget(list);
+    splitter->addWidget(map);
     splitter->addWidget(table);
     //splitter->addWidget(pieChart);
-    splitter->setStretchFactor(0, 1);
+    splitter->setStretchFactor(0, 3);
     splitter->setStretchFactor(1, 1);
 
     table->setModel(model);
-    list->setModel(model);
-
-    SM_DataModel *mommodel=((SM_DataModel*)model);
+    map->setModel(model);
 
     //pieChart->setModel(model);
 
     QItemSelectionModel *selectionModel = new QItemSelectionModel(model);
     table->setSelectionModel(selectionModel);
     table->setSortingEnabled(true);
-    list->setSelectionModel(selectionModel);
+    map->setSelectionModel(selectionModel);
     //pieChart->setSelectionModel(selectionModel);
-    QObject::connect(table->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(sortByColumn(int)));
 
     QHeaderView *headerView = table->horizontalHeader();
     headerView->setResizeMode(QHeaderView::ResizeToContents);
@@ -216,8 +214,3 @@ void MainWindow::addIPv6Subnet()
 
 
 }
-
-void MainWindow::sortByColumn(int &i)
-{
-    model->sort(i);
-};

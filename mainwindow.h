@@ -21,8 +21,6 @@ private slots:
     void addIPv4Subnet();
     void addIPv6Subnet();
 
-    void sortByColumn(int &i);
-
 private:
     void setupModel();
     void setupViews();
