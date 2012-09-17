@@ -81,10 +81,19 @@ void SM_SubnetView::paintEvent(QPaintEvent *event)
     // Store the original state of the painter...
     painter.save();
 
+    // TODO: Draw stuff for real
 
+    // Draw legend for IPv4
 
+    // Draw IPv4 subnets
 
+    // Draw Extras for IPv4
 
+    // Draw legend for IPv6
+
+    // Draw IPv6 subnets
+
+    // Draw Extras for IPv6
 
     // Put everything back in the state we found it in (Is this even necessary?!).
     painter.restore();
