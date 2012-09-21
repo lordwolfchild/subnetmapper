@@ -106,6 +106,11 @@ void MainWindow::setupViews()
     table->setModel(model);
     map->setModel(model);
 
+    map->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    map->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+
+    map->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
     //pieChart->setModel(model);
 
     QItemSelectionModel *selectionModel = new QItemSelectionModel(model);

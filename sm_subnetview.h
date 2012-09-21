@@ -13,6 +13,7 @@ public:
     void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible);
     QModelIndex indexAt(const QPoint &point) const;
 
+
 signals:
 
 public slots:
@@ -31,6 +32,12 @@ protected:
     void setSelection(const QRect&, QItemSelectionModel::SelectionFlags command);
 
     QRegion visualRegionForSelection(const QItemSelection &selection) const;
+
+    void scrollContentsBy(int dx, int dy);
+
+private:
+
+    void updateGeometries();
 
 
 };

@@ -12,7 +12,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    ttsubnetview.cpp \
     subnet.cpp \
     subnet_v6.cpp \
     sm_datamodel.cpp \
@@ -23,7 +22,6 @@ SOURCES += main.cpp\
     sm_subnetview.cpp
 
 HEADERS  += mainwindow.h \
-    ttsubnetview.h \
     subnet.h \
     subnet_v6.h \
     sm_datamodel.h \

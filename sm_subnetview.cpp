@@ -25,6 +25,23 @@ QModelIndex SM_SubnetView::indexAt(const QPoint &point) const
     return QModelIndex();
 }
 
+void SM_SubnetView::scrollContentsBy(int dx, int dy)
+{
+    viewport()->scroll(dx, dy);
+}
+
+void SM_SubnetView::updateGeometries()
+{
+    int totalSize=2000;
+
+    horizontalScrollBar()->setPageStep(viewport()->width());
+    horizontalScrollBar()->setRange(0, qMax(0, 2*totalSize - viewport()->width()));
+    verticalScrollBar()->setPageStep(viewport()->height());
+    verticalScrollBar()->setRange(0, qMax(0, totalSize - viewport()->height()));
+
+    viewport()->update();
+}
+
 void SM_SubnetView::paintEvent(QPaintEvent *event)
 {
     QItemSelectionModel *selections = selectionModel();
@@ -57,7 +74,7 @@ void SM_SubnetView::paintEvent(QPaintEvent *event)
     // to iterate this structure to ease up the whole rendering process.
     QHash< quint32, QList<uint> > ipv4cache;
 
-    // We would do the same for IPv6, but as we need longer prefixes here, we use string represantations instead.
+    // We would do the same for IPv6, but as we need longer prefixes here, we use string representations instead.
     // As we would have to do some serious magic here to speed up things we just hope that string handling will not
     // take too much cpu time... *fingerscrossed*. That method has the advantange, that we do not need the
     // Subnet Helpers for conversion all the time. ;)
@@ -81,19 +98,61 @@ void SM_SubnetView::paintEvent(QPaintEvent *event)
     // Store the original state of the painter...
     painter.save();
 
-    // TODO: Draw stuff for real
+    // define some constants for drawing calulations TODO: Move them to options file/dialog
+    uint general_margin = 20;
 
-    // Draw legend for IPv4
+    uint x_offset = 80;
+    uint y_offset = 20;
 
-    // Draw IPv4 subnets
+    uint x_width = 600;
 
-    // Draw Extras for IPv4
+    uint line_height = 25;
 
-    // Draw legend for IPv6
+    uint y_internetwork_spacer = 50;
+    uint y_interversion_spacer = 100;
 
-    // Draw IPv6 subnets
+    // a helper to make the point calculations more readable. holds the offset for each block of the graphs.
+    uint y_local_offset = general_margin + y_offset;
 
-    // Draw Extras for IPv6
+    // resize the widget to the needed size
+    //this->resize((general_margin*2) + x_offset+x_width, (general_margin*2) + (y_offset*4) + ((((ipv4cache.count()+1)*line_height))*2) + ((((ipv6cache.count()+1)*line_height))*2) + y_internetwork_spacer + y_interversion_spacer);
+
+
+    // 1.1 Draw legend for IPv4
+    painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(subnetsV4.count()+1))));
+    painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(subnetsV4.count()+1))));
+    painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+
+    y_local_offset = general_margin + y_offset + (line_height*(subnetsV4.count()+1)) + y_internetwork_spacer;
+
+    painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(subnetsV4.count()+1))));
+    painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(subnetsV4.count()+1))));
+    painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+
+    // 1.2 Draw IPv4 subnets
+
+    // 1.3 Draw Extras for IPv4
+
+    // stores the offset which the ipv6 block always has through the ipv4 block
+    uint y_offset_ipv6 = general_margin + ((y_offset + (line_height*(subnetsV4.count()+1)))*2) + y_internetwork_spacer + y_interversion_spacer;
+
+    y_local_offset = y_offset_ipv6 + y_offset;
+
+    // 2.1 Draw legend for IPv6
+
+    painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(subnetsV6.count()+1))));
+    painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(subnetsV6.count()+1))));
+    painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+
+    y_local_offset = y_offset_ipv6 + (y_offset*2) + ((line_height*(subnetsV6.count()+1))*2) + y_internetwork_spacer;
+
+    painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(subnetsV6.count()+1))));
+    painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(subnetsV6.count()+1))));
+    painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+
+    // 2.2 Draw IPv6 subnets
+
+    // 2.3 Draw Extras for IPv6
 
     // Put everything back in the state we found it in (Is this even necessary?!).
     painter.restore();
