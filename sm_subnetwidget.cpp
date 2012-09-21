@@ -18,8 +18,6 @@ void SM_SubnetWidget::setModel(SM_DataModel *newmodel)
 void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 {
 
-    resize(800,900);
-
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
@@ -120,6 +118,8 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     // 2.2 Draw IPv6 subnets
 
     // 2.3 Draw Extras for IPv6
+
+    resize((2*general_margin)+(2*x_offset)+x_width, y_local_offset+(line_height*(subnetsV6.count()+1))+y_offset+general_margin);
 
     // Put everything back in the state we found it in (Is this even necessary?!).
     painter.restore();

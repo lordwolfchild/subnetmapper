@@ -99,6 +99,7 @@ void MainWindow::setupViews()
     SM_SubnetWidget *map = new SM_SubnetWidget;
 
     scroller->setWidget(map);
+    scroller->setWidgetResizable(false);
 
     splitter->addWidget(scroller);
     splitter->addWidget(table);
