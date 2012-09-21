@@ -1,65 +1,32 @@
-#include "sm_subnetview.h"
-#include <QScrollBar>
-#include <QBrush>
-#include <QPen>
+#include "sm_subnetwidget.h"
 #include <QPainter>
 #include <QPaintEvent>
-#include <QStyle>
 
-SM_SubnetView::SM_SubnetView(QWidget *parent) :
-    QAbstractItemView(parent)
+SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
+    QWidget(parent)
 {
+    setModel(NULL);
+    setMinimumSize(400,400);
 }
 
-QRect SM_SubnetView::visualRect(const QModelIndex &index) const
+void SM_SubnetWidget::setModel(SM_DataModel *newmodel)
 {
-    return QRect(10,10,100,100);
+    model=newmodel;
 }
 
-void SM_SubnetView::scrollTo(const QModelIndex &index, QAbstractItemView::ScrollHint hint)
+
+void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 {
-}
 
-QModelIndex SM_SubnetView::indexAt(const QPoint &point) const
-{
-    return QModelIndex();
-}
+    resize(800,900);
 
-void SM_SubnetView::scrollContentsBy(int dx, int dy)
-{
-    viewport()->scroll(dx, dy);
-}
-
-void SM_SubnetView::updateGeometries()
-{
-    int totalSize=2000;
-
-    horizontalScrollBar()->setPageStep(viewport()->width());
-    horizontalScrollBar()->setRange(0, qMax(0, 2*totalSize - viewport()->width()));
-    verticalScrollBar()->setPageStep(viewport()->height());
-    verticalScrollBar()->setRange(0, qMax(0, totalSize - viewport()->height()));
-
-    viewport()->update();
-}
-
-void SM_SubnetView::paintEvent(QPaintEvent *event)
-{
-    QItemSelectionModel *selections = selectionModel();
-    QStyleOptionViewItem option = viewOptions();
-    QStyle::State state = option.state;
-
-    QBrush background = option.palette.base();
-    QPen foreground(option.palette.color(QPalette::WindowText));
-    QPen textPen(option.palette.color(QPalette::Text));
-    QPen highlightedPen(option.palette.color(QPalette::HighlightedText));
-
-    QPainter painter(viewport());
+    QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    painter.fillRect(event->rect(),background);
-    painter.setPen(foreground);
+    painter.fillRect(event->rect(),Qt::white);
+    painter.setPen(Qt::black);
 
-    int itemCount=model()->rowCount();
+    int itemCount=model->rowCount();
 
     int countV6=0;
     int countV4=0;
@@ -82,14 +49,14 @@ void SM_SubnetView::paintEvent(QPaintEvent *event)
 
 
     // Iterate the Model and store the data we need to prepare our little drawing.
-    for (int i=0;i<model()->rowCount();i++) {
-        if (model()->data(model()->index(i,0),Qt::UserRole)=="IPv4") {
+    for (int i=0;i<model->rowCount();i++) {
+        if (model->data(model->index(i,0),Qt::UserRole)=="IPv4") {
             subnetsV4.insert(i);
-            ipv4cache[((model()->data(model()->index(i,1),Qt::UserRole)).toUInt()&(~((quint32)255)))].append(i);
+            ipv4cache[((model->data(model->index(i,1),Qt::UserRole)).toUInt()&(~((quint32)255)))].append(i);
             countV4++;
         } else {
             subnetsV6.insert(i);
-            QString momip = (model()->data(model()->index(i,1),Qt::UserRole)).toString();
+            QString momip = (model->data(model->index(i,1),Qt::UserRole)).toString();
             ipv6cache[momip.left(34)].append(i);
             countV6++;
         };
@@ -144,7 +111,7 @@ void SM_SubnetView::paintEvent(QPaintEvent *event)
     painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(subnetsV6.count()+1))));
     painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
 
-    y_local_offset = y_offset_ipv6 + (y_offset*2) + ((line_height*(subnetsV6.count()+1))*2) + y_internetwork_spacer;
+    y_local_offset = y_offset_ipv6 + y_offset + (line_height*(subnetsV6.count()+1)) + y_internetwork_spacer;
 
     painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(subnetsV6.count()+1))));
     painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(subnetsV6.count()+1))));
@@ -158,34 +125,3 @@ void SM_SubnetView::paintEvent(QPaintEvent *event)
     painter.restore();
 
 }
-
-QModelIndex SM_SubnetView::moveCursor(QAbstractItemView::CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
-{
-    return QModelIndex();
-}
-
-int SM_SubnetView::horizontalOffset() const
-{
-    return horizontalScrollBar()->value();
-}
-
-int SM_SubnetView::verticalOffset() const
-{
-    return verticalScrollBar()->value();
-}
-
-bool SM_SubnetView::isIndexHidden(const QModelIndex &index) const
-{
-    return false;
-}
-
-void SM_SubnetView::setSelection(const QRect &, QItemSelectionModel::SelectionFlags command)
-{
-}
-
-QRegion SM_SubnetView::visualRegionForSelection(const QItemSelection &selection) const
-{
-    return QRegion(10,10,100,100);
-}
-
-

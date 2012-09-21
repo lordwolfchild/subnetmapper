@@ -14,7 +14,8 @@
 #include <QXmlSimpleReader>
 #include "sm_ipv4editdialog.h"
 #include "sm_ipv6editdialog.h"
-#include "sm_subnetview.h"
+#include "sm_subnetwidget.h"
+#include <QScrollArea>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -94,29 +95,30 @@ void MainWindow::setupViews()
     QSplitter *splitter = new QSplitter;
     splitter->setOrientation(Qt::Vertical);
     QTableView *table = new QTableView;
-    SM_SubnetView *map = new SM_SubnetView(this);
+    QScrollArea *scroller = new QScrollArea;
+    SM_SubnetWidget *map = new SM_SubnetWidget;
 
-    //map = new SM_mapView;
-    splitter->addWidget(map);
+    scroller->setWidget(map);
+
+    splitter->addWidget(scroller);
     splitter->addWidget(table);
-    //splitter->addWidget(pieChart);
     splitter->setStretchFactor(0, 3);
     splitter->setStretchFactor(1, 1);
 
     table->setModel(model);
-    map->setModel(model);
+    map->setModel((SM_DataModel*)model);
 
-    map->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-    map->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+//    map->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+//    map->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    map->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+//    map->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     //pieChart->setModel(model);
 
     QItemSelectionModel *selectionModel = new QItemSelectionModel(model);
     table->setSelectionModel(selectionModel);
     table->setSortingEnabled(true);
-    map->setSelectionModel(selectionModel);
+    //map->setSelectionModel(selectionModel);
     //pieChart->setSelectionModel(selectionModel);
 
     QHeaderView *headerView = table->horizontalHeader();

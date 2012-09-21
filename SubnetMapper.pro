@@ -19,7 +19,7 @@ SOURCES += main.cpp\
     sm_ipv4editdialog.cpp \
     sm_ipv6editdialog.cpp \
     ipv6validator.cpp \
-    sm_subnetview.cpp
+    sm_subnetwidget.cpp
 
 HEADERS  += mainwindow.h \
     subnet.h \
@@ -29,7 +29,7 @@ HEADERS  += mainwindow.h \
     sm_ipv4editdialog.h \
     sm_ipv6editdialog.h \
     ipv6validator.h \
-    sm_subnetview.h
+    sm_subnetwidget.h
 
 FORMS    += \
     sm_ipv4editdialog.ui \
