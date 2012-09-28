@@ -175,7 +175,7 @@ void SM_DataModel::addDemos()
     Subnet *mom1 = new Subnet_v4("131.220.149.0","255.255.255.224","sgbit1","sgbit VLAN1");
     Subnet *mom2 = new Subnet_v4("131.220.150.0","255.255.255.0","sgbit2","sgbit VLAN2");
     Subnet *mom3 = new Subnet_v4("131.220.151.164","255.255.255.224","sgbit3","sgbit VLAN3");
-    Subnet *mom4 = new Subnet_v4("131.220.152.128","255.255.255.127","sgbit4","sgbit VLAN4");
+    Subnet *mom4 = new Subnet_v4("131.220.152.128","255.255.255.128","sgbit4","sgbit VLAN4");
 
     SubnetList.append(mom1);
     SubnetList.append(mom2);

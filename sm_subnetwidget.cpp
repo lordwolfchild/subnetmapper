@@ -110,32 +110,33 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
             // We have our subnet, now we need to decide, where we put it. To achieve this, we have to analyze its size and its position.
 
             quint32 start_position = (((quint32)255)&(momNet->getIP()));
-            quint32 end_position = (((quint32)255)&(momNet->getBroadcast()))+1;
+            quint32 end_position = (((quint32)255)&(momNet->getBroadcast()));
+            quint32 size = momNet->getSize();
 
-            qDebug("%u %u",start_position,end_position);
+            painter.setBrush( QBrush( momNet->getColor() ));
+            momNet->dumpAll();
+            qDebug("--> start: %u end: %u",start_position,end_position);
 
             if (start_position<128)  {
 
                 if (end_position>128) {
 
-                    painter.drawLine(general_margin+x_offset+((x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),general_margin+x_offset+((x_width/128)*127),y_block1_offset+(line_height*(line+2)));
-                    painter.drawLine(general_margin+x_offset+((128)*start_position),y_block2_offset+(line_height*(line+1)),general_margin+x_offset+((x_width/128)*end_position),y_block2_offset+(line_height*(line+2)));
-
+                    painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*128),line_height);
+                    painter.drawRect(general_margin+x_offset,y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*(size-128)),line_height);
 
                 } else {
 
-                    painter.drawLine(general_margin+x_offset+((x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),general_margin+x_offset+((x_width/128)*end_position),y_block1_offset+(line_height*(line+2)));
+                    painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*end_position),line_height);
 
                 }
 
 
             }
             else {
-
-                painter.drawLine(general_margin+x_offset+((x_width/128)*start_position),y_block2_offset+(line_height*(line+1)),general_margin+x_offset+((x_width/128)*end_position),y_block2_offset+(line_height*(line+2)));
-
+                painter.drawRect(general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size),line_height);
             }
 
+            painter.setBrush( Qt::NoBrush );
 
 
         }
