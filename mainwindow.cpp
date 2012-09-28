@@ -108,8 +108,8 @@ void MainWindow::setupViews()
     splitter->setStretchFactor(1, 1);
 
     // bind our model to the views. Be advised that SM_subnetwidget is  not a Model/View aware class, but
-    // only emulates this behavoiur in necessary boundaries to retrieve its data from the model and the selection.
-    // Do not try fancy stuff with this class!
+    // only emulates this behaviour in necessary boundaries to retrieve its data from the model and the selection.
+    // Do not try fancy stuff with this class (without knowing what you do, of course)!
     table->setModel(model);
     map->setModel((SM_DataModel*)model);
     map->setSelectionModel(selectionModel);

@@ -103,7 +103,41 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
         quint32 index=ipv4cache.keys()[line];
         for (int net=0;net<ipv4cache[index].count();net++) {
             Subnet_v4 *momNet=(Subnet_v4*)model->getSubnet(ipv4cache[index].at(net));
-            qDebug("Hit: %s",qPrintable(momNet->toString()));
+
+            uint y_block1_offset = general_margin + y_offset;
+            uint y_block2_offset = general_margin + y_offset + (line_height*(subnetsV4.count()+1)) + y_internetwork_spacer;
+
+            // We have our subnet, now we need to decide, where we put it. To achieve this, we have to analyze its size and its position.
+
+            quint32 start_position = (((quint32)255)&(momNet->getIP()));
+            quint32 end_position = (((quint32)255)&(momNet->getBroadcast()))+1;
+
+            qDebug("%u %u",start_position,end_position);
+
+            if (start_position<128)  {
+
+                if (end_position>128) {
+
+                    painter.drawLine(general_margin+x_offset+((x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),general_margin+x_offset+((x_width/128)*127),y_block1_offset+(line_height*(line+2)));
+                    painter.drawLine(general_margin+x_offset+((128)*start_position),y_block2_offset+(line_height*(line+1)),general_margin+x_offset+((x_width/128)*end_position),y_block2_offset+(line_height*(line+2)));
+
+
+                } else {
+
+                    painter.drawLine(general_margin+x_offset+((x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),general_margin+x_offset+((x_width/128)*end_position),y_block1_offset+(line_height*(line+2)));
+
+                }
+
+
+            }
+            else {
+
+                painter.drawLine(general_margin+x_offset+((x_width/128)*start_position),y_block2_offset+(line_height*(line+1)),general_margin+x_offset+((x_width/128)*end_position),y_block2_offset+(line_height*(line+2)));
+
+            }
+
+
+
         }
     }
 
