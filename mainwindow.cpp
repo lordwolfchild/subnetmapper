@@ -100,27 +100,23 @@ void MainWindow::setupViews()
 
     scroller->setWidget(map);
     scroller->setWidgetResizable(false);
+    scroller->setStyleSheet(tr("QScrollArea { background-color: white }"));
 
     splitter->addWidget(scroller);
     splitter->addWidget(table);
-    splitter->setStretchFactor(0, 3);
+    splitter->setStretchFactor(0, 2);
     splitter->setStretchFactor(1, 1);
 
+    // bind our model to the views. Be advised that SM_subnetwidget is  not a Model/View aware class, but
+    // only emulates this behavoiur in necessary boundaries to retrieve its data from the model and the selection.
+    // Do not try fancy stuff with this class!
     table->setModel(model);
     map->setModel((SM_DataModel*)model);
-
-//    map->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-//    map->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-
-//    map->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
-    //pieChart->setModel(model);
+    map->setSelectionModel(selectionModel);
 
     QItemSelectionModel *selectionModel = new QItemSelectionModel(model);
     table->setSelectionModel(selectionModel);
     table->setSortingEnabled(true);
-    //map->setSelectionModel(selectionModel);
-    //pieChart->setSelectionModel(selectionModel);
 
     QHeaderView *headerView = table->horizontalHeader();
     headerView->setResizeMode(QHeaderView::ResizeToContents);

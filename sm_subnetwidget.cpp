@@ -6,12 +6,18 @@ SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     QWidget(parent)
 {
     setModel(NULL);
+    setSelectionModel(NULL);
     setMinimumSize(400,400);
 }
 
 void SM_SubnetWidget::setModel(SM_DataModel *newmodel)
 {
     model=newmodel;
+}
+
+void SM_SubnetWidget::setSelectionModel(QItemSelectionModel *newselectionmodel)
+{
+    selectionModel=newselectionmodel;
 }
 
 
@@ -50,7 +56,8 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     for (int i=0;i<model->rowCount();i++) {
         if (model->data(model->index(i,0),Qt::UserRole)=="IPv4") {
             subnetsV4.insert(i);
-            ipv4cache[((model->data(model->index(i,1),Qt::UserRole)).toUInt()&(~((quint32)255)))].append(i);
+            //ipv4cache[((model->data(model->index(i,1),Qt::UserRole)).toUInt()&(~((quint32)255)))].append(i);
+            ipv4cache[((((Subnet_v4*)(model->getSubnet(i)))->getIP())&(~((quint32)255)))].append(i);
             countV4++;
         } else {
             subnetsV6.insert(i);
@@ -79,10 +86,6 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     // a helper to make the point calculations more readable. holds the offset for each block of the graphs.
     uint y_local_offset = general_margin + y_offset;
 
-    // resize the widget to the needed size
-    //this->resize((general_margin*2) + x_offset+x_width, (general_margin*2) + (y_offset*4) + ((((ipv4cache.count()+1)*line_height))*2) + ((((ipv6cache.count()+1)*line_height))*2) + y_internetwork_spacer + y_interversion_spacer);
-
-
     // 1.1 Draw legend for IPv4
     painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(subnetsV4.count()+1))));
     painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(subnetsV4.count()+1))));
@@ -95,6 +98,14 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
 
     // 1.2 Draw IPv4 subnets
+
+    for (int line=0;line<ipv4cache.keys().count();line++) {
+        quint32 index=ipv4cache.keys()[line];
+        for (int net=0;net<ipv4cache[index].count();net++) {
+            Subnet_v4 *momNet=(Subnet_v4*)model->getSubnet(ipv4cache[index].at(net));
+            qDebug("Hit: %s",qPrintable(momNet->toString()));
+        }
+    }
 
     // 1.3 Draw Extras for IPv4
 
@@ -119,6 +130,7 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
     // 2.3 Draw Extras for IPv6
 
+    // resize the widget to the needed size
     resize((2*general_margin)+(2*x_offset)+x_width, y_local_offset+(line_height*(subnetsV6.count()+1))+y_offset+general_margin);
 
     // Put everything back in the state we found it in (Is this even necessary?!).

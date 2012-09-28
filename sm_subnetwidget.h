@@ -2,6 +2,7 @@
 #define SM_SUBNETWIDGET_H
 
 #include <QWidget>
+#include <QItemSelectionModel>
 #include <sm_datamodel.h>
 
 class SM_SubnetWidget : public QWidget
@@ -11,6 +12,7 @@ public:
     explicit SM_SubnetWidget(QWidget *parent = 0);
 
     void setModel(SM_DataModel *newmodel);
+    void setSelectionModel(QItemSelectionModel *newselectionmodel);
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -21,6 +23,7 @@ public slots:
 
 private:
     SM_DataModel *model;
+    QItemSelectionModel *selectionModel;
 
 };
 

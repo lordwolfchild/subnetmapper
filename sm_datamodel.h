@@ -30,6 +30,8 @@ public:
     void addDemos();
     void addSubnet(Subnet *subnet);
 
+    Subnet* getSubnet(int index);
+
     void clearData();
     bool loadFromXmlStream (QXmlStreamReader &stream);
 

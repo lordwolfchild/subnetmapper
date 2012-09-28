@@ -203,6 +203,12 @@ void SM_DataModel::addSubnet(Subnet *subnet)
     reset();
 }
 
+Subnet *SM_DataModel::getSubnet(int index)
+{
+    if ((index>=0)&(index<SubnetList.count())) return SubnetList.at(index);
+    return NULL;
+}
+
 
 void SM_DataModel::clearData()
 {
