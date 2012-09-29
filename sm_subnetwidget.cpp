@@ -114,8 +114,6 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
             quint32 size = momNet->getSize();
 
             painter.setBrush( QBrush( momNet->getColor() ));
-            momNet->dumpAll();
-            qDebug("--> start: %u end: %u",start_position,end_position);
 
             if (start_position<128)  {
                 if (end_position>128) {

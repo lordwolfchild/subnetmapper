@@ -16,12 +16,14 @@
 #include "sm_ipv6editdialog.h"
 #include "sm_subnetwidget.h"
 #include <QScrollArea>
+#include "sm_aboutdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
     QMenu *fileMenu = new QMenu(tr("&File"), this);
     QMenu *editMenu = new QMenu(tr("&Edit"), this);
+    QMenu *helpMenu = new QMenu(tr("&Help"), this);
 
     // Open File
     QAction *openAction = fileMenu->addAction(tr("&Open..."));
@@ -48,6 +50,10 @@ MainWindow::MainWindow(QWidget *parent) :
     addIPv6Action->setShortcut(QKeySequence(tr("Ctrl+Shift+N")));
     addIPv6Action->setIcon(QIcon(":/addipv6.svg"));
 
+    // About Dialog
+    QAction *aboutAction = helpMenu->addAction(tr("&About SubnetMapper"));
+    aboutAction->setIcon(QIcon(":/appicon.svg"));
+
 
     setupModel();
     setupViews();
@@ -57,9 +63,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
     connect(addIPv4Action, SIGNAL(triggered()), this, SLOT(addIPv4Subnet()));
     connect(addIPv6Action, SIGNAL(triggered()), this, SLOT(addIPv6Subnet()));
+    connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
 
     this->menuBar()->addMenu(fileMenu);
     this->menuBar()->addMenu(editMenu);
+    this->menuBar()->addMenu(helpMenu);
     statusBar();
 
     QToolBar *toolbar = new QToolBar("Main Toolbar",this);
@@ -70,10 +78,11 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbar->addAction(addIPv4Action);
     toolbar->insertSeparator(addIPv4Action);
     toolbar->addAction(addIPv6Action);
+    toolbar->addAction(aboutAction);
     toolbar->addAction(quitAction);
-    toolbar->insertSeparator(quitAction);
+    toolbar->insertSeparator(aboutAction);
 
-    setWindowTitle(tr("SubnetMapper V0.0"));
+    setWindowTitle(tr("SubnetMapper V2.0.0"));
 
     resize(1000,600);
 
@@ -128,6 +137,14 @@ void MainWindow::setupViews()
     headerSideView->hide();
 
     setCentralWidget(splitter);
+}
+
+void MainWindow::showAboutDialog()
+{
+    SM_AboutDialog aboutDialog(this);
+
+    aboutDialog.setModal(true);
+    aboutDialog.exec();
 }
 
 void MainWindow::openFile(const QString &path)
