@@ -118,27 +118,17 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
             qDebug("--> start: %u end: %u",start_position,end_position);
 
             if (start_position<128)  {
-
                 if (end_position>128) {
-
                     painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*128),line_height);
                     painter.drawRect(general_margin+x_offset,y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*(size-128)),line_height);
-
                 } else {
-
                     painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*end_position),line_height);
-
                 }
-
-
             }
             else {
                 painter.drawRect(general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size),line_height);
             }
-
             painter.setBrush( Qt::NoBrush );
-
-
         }
     }
 
