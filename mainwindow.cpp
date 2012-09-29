@@ -77,6 +77,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     resize(1000,600);
 
+    setWindowIcon(QIcon(":/appicon.svg"));
+
 }
 
 MainWindow::~MainWindow()

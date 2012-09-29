@@ -5,5 +5,6 @@
         <file alias="open.svg">images/document-open.svg</file>
         <file alias="addipv4.svg">images/addipv4.svg</file>
         <file alias="addipv6.svg">images/addipv6.svg</file>
+        <file alias="appicon.svg">images/icon_SubnetMapper2_plain.svg</file>
     </qresource>
 </RCC>
