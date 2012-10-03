@@ -73,12 +73,18 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     // define some constants for drawing calulations TODO: Move them to options file/dialog
     uint general_margin = 20;
 
+    uint text_offset = 4;
+
     uint x_offset = 80;
     uint y_offset = 20;
 
     uint x_width = 600;
 
-    uint line_height = 25;
+    uint line_height = 20;
+
+    QFont newFont = painter.font();
+    newFont.setPixelSize(line_height-(text_offset*2));
+    painter.setFont(newFont);
 
     uint y_internetwork_spacer = 50;
     uint y_interversion_spacer = 100;
@@ -117,14 +123,19 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
             if (start_position<128)  {
                 if (end_position>128) {
-                    painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*128),line_height);
-                    painter.drawRect(general_margin+x_offset,y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*(size-128)),line_height);
+                    painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),x_width,line_height);
+                    painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter,momNet->toString());
+                    painter.drawRect(general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width,line_height);
+                    painter.drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset),line_height,Qt::AlignVCenter,momNet->toString());
+                    if (momNet->getSize()>256) painter.drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter|Qt::AlignRight,tr("+"));
                 } else {
                     painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*end_position),line_height);
+                    painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*end_position),line_height,Qt::AlignVCenter,momNet->toString());
                 }
             }
             else {
                 painter.drawRect(general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size),line_height);
+                painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size),line_height,Qt::AlignVCenter,momNet->toString());
             }
             painter.setBrush( Qt::NoBrush );
         }
@@ -160,3 +171,8 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     painter.restore();
 
 }
+
+void SM_SubnetWidget::dataHasChanged()
+{
+    qDebug("Data has changed!");
+};

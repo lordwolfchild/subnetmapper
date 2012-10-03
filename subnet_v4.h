@@ -55,6 +55,8 @@ public:
 
     void dumpAll();
 
+    bool overlapsWith(Subnet_v4 &other_subnet);
+
 signals:
 
 public slots:

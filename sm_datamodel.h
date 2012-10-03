@@ -6,6 +6,7 @@
 #include "subnet_v6.h"
 #include "subnet.h"
 #include <QXmlStreamWriter>
+#include <QFile>
 
 class SM_DataModel : public QAbstractTableModel
 {

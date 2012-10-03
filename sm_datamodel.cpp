@@ -1,5 +1,7 @@
 #include "sm_datamodel.h"
 #include <QBrush>
+#include <QDomDocument>
+#include <QMessageBox>
 
 SM_DataModel::SM_DataModel(QObject *parent) : QAbstractTableModel(parent)
 {
@@ -172,11 +174,13 @@ bool SM_DataModel::removeRows(int row, int count, const QModelIndex& /*parent*/)
 void SM_DataModel::addDemos()
 {
 
+    Subnet *mom0 = new Subnet_v4("192.168.1.0","255.255.254.0","sgbit0","sgbit VLAN0");
     Subnet *mom1 = new Subnet_v4("131.220.149.0","255.255.255.224","sgbit1","sgbit VLAN1");
     Subnet *mom2 = new Subnet_v4("131.220.150.0","255.255.255.0","sgbit2","sgbit VLAN2");
     Subnet *mom3 = new Subnet_v4("131.220.151.164","255.255.255.224","sgbit3","sgbit VLAN3");
     Subnet *mom4 = new Subnet_v4("131.220.152.128","255.255.255.128","sgbit4","sgbit VLAN4");
 
+    SubnetList.append(mom0);
     SubnetList.append(mom1);
     SubnetList.append(mom2);
     SubnetList.append(mom3);
@@ -373,4 +377,5 @@ bool SM_DataModel::saveToXmlStream(QXmlStreamWriter &stream)
 
     return true;
 }
+
 

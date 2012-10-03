@@ -364,6 +364,17 @@ void Subnet_v4::dumpAll()
      qDebug("---------------------------------DUMP END---");
 }
 
+bool Subnet_v4::overlapsWith(Subnet_v4 &other_subnet)
+{
+    qDebug("overlap TEST:");
+    this->dumpAll();
+    other_subnet.dumpAll();
+
+    if (containsHost(other_subnet.getIP())) return true;
+    if (other_subnet.containsHost(this->getIP())) return true;
+    return false;
+}
+
 QString Subnet_v4::getStrWC()
 {
     quint32 momWC = getWildcard();

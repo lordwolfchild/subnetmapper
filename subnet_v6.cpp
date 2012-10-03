@@ -317,6 +317,7 @@ QString Subnet_v6::IP2String(QPair<quint64,quint64> &ip)
     quint64 lo = ip.second;
 
 // Lets tell those guys out there that we did unholy stuff with pointers which garbles their IPv6 address display
+
 #ifndef __ORDER_LITTLE_ENDIAN__
 #warning "SubnetMapper only works well on litte endian Systems. Reimplement conversion functions of Subnet_v6 for big endian systems. Display of IPv6 Addresses will be false."
 #endif
@@ -646,6 +647,17 @@ void Subnet_v6::dumpAll()
      qDebug("--------------------------------------------------------------------");
      qDebug(" Subnet color:           %s",qPrintable(_color->name()));
      qDebug("---------------------------------------------------------DUMP END---");
+}
+
+bool Subnet_v6::overlapsWith(Subnet_v6 &other_subnet)
+{
+    QPair<quint64,quint64> myIP  = this->getIP();
+    QPair<quint64,quint64> hisIP = other_subnet.getIP();
+
+
+    if (containsHost(hisIP)) return true;
+    if (other_subnet.containsHost(myIP)) return true;
+    return false;
 }
 
 QString Subnet_v6::getStrWC()

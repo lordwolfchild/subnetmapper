@@ -1,5 +1,6 @@
 #include "sm_ipv4editdialog.h"
 #include "ui_sm_ipv4editdialog.h"
+#include <QColorDialog>
 
 sm_IPv4EditDialog::sm_IPv4EditDialog(QWidget *parent) :
     QDialog(parent),
@@ -12,6 +13,11 @@ sm_IPv4EditDialog::sm_IPv4EditDialog(QWidget *parent) :
 
     helperSubnet.setIP(momIP);
     helperSubnet.setNM(momNM);
+
+    selectedColor.setNamedColor(tr("red"));
+
+    ui->colorBox->setStyleSheet("QFrame { background-color: "+selectedColor.name()+" }");
+
 }
 
 sm_IPv4EditDialog::~sm_IPv4EditDialog()
@@ -85,6 +91,14 @@ void sm_IPv4EditDialog::updateCIDR()
     ui->nm_byte2->setValue(*((unsigned char*)(((unsigned char*)&nm)+2)));
     ui->nm_byte3->setValue(*((unsigned char*)(((unsigned char*)&nm)+1)));
     ui->nm_byte4->setValue(*((unsigned char*)(((unsigned char*)&nm)+0)));
+}
+
+void sm_IPv4EditDialog::colorClicked()
+{
+    QColorDialog colorDialog(selectedColor);
+    colorDialog.exec();
+    selectedColor=colorDialog.selectedColor();
+    ui->colorBox->setStyleSheet("QFrame { background-color: "+selectedColor.name()+" }");
 };
 
 void sm_IPv4EditDialog::setDescription(QString description)
@@ -95,5 +109,15 @@ void sm_IPv4EditDialog::setDescription(QString description)
 void sm_IPv4EditDialog::setIdentifier(QString identifier)
 {
     ui->identifier->setText(identifier);
+}
+
+QColor sm_IPv4EditDialog::getColor()
+{
+    return selectedColor;
+}
+
+void sm_IPv4EditDialog::setColor(QColor &color)
+{
+    selectedColor=color;
 }
 

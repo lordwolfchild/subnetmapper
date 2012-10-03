@@ -16,6 +16,7 @@
 #include "sm_ipv6editdialog.h"
 #include "sm_subnetwidget.h"
 #include <QScrollArea>
+#include <QMessageBox>
 #include "sm_aboutdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -107,7 +108,7 @@ void MainWindow::setupViews()
     splitter->setOrientation(Qt::Vertical);
     QTableView *table = new QTableView;
     QScrollArea *scroller = new QScrollArea;
-    SM_SubnetWidget *map = new SM_SubnetWidget;
+    map = new SM_SubnetWidget;
 
     scroller->setWidget(map);
     scroller->setWidgetResizable(false);
@@ -122,12 +123,13 @@ void MainWindow::setupViews()
     // only emulates this behaviour in necessary boundaries to retrieve its data from the model and the selection.
     // Do not try fancy stuff with this class (without knowing what you do, of course)!
     table->setModel(model);
-    map->setModel((SM_DataModel*)model);
-    map->setSelectionModel(selectionModel);
 
     QItemSelectionModel *selectionModel = new QItemSelectionModel(model);
     table->setSelectionModel(selectionModel);
     table->setSortingEnabled(true);
+
+    map->setModel((SM_DataModel*)model);
+    map->setSelectionModel(selectionModel);
 
     QHeaderView *headerView = table->horizontalHeader();
     headerView->setResizeMode(QHeaderView::ResizeToContents);
@@ -137,6 +139,9 @@ void MainWindow::setupViews()
     headerSideView->hide();
 
     setCentralWidget(splitter);
+
+    SM_DataModel* momLink = (SM_DataModel*)model;
+
 }
 
 void MainWindow::showAboutDialog()
@@ -204,13 +209,34 @@ void MainWindow::addIPv4Subnet()
 
         QString momdesc = editor.getDescription();
         QString momid = editor.getIdentifier();
+        QColor momcolor = editor.getColor();
 
         Subnet *newSubnet = new Subnet_v4(editor.getIP(),editor.getNM());
         newSubnet->setDescription(momdesc);
         newSubnet->setIdentifier(momid);
-        ((SM_DataModel*)model)->addSubnet(newSubnet);
+        newSubnet->setColor(momcolor);
+
+        bool isNotOverlappingWithAnything=true;
+
+        for (int i=0;i<((SM_DataModel*)model)->rowCount();i++) {
+            if (((SM_DataModel*)model)->getSubnet(i)->isV4())
+                if (((Subnet_v4*)(((SM_DataModel*)model)->getSubnet(i)))->overlapsWith(*((Subnet_v4*)newSubnet)))
+                    isNotOverlappingWithAnything=false;
+        }
+
+        if (isNotOverlappingWithAnything) ((SM_DataModel*)model)->addSubnet(newSubnet);
+        else {
+            QMessageBox msgBox;
+            msgBox.setText("The Subnet you specified overlaps with an existing subnet.");
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setDetailedText("The overlapping of subnets in a single map is not allowed in SubnetMapper. The author of this program cannot think of a situation in the real world where this could be an advisable situation. If you find yourself in a mess like this, please think it over, stuff like that always catches up with you at a later point in time, when you are actually least expecting it.");
+            msgBox.exec();
+        }
+
+        if (isNotOverlappingWithAnything) map->repaint();
 
     }
+
 
 }
 
@@ -231,7 +257,12 @@ void MainWindow::addIPv6Subnet()
         Subnet *newSubnet = new Subnet_v6(editor.getIP(),editor.getNM());
         newSubnet->setDescription(momdesc);
         newSubnet->setIdentifier(momid);
+
+        // TODO: check if subnet overlaps something we already have in this map
+
         ((SM_DataModel*)model)->addSubnet(newSubnet);
+
+        map->repaint();
 
     }
 

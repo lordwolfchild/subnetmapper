@@ -3,8 +3,9 @@
 
 #include <QMainWindow>
 #include <QAbstractTableModel>
-#include <QAbstractItemView>
+#include "sm_subnetwidget.h"
 #include <QItemSelectionModel>
+#include "sm_datamodel.h"
 
 class MainWindow : public QMainWindow
 {
@@ -27,8 +28,8 @@ private:
     void setupModel();
     void setupViews();
 
-    QAbstractTableModel *model;
-    QAbstractItemView *map;
+    SM_DataModel *model;
+    SM_SubnetWidget *map;
     QItemSelectionModel *selectionModel;
 
 };

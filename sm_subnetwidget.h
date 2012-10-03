@@ -21,6 +21,8 @@ signals:
 
 public slots:
 
+    void dataHasChanged();
+
 private:
     SM_DataModel *model;
     QItemSelectionModel *selectionModel;

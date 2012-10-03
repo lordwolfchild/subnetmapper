@@ -23,16 +23,20 @@ public:
     QString getIdentifier();
     void setDescription(QString description);
     void setIdentifier(QString identifier);
+    QColor getColor();
+    void setColor(QColor &color);
 
 protected slots:
     void updateFields();
     void updateCIDR();
+    void colorClicked();
 
 protected:
     Subnet_v4 helperSubnet;
 
 private:
     Ui::sm_IPv4EditDialog *ui;
+    QColor selectedColor;
 };
 
 #endif // SM_IPV4EDITDIALOG_H
