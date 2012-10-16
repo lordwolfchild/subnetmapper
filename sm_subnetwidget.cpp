@@ -24,6 +24,8 @@ void SM_SubnetWidget::setSelectionModel(QItemSelectionModel *newselectionmodel)
 void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 {
 
+    model->sortData();
+
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
@@ -54,14 +56,13 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
     // Iterate the Model and store the data we need to prepare our little drawing.
     for (int i=0;i<model->rowCount();i++) {
-        if (model->data(model->index(i,0),Qt::UserRole)=="IPv4") {
+        if (model->data(model->index(i,1),Qt::UserRole)=="IPv4") {
             subnetsV4.insert(i);
-            //ipv4cache[((model->data(model->index(i,1),Qt::UserRole)).toUInt()&(~((quint32)255)))].append(i);
             ipv4cache[((((Subnet_v4*)(model->getSubnet(i)))->getIP())&(~((quint32)255)))].append(i);
             countV4++;
         } else {
             subnetsV6.insert(i);
-            QString momip = (model->data(model->index(i,1),Qt::UserRole)).toString();
+            QString momip = (model->data(model->index(i,2),Qt::UserRole)).toString();
             ipv6cache[momip.left(34)].append(i);
             countV6++;
         };

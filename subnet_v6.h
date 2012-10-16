@@ -3,6 +3,7 @@
 
 #include "subnet.h"
 #include <QPair>
+#include "subnet_v4.h"
 
 /*
 

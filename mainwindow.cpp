@@ -165,15 +165,47 @@ void MainWindow::openFile(const QString &path)
         QFile file(fileName);
 
         if (file.open(QFile::ReadOnly | QFile::Text)) {
+            /*
             QXmlStreamReader stream(&file);
             bool result;
 
             result=((SM_DataModel*)model)->loadFromXmlStream(stream);
+            */
+
+            QDomDocument doc("SubnetMap");
+            bool result=false;
+
+            QString errMsg;
+            int line,col;
+
+            result=doc.setContent(&file,&errMsg,&line,&col);
+
+            if (!result) {
+
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setText("Failed to parse the XML data in this file: "+errMsg+" in line "+QString::number(line)+" at column "+QString::number(col)+"!");
+                msgBox.exec();
+
+                file.close();
+                return;
+            }
+
+
+            result=false;
+            result=((SM_DataModel*)model)->loadFromDomDoc(doc);
 
             file.close();
+
             if (result) statusBar()->showMessage(tr("Loaded %1").arg(fileName), 5000);
             else statusBar()->showMessage(tr("Failed to parse SubnetMap %1").arg(fileName),5000);
-        }
+        } else {
+
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setText("Failed to open file: "+fileName);
+            msgBox.exec();
+        };
     }
 }
 

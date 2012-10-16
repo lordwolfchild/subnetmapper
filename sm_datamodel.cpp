@@ -17,13 +17,13 @@ Qt::ItemFlags SM_DataModel::flags ( const QModelIndex & index ) const
     switch (index.column()) {
 
         case 0:
-            return Qt::ItemIsEditable|Qt::ItemIsSelectable|Qt::ItemIsEnabled;
+            return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
         case 1:
-            return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
-        case 2:
             return Qt::ItemIsEditable|Qt::ItemIsSelectable|Qt::ItemIsEnabled;
-        default:
+        case 2:
             return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
+        default:
+            return Qt::ItemIsEditable|Qt::ItemIsSelectable|Qt::ItemIsEnabled;
 
     };
 
@@ -35,12 +35,15 @@ QVariant SM_DataModel::headerData(int section, Qt::Orientation orientation, int 
     if ((role==Qt::DisplayRole)&(orientation=Qt::Horizontal)) {
         switch(section) {
         case 0:
-            return QString("Identifier");
+            return QString("");
             break;
         case 1:
-            return QString("IP/CIDR");
+            return QString("Identifier");
             break;
         case 2:
+            return QString("IP/CIDR");
+            break;
+        case 3:
             return QString("Description");
             break;
         default:
@@ -53,6 +56,12 @@ QVariant SM_DataModel::headerData(int section, Qt::Orientation orientation, int 
 QVariant SM_DataModel::data(const QModelIndex &index, int role) const
 {
     if ((index.isValid())&(role==Qt::BackgroundRole)) {
+
+        if (index.column()==0) {
+            QBrush subnetColor(((Subnet*)SubnetList.at(index.row()))->getColor());
+            return subnetColor;
+        };
+
         if ((index.row()%2)==1) {
             QBrush whiteBackground(Qt::white);
             return whiteBackground;
@@ -63,23 +72,23 @@ QVariant SM_DataModel::data(const QModelIndex &index, int role) const
     }
 
     if ((index.isValid())&(role==Qt::ForegroundRole)) {
-        QBrush subnetColor(((Subnet*)SubnetList.at(index.row()))->getColor());
-        return subnetColor;
+        QBrush blackColor(Qt::black);
+        return blackColor;
     }
 
     if ((index.isValid())&(role==Qt::UserRole)) {
 
         switch (index.column()) {
-        case 0:
+        case 1:
             if (((Subnet*)SubnetList.at(index.row()))->getIPversion()==Subnet::IPv4) return QString("IPv4");
             else return QString("IPv6");
-        case 1:
+        case 2:
             if (((Subnet*)SubnetList.at(index.row()))->getIPversion()==Subnet::IPv4) return ((Subnet_v4*)SubnetList.at(index.row()))->getIP();
             else {
                 QPair<quint64,quint64> momip = ((Subnet_v6*)SubnetList.at(index.row()))->getIP();
                 return Subnet_v6::IP2String(momip);
             };
-        case 2:
+        case 3:
             if (((Subnet*)SubnetList.at(index.row()))->getIPversion()==Subnet::IPv4) return QString("IPv4");
             else return QString("IPv6");
         default:
@@ -92,12 +101,15 @@ QVariant SM_DataModel::data(const QModelIndex &index, int role) const
     else {
         switch(index.column()) {
             case 0:
-                return ((Subnet*)(SubnetList.at(index.row())))->getIdentifier();
+                return QString();
                 break;
             case 1:
-                return ((Subnet*)(SubnetList.at(index.row())))->toString();
+                return ((Subnet*)(SubnetList.at(index.row())))->getIdentifier();
                 break;
             case 2:
+                return ((Subnet*)(SubnetList.at(index.row())))->toString();
+                break;
+            case 3:
                 return ((Subnet*)(SubnetList.at(index.row())))->getDescription();
                 break;
             default:
@@ -116,7 +128,7 @@ int SM_DataModel::rowCount(const QModelIndex& /* parent */ ) const
 
 int SM_DataModel::columnCount(const QModelIndex& /* parent */) const
 {
-    return 3;
+    return 4;
 }
 
 bool SM_DataModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -127,14 +139,14 @@ bool SM_DataModel::setData(const QModelIndex &index, const QVariant &value, int 
 
             switch(index.column()) {
 
-                case 0:
+                case 1:
                     // identifier changed
                     momItem->setIdentifier((QString&)value);
                     emit dataChanged(index,index);
                     return true;
                     break;
 
-                case 2:
+                case 3:
                     // description changed
                     momItem->setDescription((QString&)value);
                     emit dataChanged(index,index);
@@ -195,6 +207,8 @@ void SM_DataModel::addDemos()
     SubnetList.append(mom6);
     SubnetList.append(mom7);
     SubnetList.append(mom8);
+
+    sortData();
 
 }
 
@@ -324,6 +338,107 @@ bool SM_DataModel::loadFromXmlStream(QXmlStreamReader &stream)
     else return false;
 }
 
+bool SM_DataModel::loadFromDomDoc(QDomDocument &doc)
+{
+
+    QMessageBox msgBox;
+
+    // let us check if we have a valid subnetmap
+
+    QDomElement docElem = doc.documentElement();
+    if (docElem.nodeName()=="SubnetMap") {
+        if (docElem.hasAttribute("fileformat")) {
+            if ((docElem.attribute("fileformat")).toInt()!=2) {
+                qDebug("SM_DataModel::loadFromDomDoc(): Failure in parsing the document, version is incompatible");
+                return false;
+            };
+        }
+    } else return false;
+
+    // now we know its one of ours.
+
+    clearData();
+
+    QDomNodeList subnetNodes = docElem.elementsByTagName("subnet");
+
+    qDebug("SM_DataModel::loadFromDomDoc(): found %u subnet nodes in the document.",subnetNodes.count());
+
+    for (int i=0;i<subnetNodes.count();i++){
+        QDomElement currentSubnetNode=subnetNodes.at(i).toElement();
+
+        QDomElement addressNode     = currentSubnetNode.firstChildElement("address");
+        QDomElement netmaskNode     = currentSubnetNode.firstChildElement("netmask");
+        QDomElement colorNode       = currentSubnetNode.firstChildElement("color");
+        QDomElement descriptionNode = currentSubnetNode.firstChildElement("description");
+        QDomElement notesNode       = currentSubnetNode.firstChildElement("notes");
+        QDomElement identifierNode  = currentSubnetNode.firstChildElement("identifier");
+
+        if (currentSubnetNode.hasAttribute("ipversion")) {
+            if (currentSubnetNode.attribute("ipversion")=="IPv4") {
+
+                Subnet_v4 *newSubnet = new Subnet_v4(this);
+
+                QString mom=netmaskNode.text();
+                newSubnet->setNM(mom);
+
+                mom=addressNode.text();
+                newSubnet->setIP(mom);
+
+                mom=identifierNode.text();
+                newSubnet->setIdentifier(mom);
+
+                mom=descriptionNode.text();
+                newSubnet->setDescription(mom);
+
+                mom=notesNode.text();
+                newSubnet->setNotes(mom);
+
+                QColor momColor= QColor(colorNode.text());
+                newSubnet->setColor(momColor);
+
+                SubnetList.append(newSubnet);
+
+
+            } else if (currentSubnetNode.attribute("ipversion")=="IPv6") {
+
+                Subnet_v6 *newSubnet = new Subnet_v6(this);
+
+                SubnetList.append(newSubnet);
+
+            } else {
+
+                msgBox.setText("Warning: Subnet "+QString::number(i)+" was invalid! Subnet will be skipped...");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setDetailedText("The Subnet was not clearly specified, the ipversion attribute is invalid."+
+                                       identifierNode.text()+"\n"+
+                                       addressNode.text()+"\n"+
+                                       netmaskNode.text()+"\n"+
+                                       descriptionNode.text()+"\n"+
+                                       notesNode.text()+"\n"+
+                                       colorNode.text()+"\n"
+                                       );
+                msgBox.exec();
+            }
+        } else {
+
+            msgBox.setText("Warning: Subnet "+QString::number(i)+" was invalid! Subnet will be skipped...");
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setDetailedText("The Subnet was not clearly specified, the ipversion attribute is missing."+
+                                   identifierNode.text()+"\n"+
+                                   addressNode.text()+"\n"+
+                                   netmaskNode.text()+"\n"+
+                                   descriptionNode.text()+"\n"+
+                                   notesNode.text()+"\n"+
+                                   colorNode.text()+"\n"
+                                   );
+            msgBox.exec();
+        }
+
+    }
+
+    return true;
+}
+
 bool SM_DataModel::saveToXmlStream(QXmlStreamWriter &stream)
 {
     stream.setAutoFormatting(true);
@@ -377,5 +492,43 @@ bool SM_DataModel::saveToXmlStream(QXmlStreamWriter &stream)
 
     return true;
 }
+
+bool SM_DataModel::SubnetLessThan(const Subnet* s1, const Subnet* s2)
+{
+
+    Subnet* sv1=(Subnet*)s1;
+    Subnet* sv2=(Subnet*)s2;
+
+    if (sv1->isV4()) {
+        if (sv2->isV4()) {
+            // numerical comparison - fails because of byte order
+            // return (((Subnet_v4*)sv1)->getIP()<((Subnet_v4*)sv2)->getIP());
+            return (((Subnet_v4*)sv1)->toString()<((Subnet_v4*)sv2)->toString());
+        } else {
+            return true;
+        }
+    } else {
+        if (sv2->isV4()) {
+            return false;
+        } else {
+            /*
+            numerical comparison fails due to byte order stuff
+            QPair<quint64,quint64> ip_sv1 = ((Subnet_v6*)sv1)->getIP();
+            QPair<quint64,quint64> ip_sv2 = ((Subnet_v6*)sv2)->getIP();
+
+            return ((ip_sv1.first<ip_sv2.first)&(ip_sv1.second<ip_sv2.second)); */
+        }
+    };
+
+    // lets show the compiler that we care, even if this code never gets touched...
+    return false;
+}
+
+void SM_DataModel::sortData()
+{
+    qSort(SubnetList.begin(), SubnetList.end(), SM_DataModel::SubnetLessThan);
+    reset();
+};
+
 
 

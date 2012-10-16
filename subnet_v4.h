@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QColor>
 #include "subnet.h"
+#include "subnet_v6.h"
 
 // Mainly taken from SubnetMapper Project that was developed under cocoa. May need some adjustments now.
 

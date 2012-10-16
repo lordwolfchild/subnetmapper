@@ -7,6 +7,8 @@
 #include "subnet.h"
 #include <QXmlStreamWriter>
 #include <QFile>
+#include <QDomDocument>
+
 
 class SM_DataModel : public QAbstractTableModel
 {
@@ -35,8 +37,12 @@ public:
 
     void clearData();
     bool loadFromXmlStream (QXmlStreamReader &stream);
+    bool loadFromDomDoc (QDomDocument &doc);
 
     bool saveToXmlStream(QXmlStreamWriter &stream);
+
+    static bool SubnetLessThan(const Subnet* s1, const Subnet* s2);
+    void sortData();
 
 protected:
 

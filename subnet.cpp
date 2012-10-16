@@ -1,5 +1,7 @@
 #include "subnet.h"
 #include <stdio.h>
+#include "subnet_v4.h"
+#include "subnet_v6.h"
 
 Subnet::Subnet(QObject *parent) :
     QObject(parent)
