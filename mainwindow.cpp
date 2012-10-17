@@ -65,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(addIPv4Action, SIGNAL(triggered()), this, SLOT(addIPv4Subnet()));
     connect(addIPv6Action, SIGNAL(triggered()), this, SLOT(addIPv6Subnet()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
+    connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),map,SLOT(dataHasChanged()));
 
     this->menuBar()->addMenu(fileMenu);
     this->menuBar()->addMenu(editMenu);

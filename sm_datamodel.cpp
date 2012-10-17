@@ -436,6 +436,10 @@ bool SM_DataModel::loadFromDomDoc(QDomDocument &doc)
 
     }
 
+    sortData();
+
+    emit(dataChanged(QModelIndex(),QModelIndex()));
+
     return true;
 }
 
