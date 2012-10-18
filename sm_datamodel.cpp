@@ -178,7 +178,7 @@ bool SM_DataModel::removeRows(int row, int count, const QModelIndex& /*parent*/)
         delete mom;
     }
 
-    reset();
+    emit(dataChanged(QModelIndex(),QModelIndex()));
 
     return true;
 }
@@ -217,8 +217,7 @@ void SM_DataModel::addSubnet(Subnet *subnet)
     SubnetList.append(subnet);
     insertRows(rowCount(),1);
 
-    // I should emit dataChanged(), but the default implementation of QTableView will not update after this call, so I have to refresh all data for the views through reset().
-    reset();
+    emit(dataChanged(QModelIndex(),QModelIndex()));
 }
 
 Subnet *SM_DataModel::getSubnet(int index)
@@ -239,8 +238,7 @@ void SM_DataModel::clearData()
         delete subnet;
     }
 
-    // Tell the widgets the data has changed.
-    reset();
+    emit(dataChanged(QModelIndex(),QModelIndex()));
 
 }
 
@@ -332,7 +330,7 @@ bool SM_DataModel::loadFromXmlStream(QXmlStreamReader &stream)
 
     };
 
-    reset();
+    emit(dataChanged(QModelIndex(),QModelIndex()));
 
     if (foundMap) return true;
     else return false;
@@ -349,7 +347,10 @@ bool SM_DataModel::loadFromDomDoc(QDomDocument &doc)
     if (docElem.nodeName()=="SubnetMap") {
         if (docElem.hasAttribute("fileformat")) {
             if ((docElem.attribute("fileformat")).toInt()!=2) {
-                qDebug("SM_DataModel::loadFromDomDoc(): Failure in parsing the document, version is incompatible");
+                msgBox.setText("Warning: the SubnetMap xou were trying to load has the wrong format. This Version of SubnetMapper can only read format version 2.");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setDetailedText("The fileformat attribute of the SubnetMap node has a version number that is not equal to 2. Update SubnetMapper to the most recent version to read this file.");
+                msgBox.exec();
                 return false;
             };
         }
@@ -361,7 +362,7 @@ bool SM_DataModel::loadFromDomDoc(QDomDocument &doc)
 
     QDomNodeList subnetNodes = docElem.elementsByTagName("subnet");
 
-    qDebug("SM_DataModel::loadFromDomDoc(): found %u subnet nodes in the document.",subnetNodes.count());
+    // qDebug("SM_DataModel::loadFromDomDoc(): found %u subnet nodes in the document.",subnetNodes.count());
 
     for (int i=0;i<subnetNodes.count();i++){
         QDomElement currentSubnetNode=subnetNodes.at(i).toElement();
@@ -402,6 +403,24 @@ bool SM_DataModel::loadFromDomDoc(QDomDocument &doc)
             } else if (currentSubnetNode.attribute("ipversion")=="IPv6") {
 
                 Subnet_v6 *newSubnet = new Subnet_v6(this);
+
+                QString mom=netmaskNode.text();
+                newSubnet->setNM(mom);
+
+                mom=addressNode.text();
+                newSubnet->setIP(mom);
+
+                mom=identifierNode.text();
+                newSubnet->setIdentifier(mom);
+
+                mom=descriptionNode.text();
+                newSubnet->setDescription(mom);
+
+                mom=notesNode.text();
+                newSubnet->setNotes(mom);
+
+                QColor momColor= QColor(colorNode.text());
+                newSubnet->setColor(momColor);
 
                 SubnetList.append(newSubnet);
 
@@ -531,8 +550,8 @@ bool SM_DataModel::SubnetLessThan(const Subnet* s1, const Subnet* s2)
 void SM_DataModel::sortData()
 {
     qSort(SubnetList.begin(), SubnetList.end(), SM_DataModel::SubnetLessThan);
-    reset();
 };
+
 
 
 
