@@ -366,12 +366,57 @@ void Subnet_v4::dumpAll()
 
 bool Subnet_v4::overlapsWith(Subnet_v4 &other_subnet)
 {
-    qDebug("overlap TEST:");
-    this->dumpAll();
-    other_subnet.dumpAll();
-
     if (containsHost(other_subnet.getIP())) return true;
     if (other_subnet.containsHost(this->getIP())) return true;
+    return false;
+}
+
+bool Subnet_v4::isLessThan(Subnet *subnet)
+{
+    // We consider IPv6 something less advanced than IPv4. ;)
+    if (subnet->isV6()) return true;
+
+    // I'm using pointer aritmethics to calculate the netmask octets...
+    // get the ip into something we cannot destroy by accident. ;)
+    unsigned long int ul_myip = getIP();
+    unsigned long int ul_otherip = ((Subnet_v4*)subnet)->getIP();
+    // Now we do the bad stuff. Get the ptr to the first byte of the ulong above.
+    unsigned char* ptr1 = (unsigned char*)&ul_myip;
+    unsigned char* ptr2 = (unsigned char*)&ul_otherip;
+    // now use this address as an offset to select the subsequent bytes from the long.
+    // Don't forget to use clean casting, or the compiler will get unhappy.
+    unsigned char a1 = *(unsigned char*)(ptr1+3);
+    unsigned char b1 = *(unsigned char*)(ptr1+2);
+    unsigned char c1 = *(unsigned char*)(ptr1+1);
+    unsigned char d1 = *(unsigned char*)(ptr1);
+    unsigned char a2 = *(unsigned char*)(ptr2+3);
+    unsigned char b2 = *(unsigned char*)(ptr2+2);
+    unsigned char c2 = *(unsigned char*)(ptr2+1);
+    unsigned char d2 = *(unsigned char*)(ptr2);
+
+
+    // check bytewise if we are really less than this self designated superior subnet. We'll show that network-nazi what we are made of! ;)
+    if (a1<a2) {
+        // *gasp* e-p-i-c f-a-i-l.
+        return true;
+    } else if (a1==a2) {
+        if (b1<b2) {
+            // Ugh. Get offa me lawn. Me not loosing, not with alive me!
+            return true;
+        } else if (b1==b2) {
+            if (c1<c2) {
+                // Duh. Darn racists! Me not inferior!
+                return true;
+            } else if (c1==c2) {
+                if (d1<d2) {
+                    // Ok, its only a little bit superior. Nothing serious.
+                    return true;
+                }
+            }
+        }
+    }
+
+    // HAH! In your FACE! We are something *better* than him!!! ;)
     return false;
 }
 

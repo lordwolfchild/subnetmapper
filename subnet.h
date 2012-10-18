@@ -37,6 +37,8 @@ public:
 
     virtual IPversion getIPversion() = 0;
 
+    virtual bool isLessThan(Subnet* subnet) = 0;
+
     bool isV4();
     bool isV6();
 

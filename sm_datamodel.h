@@ -44,6 +44,8 @@ public:
     static bool SubnetLessThan(const Subnet* s1, const Subnet* s2);
     void sortData();
 
+    void dumpAllSubnets();
+
 protected:
 
     QList<Subnet*>  SubnetList;

@@ -45,13 +45,13 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     // ipv4cache[Subnet::String2IP("192.168.0.0")].append(10);
     // ... if Index #8 and #10 are in the same subnet (and henceforth in the same line). Then we only need
     // to iterate this structure to ease up the whole rendering process.
-    QHash< quint32, QList<uint> > ipv4cache;
+    QMap< quint32, QList<uint> > ipv4cache;
 
     // We would do the same for IPv6, but as we need longer prefixes here, we use string representations instead.
     // As we would have to do some serious magic here to speed up things we just hope that string handling will not
     // take too much cpu time... *fingerscrossed*. That method has the advantange, that we do not need the
     // Subnet Helpers for conversion all the time. ;)
-    QHash< QString, QList<uint> > ipv6cache;
+    QMap< QString, QList<uint> > ipv6cache;
 
 
     // Iterate the Model and store the data we need to prepare our little drawing.
@@ -76,7 +76,7 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
     uint text_offset = 4;
 
-    uint x_offset = 80;
+    uint x_offset = 120;
     uint y_offset = 20;
 
     uint x_width = 600;
@@ -87,6 +87,9 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     newFont.setPixelSize(line_height-(text_offset*2));
     painter.setFont(newFont);
 
+    QPen grayDotted= QPen( Qt::gray,1,Qt::DotLine);
+    QPen grayDashed= QPen( Qt::gray,1,Qt::DashLine);
+
     uint y_internetwork_spacer = 50;
     uint y_interversion_spacer = 100;
 
@@ -95,26 +98,52 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
     // 1.1 Draw legend for IPv4
     painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv4cache.count()+1))));
+    painter.setPen(grayDotted);
+    painter.drawLine(QPoint(general_margin+x_offset+(x_width/4), y_local_offset),QPoint(general_margin+x_offset+(x_width/4),general_margin+(y_local_offset+(line_height*(ipv4cache.count()+1)))*2));
+    painter.setPen(grayDashed);
+    painter.drawLine(QPoint(general_margin+x_offset+(x_width/2), y_local_offset),QPoint(general_margin+x_offset+(x_width/2),general_margin+(y_local_offset+(line_height*(ipv4cache.count()+1)))*2));
+    painter.setPen(grayDotted);
+    painter.drawLine(QPoint(general_margin+x_offset+((x_width/4)*3), y_local_offset),QPoint(general_margin+x_offset+((x_width/4)*3),general_margin+(y_local_offset+(line_height*(ipv4cache.count()+1)))*2));
+    painter.setPen(Qt::black);
     painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv4cache.count()+1))));
     painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+    painter.setPen(Qt::gray);
+    painter.drawText(general_margin+x_offset+((x_width/4)*0)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".0");
+    painter.drawText(general_margin+x_offset+((x_width/4)*1)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".32");
+    painter.drawText(general_margin+x_offset+((x_width/4)*2)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".64");
+    painter.drawText(general_margin+x_offset+((x_width/4)*3)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".96");
+    painter.drawText(general_margin+x_offset+((x_width/4)*4)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".127");
+    painter.setPen(Qt::black);
 
     y_local_offset = general_margin + y_offset + (line_height*(ipv4cache.count()+1)) + y_internetwork_spacer;
 
     painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv4cache.count()+1))));
     painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv4cache.count()+1))));
     painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
-
-    // TODO: Draw /24 Subnet adresses on the left
+    painter.setPen(Qt::gray);
+    painter.drawText(general_margin+x_offset+((x_width/4)*0)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".128");
+    painter.drawText(general_margin+x_offset+((x_width/4)*1)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".160");
+    painter.drawText(general_margin+x_offset+((x_width/4)*2)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".192");
+    painter.drawText(general_margin+x_offset+((x_width/4)*3)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".224");
+    painter.drawText(general_margin+x_offset+((x_width/4)*4)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".255");
+    painter.setPen(Qt::black);
 
     // 1.2 Draw IPv4 subnets
 
     for (int line=0;line<ipv4cache.keys().count();line++) {
         quint32 index=ipv4cache.keys()[line];
+
+        uint y_block1_offset = general_margin + y_offset;
+        uint y_block2_offset = general_margin + y_offset + (line_height*(ipv4cache.count()+1)) + y_internetwork_spacer;
+
+        // drawing the net legend (/24 Network Address on the left side of the map)
+        QString legend_str=Subnet_v4::IP2String(ipv4cache.keys()[line]);
+        legend_str=legend_str.left(legend_str.lastIndexOf('.'))+".*";
+        painter.drawText(general_margin+text_offset,y_block1_offset+(line_height*(line+1)),x_offset-(2*text_offset),line_height,Qt::AlignVCenter,legend_str);
+        painter.drawText(general_margin+text_offset,y_block2_offset+(line_height*(line+1)),x_offset-(2*text_offset),line_height,Qt::AlignVCenter,legend_str);
+
         for (int net=0;net<ipv4cache[index].count();net++) {
             Subnet_v4 *momNet=(Subnet_v4*)model->getSubnet(ipv4cache[index].at(net));
-
-            uint y_block1_offset = general_margin + y_offset;
-            uint y_block2_offset = general_margin + y_offset + (line_height*(ipv4cache.count()+1)) + y_internetwork_spacer;
 
             // We have our subnet, now we need to decide, where we put it. To achieve this, we have to analyze its size and its position.
 

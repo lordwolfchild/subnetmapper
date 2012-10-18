@@ -58,6 +58,9 @@ public:
 
     bool overlapsWith(Subnet_v4 &other_subnet);
 
+    bool isLessThan(Subnet* subnet);
+
+
 signals:
 
 public slots:

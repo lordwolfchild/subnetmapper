@@ -192,6 +192,18 @@ void SM_DataModel::addDemos()
     Subnet *mom3 = new Subnet_v4("131.220.151.164","255.255.255.224","sgbit3","sgbit VLAN3");
     Subnet *mom4 = new Subnet_v4("131.220.152.128","255.255.255.128","sgbit4","sgbit VLAN4");
 
+    QColor red=QColor(Qt::red);
+    QColor blue=QColor(Qt::blue);
+    QColor green=QColor(Qt::green);
+    QColor yellow=QColor(Qt::yellow);
+    QColor magenta=QColor(Qt::magenta);
+
+    mom0->setColor(red);
+    mom1->setColor(blue);
+    mom2->setColor(green);
+    mom3->setColor(yellow);
+    mom4->setColor(magenta);
+
     SubnetList.append(mom0);
     SubnetList.append(mom1);
     SubnetList.append(mom2);
@@ -202,6 +214,12 @@ void SM_DataModel::addDemos()
     Subnet *mom6 = new Subnet_v6("::2222:128/124","sgbit5","sgbit VLAN5");
     Subnet *mom7 = new Subnet_v6("::3333:128/124","sgbit6","sgbit VLAN6");
     Subnet *mom8 = new Subnet_v6("1:2:3:4:5:6:7:8128/124","sgbit7","sgbit VLAN7");
+
+    mom5->setColor(red);
+    mom6->setColor(blue);
+    mom7->setColor(green);
+    mom8->setColor(yellow);
+
 
     SubnetList.append(mom5);
     SubnetList.append(mom6);
@@ -518,38 +536,22 @@ bool SM_DataModel::saveToXmlStream(QXmlStreamWriter &stream)
 
 bool SM_DataModel::SubnetLessThan(const Subnet* s1, const Subnet* s2)
 {
-
     Subnet* sv1=(Subnet*)s1;
     Subnet* sv2=(Subnet*)s2;
 
-    if (sv1->isV4()) {
-        if (sv2->isV4()) {
-            // numerical comparison - fails because of byte order
-            // return (((Subnet_v4*)sv1)->getIP()<((Subnet_v4*)sv2)->getIP());
-            return (((Subnet_v4*)sv1)->toString()<((Subnet_v4*)sv2)->toString());
-        } else {
-            return true;
-        }
-    } else {
-        if (sv2->isV4()) {
-            return false;
-        } else {
-            /*
-            numerical comparison fails due to byte order stuff
-            QPair<quint64,quint64> ip_sv1 = ((Subnet_v6*)sv1)->getIP();
-            QPair<quint64,quint64> ip_sv2 = ((Subnet_v6*)sv2)->getIP();
-
-            return ((ip_sv1.first<ip_sv2.first)&(ip_sv1.second<ip_sv2.second)); */
-        }
-    };
-
-    // lets show the compiler that we care, even if this code never gets touched...
-    return false;
+    return sv1->isLessThan(sv2);
 }
 
 void SM_DataModel::sortData()
 {
-    qSort(SubnetList.begin(), SubnetList.end(), SM_DataModel::SubnetLessThan);
+    qStableSort(SubnetList.begin(), SubnetList.end(), SM_DataModel::SubnetLessThan);
+}
+
+void SM_DataModel::dumpAllSubnets()
+{
+    qDebug("---vv START vv----------------------------------------------------> dumpAllSubnets() <---");
+    for (int i=0;i<SubnetList.count();i++) qDebug("%s",qPrintable(SubnetList.at(i)->toString()));
+    qDebug("---^^  END  ^^----------------------------------------------------> dumpAllSubnets() <---");
 };
 
 

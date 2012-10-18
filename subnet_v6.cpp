@@ -660,6 +660,14 @@ bool Subnet_v6::overlapsWith(Subnet_v6 &other_subnet)
     return false;
 }
 
+bool Subnet_v6::isLessThan(Subnet *subnet)
+{
+
+    if (subnet->isV4()) return false;
+
+    return (toString()<(subnet->toString()));
+}
+
 QString Subnet_v6::getStrWC()
 {
     QPair<quint64,quint64> momWC = getWildcard();
