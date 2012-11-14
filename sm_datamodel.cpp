@@ -122,7 +122,6 @@ QVariant SM_DataModel::data(const QModelIndex &index, int role) const
 
 int SM_DataModel::rowCount(const QModelIndex& /* parent */ ) const
 {
-
     return SubnetList.count();
 }
 
@@ -178,7 +177,7 @@ bool SM_DataModel::removeRows(int row, int count, const QModelIndex& /*parent*/)
         delete mom;
     }
 
-    emit(dataChanged(QModelIndex(),QModelIndex()));
+    reset();
 
     return true;
 }
@@ -235,7 +234,7 @@ void SM_DataModel::addSubnet(Subnet *subnet)
     SubnetList.append(subnet);
     insertRows(rowCount(),1);
 
-    emit(dataChanged(QModelIndex(),QModelIndex()));
+    reset();
 }
 
 Subnet *SM_DataModel::getSubnet(int index)
@@ -256,7 +255,7 @@ void SM_DataModel::clearData()
         delete subnet;
     }
 
-    emit(dataChanged(QModelIndex(),QModelIndex()));
+    reset();
 
 }
 
@@ -348,7 +347,7 @@ bool SM_DataModel::loadFromXmlStream(QXmlStreamReader &stream)
 
     };
 
-    emit(dataChanged(QModelIndex(),QModelIndex()));
+    reset();
 
     if (foundMap) return true;
     else return false;
@@ -475,7 +474,7 @@ bool SM_DataModel::loadFromDomDoc(QDomDocument &doc)
 
     sortData();
 
-    emit(dataChanged(QModelIndex(),QModelIndex()));
+    reset();
 
     return true;
 }
@@ -554,6 +553,10 @@ void SM_DataModel::dumpAllSubnets()
     qDebug("---^^  END  ^^----------------------------------------------------> dumpAllSubnets() <---");
 };
 
-
+void SM_DataModel::reset()
+{
+    emit(dataChanged(QModelIndex(),QModelIndex()));
+    QAbstractTableModel::reset();
+};
 
 

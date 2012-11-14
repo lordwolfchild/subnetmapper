@@ -24,7 +24,9 @@ void SM_SubnetWidget::setSelectionModel(QItemSelectionModel *newselectionmodel)
 void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 {
 
+    // prepare our model and metadata for drawing of the map
     model->sortData();
+    clearCache();
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -161,6 +163,14 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
             if (start_position<128)  {
                 if (end_position>128) {
+                    // two blocks, size 255
+
+                    // cache calculation stuff:
+                    QRect* momRect1= new QRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),x_width,line_height);
+                    QRect* momRect2= new QRect(general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width,line_height);
+                    rectCache1_v4.append(momRect1);
+                    rectCache2_v4.append(momRect2);
+
                     painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),x_width,line_height);
                     painter.setPen(invColor);
                     painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
@@ -170,7 +180,9 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
                     painter.drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset),line_height,Qt::AlignVCenter,momNet->getIdentifier());
                     painter.setPen(Qt::black);
                     if (momNet->getSize()>256) painter.drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter|Qt::AlignRight,tr("+"));
+
                 } else {
+                    // one block, in between 0-127
                     painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*size),line_height);
                     painter.setPen(invColor);
                     painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*size)-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
@@ -178,6 +190,7 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
                 }
             }
             else {
+                // one block, in between 128-255
                 painter.drawRect(general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size),line_height);
                 painter.setPen(invColor);
                 painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size)-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
@@ -218,7 +231,35 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
 }
 
+void SM_SubnetWidget::clearCache()
+{
+    for (int i=0;i<rectCache1_v4.count();i++) {
+        delete rectCache1_v4.at(i);
+    }
+    rectCache1_v4.clear();
+
+    for (int i=0;i<rectCache2_v4.count();i++) {
+        delete rectCache2_v4.at(i);
+    }
+    rectCache2_v4.clear();
+
+    for (int i=0;i<rectCache1_v6.count();i++) {
+        delete rectCache1_v6.at(i);
+    }
+    rectCache1_v6.clear();
+
+    for (int i=0;i<rectCache2_v6.count();i++) {
+        delete rectCache2_v6.at(i);
+    }
+    rectCache2_v6.clear();
+}
+
 void SM_SubnetWidget::dataHasChanged()
 {
     this->repaint();
 };
+
+SM_SubnetWidget::~SM_SubnetWidget()
+{
+    clearCache();
+}

@@ -5,6 +5,7 @@
 #include <QAbstractTableModel>
 #include "sm_subnetwidget.h"
 #include <QItemSelectionModel>
+#include <QTableView>
 #include "sm_datamodel.h"
 
 class MainWindow : public QMainWindow
@@ -31,6 +32,7 @@ private:
     SM_DataModel *model;
     SM_SubnetWidget *map;
     QItemSelectionModel *selectionModel;
+    QTableView *table;
 
 };
 

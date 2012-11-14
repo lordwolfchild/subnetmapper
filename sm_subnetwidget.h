@@ -10,12 +10,15 @@ class SM_SubnetWidget : public QWidget
     Q_OBJECT
 public:
     explicit SM_SubnetWidget(QWidget *parent = 0);
+    ~SM_SubnetWidget();
 
     void setModel(SM_DataModel *newmodel);
     void setSelectionModel(QItemSelectionModel *newselectionmodel);
 
 protected:
     void paintEvent(QPaintEvent *event);
+
+    void clearCache();
 
 signals:
 
@@ -26,6 +29,11 @@ public slots:
 private:
     SM_DataModel *model;
     QItemSelectionModel *selectionModel;
+
+    QList<QRect*> rectCache1_v4;
+    QList<QRect*> rectCache2_v4;
+    QList<QRect*> rectCache1_v6;
+    QList<QRect*> rectCache2_v6;
 
 };
 

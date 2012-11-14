@@ -33,6 +33,8 @@ public:
     void addDemos();
     void addSubnet(Subnet *subnet);
 
+    void reset();
+
     Subnet* getSubnet(int index);
 
     void clearData();

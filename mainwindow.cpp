@@ -107,7 +107,7 @@ void MainWindow::setupViews()
 {
     QSplitter *splitter = new QSplitter;
     splitter->setOrientation(Qt::Vertical);
-    QTableView *table = new QTableView;
+    table = new QTableView;
     QScrollArea *scroller = new QScrollArea;
     map = new SM_SubnetWidget;
 
@@ -198,8 +198,9 @@ void MainWindow::openFile(const QString &path)
 
             file.close();
 
-            if (result) statusBar()->showMessage(tr("Loaded %1").arg(fileName), 5000);
-            else statusBar()->showMessage(tr("Failed to parse SubnetMap %1").arg(fileName),5000);
+            if (result) {
+                statusBar()->showMessage(tr("Loaded %1").arg(fileName), 5000);
+            } else statusBar()->showMessage(tr("Failed to parse SubnetMap %1").arg(fileName),5000);
         } else {
 
             QMessageBox msgBox;
@@ -266,7 +267,9 @@ void MainWindow::addIPv4Subnet()
             msgBox.exec();
         }
 
-        if (isNotOverlappingWithAnything) map->repaint();
+        if (isNotOverlappingWithAnything) {
+            map->repaint();
+        };
 
     }
 
