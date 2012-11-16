@@ -26,7 +26,7 @@ public:
     void setNM(QString &nm);
     void setDescription(QString &description);
     void setIdentifier(QString &identifier);
-    void setSelected(bool &selected);
+    void setSelected(bool selected);
     void setNotes(QString &notes);
 
     IPversion getIPversion();

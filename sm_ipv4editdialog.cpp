@@ -35,6 +35,48 @@ QString sm_IPv4EditDialog::getNM()
     return (QString::number(ui->nm_byte1->value())+QString(".")+QString::number(ui->nm_byte2->value())+QString(".")+QString::number(ui->nm_byte3->value())+QString(".")+QString::number(ui->nm_byte4->value()));
 }
 
+void sm_IPv4EditDialog::setIP(quint32 ip)
+{
+    // I'm using pointer aritmethics to calculate the ip octets...
+    // get the ip into something we cannot destroy by accident. ;)
+    unsigned long int ul_ip = ip;
+    // Now we do the bad stuff. Get the ptr to the first byte of the ulong above.
+    unsigned char* ptr = (unsigned char*)&ul_ip;
+    // now use this address as an offset to select the subsequent bytes from the long.
+    // Don't forget to use clean casting, or the compiler will get unhappy.
+    unsigned char oct1 = *(unsigned char*)(ptr+3);
+    unsigned char oct2 = *(unsigned char*)(ptr+2);
+    unsigned char oct3 = *(unsigned char*)(ptr+1);
+    unsigned char oct4 = *(unsigned char*)(ptr);
+
+    // Now put it in the corresponding fields
+    ui->ip_byte1->setValue(oct1);
+    ui->ip_byte2->setValue(oct2);
+    ui->ip_byte3->setValue(oct3);
+    ui->ip_byte4->setValue(oct4);
+}
+
+void sm_IPv4EditDialog::setNM(quint32 nm)
+{
+    // I'm using pointer aritmethics to calculate the ip octets...
+    // get the ip into something we cannot destroy by accident. ;)
+    unsigned long int ul_ip = nm;
+    // Now we do the bad stuff. Get the ptr to the first byte of the ulong above.
+    unsigned char* ptr = (unsigned char*)&ul_ip;
+    // now use this address as an offset to select the subsequent bytes from the long.
+    // Don't forget to use clean casting, or the compiler will get unhappy.
+    unsigned char oct1 = *(unsigned char*)(ptr+3);
+    unsigned char oct2 = *(unsigned char*)(ptr+2);
+    unsigned char oct3 = *(unsigned char*)(ptr+1);
+    unsigned char oct4 = *(unsigned char*)(ptr);
+
+    // Now put it in the corresponding fields
+    ui->nm_byte1->setValue(oct1);
+    ui->nm_byte2->setValue(oct2);
+    ui->nm_byte3->setValue(oct3);
+    ui->nm_byte4->setValue(oct4);
+}
+
 QString sm_IPv4EditDialog::getDescription()
 {
     return ui->description->text();
@@ -119,5 +161,6 @@ QColor sm_IPv4EditDialog::getColor()
 void sm_IPv4EditDialog::setColor(QColor &color)
 {
     selectedColor=color;
+    ui->colorBox->setStyleSheet("QFrame { background-color: "+selectedColor.name()+" }");
 }
 

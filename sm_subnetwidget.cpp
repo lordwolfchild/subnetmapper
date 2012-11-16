@@ -1,6 +1,9 @@
 #include "sm_subnetwidget.h"
 #include <QPainter>
 #include <QPaintEvent>
+#include "sm_ipv4editdialog.h"
+#include "sm_ipv6editdialog.h"
+#include <QMessageBox>
 
 SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     QWidget(parent)
@@ -18,6 +21,7 @@ void SM_SubnetWidget::setModel(SM_DataModel *newmodel)
 void SM_SubnetWidget::setSelectionModel(QItemSelectionModel *newselectionmodel)
 {
     selectionModel=newselectionmodel;
+    if (selectionModel) connect(selectionModel,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(selectionChangedInTable(QModelIndex,QModelIndex)));
 }
 
 
@@ -92,6 +96,9 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     QPen grayDotted= QPen( Qt::gray,1,Qt::DotLine);
     QPen grayDashed= QPen( Qt::gray,1,Qt::DashLine);
 
+    QPen selectedPenUp = QPen( Qt::red,2,Qt::SolidLine);
+    QPen selectedPenDown = QPen( Qt::gray,4,Qt::SolidLine);
+
     uint y_internetwork_spacer = 50;
     uint y_interversion_spacer = 100;
 
@@ -163,38 +170,80 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
             if (start_position<128)  {
                 if (end_position>128) {
+
                     // two blocks, size 255
 
-                    // cache calculation stuff:
                     QRect* momRect1= new QRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),x_width,line_height);
                     QRect* momRect2= new QRect(general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width,line_height);
                     rectCache1_v4.append(momRect1);
                     rectCache2_v4.append(momRect2);
 
-                    painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),x_width,line_height);
+                    painter.drawRect(*momRect1);
                     painter.setPen(invColor);
                     painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
                     painter.setPen(Qt::black);
-                    painter.drawRect(general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width,line_height);
+                    painter.drawRect(*momRect2);
                     painter.setPen(invColor);
                     painter.drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset),line_height,Qt::AlignVCenter,momNet->getIdentifier());
                     painter.setPen(Qt::black);
                     if (momNet->getSize()>256) painter.drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter|Qt::AlignRight,tr("+"));
 
+                    if (momNet->getSelected()) {
+                        painter.setBrush(Qt::transparent);
+                        painter.setPen(selectedPenDown);
+                        painter.drawRect(*momRect1);
+                        painter.drawRect(*momRect2);
+                        painter.setPen(selectedPenUp);
+                        painter.drawRect(*momRect1);
+                        painter.drawRect(*momRect2);
+                        painter.setPen(Qt::black);
+                    }
+
+
                 } else {
                     // one block, in between 0-127
-                    painter.drawRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*size),line_height);
+
+                    QRect* momRect1= new QRect(general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*size),line_height);
+                    QRect* momRect2= new QRect(0,0,0,0);
+                    rectCache1_v4.append(momRect1);
+                    rectCache2_v4.append(momRect2);
+
+                    painter.drawRect(*momRect1);
                     painter.setPen(invColor);
                     painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*size)-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
                     painter.setPen(Qt::black);
+
+                    if (momNet->getSelected()) {
+                        painter.setBrush(Qt::transparent);
+                        painter.setPen(selectedPenDown);
+                        painter.drawRect(*momRect1);
+                        painter.setPen(selectedPenUp);
+                        painter.drawRect(*momRect1);
+                        painter.setPen(Qt::black);
+                    }
                 }
             }
             else {
                 // one block, in between 128-255
-                painter.drawRect(general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size),line_height);
+
+                QRect* momRect1= new QRect(0,0,0,0);
+                QRect* momRect2= new QRect(general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size),line_height);
+                rectCache1_v4.append(momRect1);
+                rectCache2_v4.append(momRect2);
+
+                painter.drawRect(*momRect2);
                 painter.setPen(invColor);
                 painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size)-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
                 painter.setPen(Qt::black);
+
+                if (momNet->getSelected()) {
+                    painter.setBrush(Qt::transparent);
+                    painter.setPen(selectedPenDown);
+                    painter.drawRect(*momRect2);
+                    painter.setPen(selectedPenUp);
+                    painter.drawRect(*momRect2);
+                    painter.setPen(Qt::black);
+                }
             }
             painter.setBrush( Qt::NoBrush );
         }
@@ -231,6 +280,106 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
 }
 
+void SM_SubnetWidget::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button()==Qt::LeftButton) {
+
+        bool foundClickedSubnet=false;
+        for (int i=0;i<rectCache1_v4.count();i++) {
+            if ((rectCache1_v4.at(i)->contains(event->x(),event->y()))|
+                    (rectCache2_v4.at(i)->contains(event->x(),event->y())))
+            {
+                (model->getSubnet(i))->setSelected(true);
+                selectionModel->setCurrentIndex(model->index(i,0),QItemSelectionModel::Select|QItemSelectionModel::Rows|QItemSelectionModel::Clear);
+                foundClickedSubnet=true;
+            } else (model->getSubnet(i))->setSelected(false);
+        }
+
+        for (int i=0;i<rectCache1_v6.count();i++) {
+            if ((rectCache1_v6.at(i)->contains(event->x(),event->y()))|
+                    (rectCache2_v6.at(i)->contains(event->x(),event->y())))
+            {
+                (model->getSubnet(i))->setSelected(true);
+                selectionModel->setCurrentIndex(model->index(i,0),QItemSelectionModel::Select|QItemSelectionModel::Rows|QItemSelectionModel::Clear);
+                foundClickedSubnet=true;
+            } else (model->getSubnet(i))->setSelected(false);
+        }
+        if (!foundClickedSubnet) selectionModel->clearSelection();
+
+        repaint();
+    }
+
+    QWidget::mousePressEvent(event);
+}
+
+void SM_SubnetWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if (selectionModel->currentIndex().isValid()) {
+
+        Subnet *momsubnet=model->getSubnet(selectionModel->currentIndex().row());
+
+        if (momsubnet) {
+            if (momsubnet->isV4()) {
+                // edit IPv4
+                sm_IPv4EditDialog editor(this);
+                Subnet_v4 *momsubnet_v4 = (Subnet_v4*)momsubnet;
+                QColor momColor=momsubnet->getColor();
+
+                editor.setDescription(momsubnet_v4->getDescription());
+                editor.setIdentifier(momsubnet_v4->getIdentifier());
+                editor.setIP(momsubnet_v4->getIP());
+                editor.setNM(momsubnet_v4->getNM());
+                editor.setColor(momColor);
+
+                editor.setModal(true);
+                if (editor.exec()==QDialog::Accepted) {
+
+                    QString momdesc = editor.getDescription();
+                    QString momid = editor.getIdentifier();
+                    QColor momcolor = editor.getColor();
+                    QString momIP = editor.getIP();
+                    QString momNM = editor.getNM();
+
+                    bool isNotOverlappingWithAnything=true;
+
+                    for (int i=0;i<((SM_DataModel*)model)->rowCount();i++) {
+                        if (((SM_DataModel*)model)->getSubnet(i)->isV4())
+                            if (((Subnet_v4*)(((SM_DataModel*)model)->getSubnet(i)))->overlapsWith(*(momsubnet_v4)))
+                                isNotOverlappingWithAnything=false;
+                    }
+
+                    if (isNotOverlappingWithAnything) {
+                        momsubnet_v4->setIP(momIP);
+                        momsubnet_v4->setNM(momNM);
+                        momsubnet_v4->setDescription(momdesc);
+                        momsubnet_v4->setIdentifier(momid);
+                        momsubnet_v4->setColor(momcolor);
+                    } else {
+                        QMessageBox msgBox;
+                        msgBox.setText("The Subnet you specified overlaps with an existing subnet.");
+                        msgBox.setIcon(QMessageBox::Critical);
+                        msgBox.setDetailedText("The overlapping of subnets in a single map is not allowed in SubnetMapper. The author of this program cannot think of a situation in the real world where this could be an advisable situation. If you find yourself in a mess like this, please think it over, stuff like that always catches up with you at a later point in time, when you are actually least expecting it.");
+                        msgBox.exec();
+                    }
+
+                    if (isNotOverlappingWithAnything) {
+                        repaint();
+                    };
+
+                }
+
+
+
+            } else {
+                //edit IPv6
+            }
+        }
+
+    }
+
+    QWidget::mouseDoubleClickEvent(event);
+}
+
 void SM_SubnetWidget::clearCache()
 {
     for (int i=0;i<rectCache1_v4.count();i++) {
@@ -257,6 +406,14 @@ void SM_SubnetWidget::clearCache()
 void SM_SubnetWidget::dataHasChanged()
 {
     this->repaint();
+}
+
+void SM_SubnetWidget::selectionChangedInTable(const QModelIndex &current, const QModelIndex &previous)
+{
+    if (previous.isValid()) model->getSubnet(previous.row())->setSelected(false);
+    if (current.isValid()) model->getSubnet(current.row())->setSelected(true);
+
+    repaint();
 };
 
 SM_SubnetWidget::~SM_SubnetWidget()

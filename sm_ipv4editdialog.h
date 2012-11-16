@@ -19,6 +19,9 @@ public:
     QString getIP();
     QString getNM();
 
+    void setIP(quint32 ip);
+    void setNM(quint32 nm);
+
     QString getDescription();
     QString getIdentifier();
     void setDescription(QString description);

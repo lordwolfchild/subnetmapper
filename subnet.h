@@ -17,7 +17,7 @@ public:
 
     virtual void setDescription(QString &description) = 0;
     virtual void setIdentifier(QString &identifier) = 0;
-    virtual void setSelected(bool &selected) = 0;
+    virtual void setSelected(bool selected) = 0;
     virtual void setNotes(QString &notes) = 0;
 
     virtual QString getStrNM() = 0;

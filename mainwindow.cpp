@@ -127,7 +127,9 @@ void MainWindow::setupViews()
 
     QItemSelectionModel *selectionModel = new QItemSelectionModel(model);
     table->setSelectionModel(selectionModel);
-    table->setSortingEnabled(true);
+    table->setSortingEnabled(false);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
 
     map->setModel((SM_DataModel*)model);
     map->setSelectionModel(selectionModel);

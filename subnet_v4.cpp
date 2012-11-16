@@ -18,6 +18,7 @@ Subnet_v4::Subnet_v4(QObject *parent) :
 
     *_ip_address=momIp;
     *_netmask=momNm;
+    *_selected=false;
     setDescription(mom);
     setIdentifier(mom);
     setNotes(mom);
@@ -39,6 +40,7 @@ Subnet_v4::Subnet_v4(quint32 ip, quint32 nm, QString id, QString description, QS
 
     *_ip_address=ip;
     *_netmask=nm;
+    *_selected=false;
     setDescription(description);
     setIdentifier(id);
     setNotes(notes);
@@ -63,6 +65,7 @@ Subnet_v4::Subnet_v4(QString ip, QString nm, QString id, QString description, QS
     quint32 momnm = String2IP(nm);
     *_ip_address=momip;
     *_netmask=momnm;
+    *_selected=false;
     setDescription(description);
     setIdentifier(id);
     setNotes(notes);
@@ -116,7 +119,7 @@ void Subnet_v4::setIdentifier(QString &identifier)
     *_identifier=identifier;
 }
 
-void Subnet_v4::setSelected(bool &selected)
+void Subnet_v4::setSelected(bool selected)
 {
         *_selected=selected;
 }
@@ -366,6 +369,7 @@ void Subnet_v4::dumpAll()
 
 bool Subnet_v4::overlapsWith(Subnet_v4 &other_subnet)
 {
+    if (this==&other_subnet) return false;
     if (containsHost(other_subnet.getIP())) return true;
     if (other_subnet.containsHost(this->getIP())) return true;
     return false;

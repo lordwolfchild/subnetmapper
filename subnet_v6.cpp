@@ -25,6 +25,7 @@ Subnet_v6::Subnet_v6(QObject *parent) :
     *_netmask_lo=momNm_lo;
     *_ip_address_hi=momIp_hi;
     *_netmask_hi=momNm_hi;
+    *_selected=false;
     setDescription(mom);
     setIdentifier(mom);
     setNotes(mom);
@@ -50,6 +51,7 @@ Subnet_v6::Subnet_v6(QPair<quint64,quint64> ip, QPair<quint64,quint64> nm, QStri
     *_ip_address_lo=ip.second;
     *_netmask_hi=nm.first;
     *_netmask_lo=nm.second;
+    *_selected=false;
     setDescription(description);
     setIdentifier(id);
     setNotes(notes);
@@ -92,6 +94,7 @@ Subnet_v6::Subnet_v6(QString cidr, QString id, QString description, QString note
 
     *_ip_address_hi=momip.first;
     *_ip_address_lo=momip.second;
+    *_selected=false;
     setDescription(description);
     setIdentifier(id);
     setNotes(notes);
@@ -176,7 +179,7 @@ void Subnet_v6::setIdentifier(QString &identifier)
     *_identifier=identifier;
 }
 
-void Subnet_v6::setSelected(bool &selected)
+void Subnet_v6::setSelected(bool selected)
 {
         *_selected=selected;
 }

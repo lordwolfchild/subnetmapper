@@ -17,7 +17,8 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *event);
-
+    void mousePressEvent(QMouseEvent *event );
+    void mouseDoubleClickEvent(QMouseEvent *event );
     void clearCache();
 
 signals:
@@ -25,6 +26,7 @@ signals:
 public slots:
 
     void dataHasChanged();
+    void selectionChangedInTable(const QModelIndex & current, const QModelIndex & previous);
 
 private:
     SM_DataModel *model;
