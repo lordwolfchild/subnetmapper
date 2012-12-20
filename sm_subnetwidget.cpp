@@ -4,6 +4,7 @@
 #include "sm_ipv4editdialog.h"
 #include "sm_ipv6editdialog.h"
 #include <QMessageBox>
+#include <QTimer>
 
 SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     QWidget(parent)
@@ -11,6 +12,11 @@ SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     setModel(NULL);
     setSelectionModel(NULL);
     setMinimumSize(400,400);
+    selAnimState=0;
+
+    selAnimTimer = new QTimer(this);
+    connect(selAnimTimer, SIGNAL(timeout()), this, SLOT(selAnimTimerTriggered()));
+    selAnimTimer->start(50);
 }
 
 void SM_SubnetWidget::setModel(SM_DataModel *newmodel)
@@ -27,18 +33,20 @@ void SM_SubnetWidget::setSelectionModel(QItemSelectionModel *newselectionmodel)
 
 void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 {
+    QPainter painter(this);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::black);
+
+    // Store the original state of the painter...
+    painter.save();
+
+    // clear the widget, we need to redraw completely
+    painter.fillRect(event->rect(),Qt::white);
 
     // prepare our model and metadata for drawing of the map
     model->sortData();
     clearCache();
-
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    painter.fillRect(event->rect(),Qt::white);
-    painter.setPen(Qt::black);
-
-    int itemCount=model->rowCount();
 
     int countV6=0;
     int countV4=0;
@@ -74,8 +82,6 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
         };
     };
 
-    // Store the original state of the painter...
-    painter.save();
 
     // define some constants for drawing calulations TODO: Move them to options file/dialog
     uint general_margin = 20;
@@ -95,9 +101,6 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
     QPen grayDotted= QPen( Qt::gray,1,Qt::DotLine);
     QPen grayDashed= QPen( Qt::gray,1,Qt::DashLine);
-
-    QPen selectedPenUp = QPen( Qt::red,2,Qt::SolidLine);
-    QPen selectedPenDown = QPen( Qt::gray,4,Qt::SolidLine);
 
     uint y_internetwork_spacer = 50;
     uint y_interversion_spacer = 100;
@@ -189,14 +192,8 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
                     if (momNet->getSize()>256) painter.drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter|Qt::AlignRight,tr("+"));
 
                     if (momNet->getSelected()) {
-                        painter.setBrush(Qt::transparent);
-                        painter.setPen(selectedPenDown);
-                        painter.drawRect(*momRect1);
-                        painter.drawRect(*momRect2);
-                        painter.setPen(selectedPenUp);
-                        painter.drawRect(*momRect1);
-                        painter.drawRect(*momRect2);
-                        painter.setPen(Qt::black);
+                        selectionCache.append(momRect1);
+                        selectionCache.append(momRect2);
                     }
 
 
@@ -214,12 +211,7 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
                     painter.setPen(Qt::black);
 
                     if (momNet->getSelected()) {
-                        painter.setBrush(Qt::transparent);
-                        painter.setPen(selectedPenDown);
-                        painter.drawRect(*momRect1);
-                        painter.setPen(selectedPenUp);
-                        painter.drawRect(*momRect1);
-                        painter.setPen(Qt::black);
+                        selectionCache.append(momRect1);
                     }
                 }
             }
@@ -237,17 +229,13 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
                 painter.setPen(Qt::black);
 
                 if (momNet->getSelected()) {
-                    painter.setBrush(Qt::transparent);
-                    painter.setPen(selectedPenDown);
-                    painter.drawRect(*momRect2);
-                    painter.setPen(selectedPenUp);
-                    painter.drawRect(*momRect2);
-                    painter.setPen(Qt::black);
+                    selectionCache.append(momRect2);
                 }
             }
             painter.setBrush( Qt::NoBrush );
         }
     }
+
 
     // 1.3 Draw Extras for IPv4
 
@@ -274,6 +262,21 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
     // resize the widget to the needed size
     resize((2*general_margin)+(2*x_offset)+x_width, y_local_offset+(line_height*(ipv4cache.count()+1))+y_offset+general_margin);
+
+    // 3 Draw Selection Boxes
+    QPen selectedPenUp = QPen( Qt::white,1.8,Qt::DashLine);
+    QPen selectedPenDown = QPen( Qt::blue,3.4,Qt::SolidLine);
+
+    for (int selIndex=0;selIndex<selectionCache.count();selIndex++) {
+        painter.setBrush(Qt::transparent);
+        painter.setPen(selectedPenDown);
+        painter.drawRect(*(selectionCache.at(selIndex)));
+        selectedPenUp.setDashOffset((qreal)selAnimState);
+        painter.setPen(selectedPenUp);
+        painter.drawRect(*(selectionCache.at(selIndex)));
+        painter.setPen(Qt::black);
+    }
+
 
     // Put everything back in the state we found it in (Is this even necessary?!).
     painter.restore();
@@ -314,7 +317,7 @@ void SM_SubnetWidget::mousePressEvent(QMouseEvent *event)
 
 void SM_SubnetWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (selectionModel->currentIndex().isValid()) {
+    if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) {
 
         Subnet *momsubnet=model->getSubnet(selectionModel->currentIndex().row());
 
@@ -401,6 +404,16 @@ void SM_SubnetWidget::clearCache()
         delete rectCache2_v6.at(i);
     }
     rectCache2_v6.clear();
+
+    // this ones members we do not need to delete - all the Rects have already been deleted in the statements before through their respective cache cleanups
+    selectionCache.clear();
+}
+
+void SM_SubnetWidget::selAnimTimerTriggered()
+{
+    selAnimState++;
+    if (selAnimState>5) selAnimState=0;
+    repaint();
 }
 
 void SM_SubnetWidget::dataHasChanged()
@@ -419,4 +432,5 @@ void SM_SubnetWidget::selectionChangedInTable(const QModelIndex &current, const 
 SM_SubnetWidget::~SM_SubnetWidget()
 {
     clearCache();
+    selAnimTimer->stop();
 }

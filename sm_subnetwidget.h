@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QItemSelectionModel>
 #include <sm_datamodel.h>
+#include <QTimer>
 
 class SM_SubnetWidget : public QWidget
 {
@@ -27,6 +28,7 @@ public slots:
 
     void dataHasChanged();
     void selectionChangedInTable(const QModelIndex & current, const QModelIndex & previous);
+    void selAnimTimerTriggered();
 
 private:
     SM_DataModel *model;
@@ -37,6 +39,10 @@ private:
     QList<QRect*> rectCache1_v6;
     QList<QRect*> rectCache2_v6;
 
+    QList<QRect*> selectionCache;
+
+    unsigned short selAnimState;
+    QTimer *selAnimTimer;
 };
 
 #endif // SM_SUBNETWIDGET_H
