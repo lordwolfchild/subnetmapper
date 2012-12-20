@@ -30,6 +30,12 @@ public slots:
     void selectionChangedInTable(const QModelIndex & current, const QModelIndex & previous);
     void selAnimTimerTriggered();
 
+    void xWidthPlus();
+    void xWidthMinus();
+    void line_heightPlus();
+    void line_heightMinus();
+
+
 private:
     SM_DataModel *model;
     QItemSelectionModel *selectionModel;
@@ -43,6 +49,11 @@ private:
 
     unsigned short selAnimState;
     QTimer *selAnimTimer;
+
+    uint x_width;
+
+    uint line_height;
+
 };
 
 #endif // SM_SUBNETWIDGET_H

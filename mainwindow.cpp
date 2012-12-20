@@ -17,7 +17,11 @@
 #include "sm_subnetwidget.h"
 #include <QScrollArea>
 #include <QMessageBox>
+#include <QSlider>
 #include "sm_aboutdialog.h"
+#include <QScrollBar>
+#include <QPushButton>
+#include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -114,11 +118,37 @@ void MainWindow::setupViews()
     scroller->setWidget(map);
     scroller->setWidgetResizable(false);
     scroller->setStyleSheet(tr("QScrollArea { background-color: white }"));
+    scroller->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    scroller->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     splitter->addWidget(scroller);
     splitter->addWidget(table);
     splitter->setStretchFactor(0, 2);
     splitter->setStretchFactor(1, 1);
+
+    QPushButton *buttonXplus  = new QPushButton("+",this);
+    QPushButton *buttonXminus = new QPushButton("-",this);
+    QPushButton *buttonYplus  = new QPushButton("+",this);
+    QPushButton *buttonYminus = new QPushButton("-",this);
+    buttonXplus->setMaximumWidth(30);
+    buttonXminus->setMaximumWidth(30);
+    buttonYplus->setMaximumWidth(30);
+    buttonYminus->setMaximumWidth(30);
+
+    scroller->addScrollBarWidget(buttonXplus,Qt::AlignRight);
+    scroller->addScrollBarWidget(buttonXminus,Qt::AlignRight);
+    scroller->addScrollBarWidget(buttonYplus,Qt::AlignBottom);
+    scroller->addScrollBarWidget(buttonYminus,Qt::AlignBottom);
+
+    (scroller->horizontalScrollBar())->setMinimumWidth(width());
+    (scroller->verticalScrollBar())->setMinimumHeight(height());
+    (scroller->verticalScrollBar())->setBaseSize(200,20);
+    (scroller->horizontalScrollBar())->setBaseSize(20,200);
+
+    connect(buttonXplus,SIGNAL(clicked()),map,SLOT(xWidthPlus()));
+    connect(buttonXminus,SIGNAL(clicked()),map,SLOT(xWidthMinus()));
+    connect(buttonYplus,SIGNAL(clicked()),map,SLOT(line_heightPlus()));
+    connect(buttonYminus,SIGNAL(clicked()),map,SLOT(line_heightMinus()));
 
     // bind our model to the views. Be advised that SM_subnetwidget is  not a Model/View aware class, but
     // only emulates this behaviour in necessary boundaries to retrieve its data from the model and the selection.

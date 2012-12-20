@@ -17,6 +17,10 @@ SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     selAnimTimer = new QTimer(this);
     connect(selAnimTimer, SIGNAL(timeout()), this, SLOT(selAnimTimerTriggered()));
     selAnimTimer->start(50);
+
+    x_width = 600;
+    line_height = 20;
+
 }
 
 void SM_SubnetWidget::setModel(SM_DataModel *newmodel)
@@ -84,16 +88,12 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
 
     // define some constants for drawing calulations TODO: Move them to options file/dialog
-    uint general_margin = 20;
+    uint general_margin = 30;
 
-    uint text_offset = 4;
+    uint text_offset = x_width/150;
 
-    uint x_offset = 120;
-    uint y_offset = 20;
-
-    uint x_width = 600;
-
-    uint line_height = 20;
+    uint x_offset = x_width/5;
+    uint y_offset = line_height;
 
     QFont newFont = painter.font();
     newFont.setPixelSize(line_height-(text_offset*2));
@@ -413,6 +413,30 @@ void SM_SubnetWidget::selAnimTimerTriggered()
 {
     selAnimState++;
     if (selAnimState>5) selAnimState=0;
+    repaint();
+}
+
+void SM_SubnetWidget::xWidthPlus()
+{
+    x_width+=15;
+    repaint();
+}
+
+void SM_SubnetWidget::xWidthMinus()
+{
+    x_width-=15;
+    repaint();
+}
+
+void SM_SubnetWidget::line_heightPlus()
+{
+    line_height++;
+    repaint();
+}
+
+void SM_SubnetWidget::line_heightMinus()
+{
+    line_height--;
     repaint();
 }
 
