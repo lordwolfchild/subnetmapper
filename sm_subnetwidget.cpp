@@ -5,6 +5,7 @@
 #include "sm_ipv6editdialog.h"
 #include <QMessageBox>
 #include <QTimer>
+#include <QtNetwork/QHostInfo>
 
 SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     QWidget(parent)
@@ -32,6 +33,16 @@ void SM_SubnetWidget::setSelectionModel(QItemSelectionModel *newselectionmodel)
 {
     selectionModel=newselectionmodel;
     if (selectionModel) connect(selectionModel,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(selectionChangedInTable(QModelIndex,QModelIndex)));
+}
+
+void SM_SubnetWidget::searchHosts(QString name)
+{
+    if (name.isEmpty()) return;
+
+    QHostInfo momHostInfo = QHostInfo::fromName(name);
+
+    if (momHostInfo.error()==QHostInfo::NoError) qDebug("valid and found %u addresses.",momHostInfo.addresses().count());
+    else qDebug("Error: %s",qPrintable(momHostInfo.errorString()));
 }
 
 

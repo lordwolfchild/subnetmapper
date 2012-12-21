@@ -30,6 +30,9 @@ private slots:
     void addIPv4Subnet();
     void addIPv6Subnet();
 
+    void searchFieldChanged();
+    void searchFieldCleared();
+
 private:
     void setupModel();
     void setupViews();
@@ -38,6 +41,7 @@ private:
     SM_SubnetWidget *map;
     QItemSelectionModel *selectionModel;
     QTableView *table;
+    QLineEdit *searchField;
 
 };
 

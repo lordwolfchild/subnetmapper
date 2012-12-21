@@ -25,6 +25,7 @@
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QPainter>
+#include <QLineEdit>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -102,6 +103,28 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowTitle(tr("SubnetMapper V2.0.0"));
 
     setWindowIcon(QIcon(":/appicon.svg"));
+
+    searchField = new QLineEdit(this);
+    searchField->setMaximumWidth(200);
+    QLabel *searchLabel = new QLabel(tr("Search Host:"),this);
+    QPushButton *searchButton = new QPushButton("Search",this);
+    QPushButton *clearSearchButton = new QPushButton("Clear",this);
+
+    connect(clearSearchButton,SIGNAL(clicked()),this,SLOT(searchFieldCleared()));
+    connect(searchButton,SIGNAL(clicked()),this,SLOT(searchFieldChanged()));
+    connect(searchField,SIGNAL(returnPressed()),this,SLOT(searchFieldChanged()));
+
+    // Spacer, no function
+    QWidget* empty = new QWidget();
+    empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+
+    toolbar->addSeparator();
+    toolbar->addWidget(empty);
+    toolbar->addWidget(searchLabel);
+    toolbar->addWidget(searchField);
+    toolbar->addWidget(searchButton);
+    toolbar->addWidget(clearSearchButton);
+
 
 }
 
@@ -218,12 +241,6 @@ void MainWindow::openFile(const QString &path)
         QFile file(fileName);
 
         if (file.open(QFile::ReadOnly | QFile::Text)) {
-            /*
-            QXmlStreamReader stream(&file);
-            bool result;
-
-            result=((SM_DataModel*)model)->loadFromXmlStream(stream);
-            */
 
             QDomDocument doc("SubnetMap");
             bool result=false;
@@ -285,10 +302,7 @@ void MainWindow::saveFile()
 
 void MainWindow::printFile()
 {
-    qDebug("MainWindow::printfile() called");
-
     QPrinter printer;
-
     QPrintDialog *dialog = new QPrintDialog(&printer, this);
     dialog->setWindowTitle(tr("Print Document"));
     if (dialog->exec() != QDialog::Accepted) return;
@@ -378,4 +392,15 @@ void MainWindow::addIPv6Subnet()
     }
 
 
+}
+
+void MainWindow::searchFieldChanged()
+{
+    map->searchHosts(searchField->text());
+}
+
+void MainWindow::searchFieldCleared()
+{
+    searchField->clear();
+    searchFieldChanged();
 }
