@@ -7,5 +7,6 @@
         <file alias="addipv6.svg">images/addipv6.svg</file>
         <file alias="appicon.svg">images/icon_SubnetMapper2_plain.svg</file>
         <file alias="printer.svg">images/printer.svg</file>
+        <file alias="pin.svg">images/pin.svg</file>
     </qresource>
 </RCC>

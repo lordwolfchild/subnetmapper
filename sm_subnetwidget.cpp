@@ -6,6 +6,8 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <QtNetwork/QHostInfo>
+#include <QIcon>
+#include <QSvgRenderer>
 
 SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     QWidget(parent)
@@ -288,6 +290,10 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
         painter.setPen(Qt::black);
     }
 
+    // TEST Render of SVG
+    QSvgRenderer momRenderer(tr(":pin.svg"));
+    QRectF momRect(100.0,100.0,line_height,line_height);
+    momRenderer.render(&painter, momRect);
 
     // Put everything back in the state we found it in (Is this even necessary?!).
     painter.restore();
