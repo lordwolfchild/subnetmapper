@@ -16,6 +16,7 @@ public:
     void setModel(SM_DataModel *newmodel);
     void setSelectionModel(QItemSelectionModel *newselectionmodel);
 
+
 protected:
     void paintEvent(QPaintEvent *event);
     void mousePressEvent(QMouseEvent *event );
@@ -34,7 +35,7 @@ public slots:
     void xWidthMinus();
     void line_heightPlus();
     void line_heightMinus();
-
+    void upscale();
 
 private:
     SM_DataModel *model;

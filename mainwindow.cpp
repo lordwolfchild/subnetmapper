@@ -22,6 +22,9 @@
 #include <QScrollBar>
 #include <QPushButton>
 #include <QLabel>
+#include <QPrinter>
+#include <QPrintDialog>
+#include <QPainter>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -39,6 +42,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QAction *saveAction = fileMenu->addAction(tr("&Save As..."));
     saveAction->setShortcuts(QKeySequence::SaveAs);
     saveAction->setIcon(QIcon(":/save.svg"));
+
+    // Print Map
+    QAction *printAction = fileMenu->addAction(tr("&Print..."));
+    printAction->setShortcut(QKeySequence(tr("Ctrl+P")));
+    printAction->setIcon(QIcon(":/printer.svg"));
 
     // Quit Program
     QAction *quitAction = fileMenu->addAction(tr("E&xit"));
@@ -59,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QAction *aboutAction = helpMenu->addAction(tr("&About SubnetMapper"));
     aboutAction->setIcon(QIcon(":/appicon.svg"));
 
+    resize(800,400);
 
     setupModel();
     setupViews();
@@ -69,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(addIPv4Action, SIGNAL(triggered()), this, SLOT(addIPv4Subnet()));
     connect(addIPv6Action, SIGNAL(triggered()), this, SLOT(addIPv6Subnet()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
+    connect(printAction,SIGNAL(triggered()),this,SLOT(printFile()));
     connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),map,SLOT(dataHasChanged()));
 
     this->menuBar()->addMenu(fileMenu);
@@ -77,10 +87,11 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar();
 
     QToolBar *toolbar = new QToolBar("Main Toolbar",this);
-    this->addToolBar(Qt::LeftToolBarArea,toolbar);
-    toolbar->setOrientation(Qt::Vertical);
+    this->addToolBar(Qt::TopToolBarArea,toolbar);
+    toolbar->setOrientation(Qt::Horizontal);
     toolbar->addAction(openAction);
     toolbar->addAction(saveAction);
+    toolbar->addAction(printAction);
     toolbar->addAction(addIPv4Action);
     toolbar->insertSeparator(addIPv4Action);
     toolbar->addAction(addIPv6Action);
@@ -90,14 +101,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowTitle(tr("SubnetMapper V2.0.0"));
 
-    resize(1000,600);
-
     setWindowIcon(QIcon(":/appicon.svg"));
 
 }
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    map->upscale();
+    QWidget::resizeEvent(event);
 }
 
 
@@ -113,7 +128,7 @@ void MainWindow::setupViews()
     splitter->setOrientation(Qt::Vertical);
     table = new QTableView;
     QScrollArea *scroller = new QScrollArea;
-    map = new SM_SubnetWidget;
+    map = new SM_SubnetWidget(this);
 
     scroller->setWidget(map);
     scroller->setWidgetResizable(false);
@@ -130,15 +145,19 @@ void MainWindow::setupViews()
     QPushButton *buttonXminus = new QPushButton("-",this);
     QPushButton *buttonYplus  = new QPushButton("+",this);
     QPushButton *buttonYminus = new QPushButton("-",this);
+    QPushButton *buttonUpscale = new QPushButton("o",this);
     buttonXplus->setMaximumWidth(30);
     buttonXminus->setMaximumWidth(30);
     buttonYplus->setMaximumWidth(30);
     buttonYminus->setMaximumWidth(30);
+    buttonUpscale->setMaximumWidth(15);
 
     scroller->addScrollBarWidget(buttonXplus,Qt::AlignRight);
     scroller->addScrollBarWidget(buttonXminus,Qt::AlignRight);
+    scroller->addScrollBarWidget(buttonUpscale,Qt::AlignBottom);
     scroller->addScrollBarWidget(buttonYplus,Qt::AlignBottom);
     scroller->addScrollBarWidget(buttonYminus,Qt::AlignBottom);
+
 
     (scroller->horizontalScrollBar())->setMinimumWidth(width());
     (scroller->verticalScrollBar())->setMinimumHeight(height());
@@ -149,6 +168,7 @@ void MainWindow::setupViews()
     connect(buttonXminus,SIGNAL(clicked()),map,SLOT(xWidthMinus()));
     connect(buttonYplus,SIGNAL(clicked()),map,SLOT(line_heightPlus()));
     connect(buttonYminus,SIGNAL(clicked()),map,SLOT(line_heightMinus()));
+    connect(buttonUpscale,SIGNAL(clicked()),map,SLOT(upscale()));
 
     // bind our model to the views. Be advised that SM_subnetwidget is  not a Model/View aware class, but
     // only emulates this behaviour in necessary boundaries to retrieve its data from the model and the selection.
@@ -173,7 +193,7 @@ void MainWindow::setupViews()
 
     setCentralWidget(splitter);
 
-    SM_DataModel* momLink = (SM_DataModel*)model;
+    map->upscale();
 
 }
 
@@ -262,6 +282,29 @@ void MainWindow::saveFile()
         statusBar()->showMessage(tr("Saved %1").arg(fileName), 5000);
     }
 }
+
+void MainWindow::printFile()
+{
+    qDebug("MainWindow::printfile() called");
+
+    QPrinter printer;
+
+    QPrintDialog *dialog = new QPrintDialog(&printer, this);
+    dialog->setWindowTitle(tr("Print Document"));
+    if (dialog->exec() != QDialog::Accepted) return;
+
+    QPainter painter;
+    painter.begin(&printer);
+    double xscale = printer.pageRect().width()/double(map->width());
+    double yscale = printer.pageRect().height()/double(map->height());
+    double scale = qMin(xscale, yscale);
+    //painter.translate(printer.paperRect().x() + printer.pageRect().width()/2,
+                      //printer.paperRect().y() + printer.pageRect().height()/2);
+    painter.scale(scale, scale);
+    //painter.translate(-width()/2, -height()/2);
+
+    map->render(&painter);
+};
 
 void MainWindow::addIPv4Subnet()
 {

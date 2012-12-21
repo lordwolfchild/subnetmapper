@@ -16,9 +16,14 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+protected:
+    void resizeEvent ( QResizeEvent * event );
+
 private slots:
     void openFile(const QString &path = QString());
     void saveFile();
+
+    void printFile();
 
     void showAboutDialog();
 

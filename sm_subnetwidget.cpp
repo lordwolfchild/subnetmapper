@@ -87,7 +87,7 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     };
 
 
-    // define some constants for drawing calulations TODO: Move them to options file/dialog
+    // define some constants for drawing calculations TODO: Move them to options file/dialog
     uint general_margin = 30;
 
     uint text_offset = x_width/150;
@@ -102,8 +102,8 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     QPen grayDotted= QPen( Qt::gray,1,Qt::DotLine);
     QPen grayDashed= QPen( Qt::gray,1,Qt::DashLine);
 
-    uint y_internetwork_spacer = 50;
-    uint y_interversion_spacer = 100;
+    uint y_internetwork_spacer = 2*line_height;
+    uint y_interversion_spacer = 5*line_height;
 
     // a helper to make the point calculations more readable. holds the offset for each block of the graphs.
     uint y_local_offset = general_margin + y_offset;
@@ -437,6 +437,13 @@ void SM_SubnetWidget::line_heightPlus()
 void SM_SubnetWidget::line_heightMinus()
 {
     line_height--;
+    repaint();
+}
+
+void SM_SubnetWidget::upscale()
+{
+    x_width=window()->width()/3*2;
+    line_height=x_width/30;
     repaint();
 }
 
