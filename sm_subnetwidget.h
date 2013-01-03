@@ -5,6 +5,7 @@
 #include <QItemSelectionModel>
 #include <sm_datamodel.h>
 #include <QTimer>
+#include <QHostInfo>
 
 class SM_SubnetWidget : public QWidget
 {
@@ -55,6 +56,8 @@ private:
     uint x_width;
 
     uint line_height;
+
+    QHostInfo searchedHosts;
 
 };
 

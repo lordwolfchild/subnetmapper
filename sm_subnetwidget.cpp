@@ -39,12 +39,25 @@ void SM_SubnetWidget::setSelectionModel(QItemSelectionModel *newselectionmodel)
 
 void SM_SubnetWidget::searchHosts(QString name)
 {
-    if (name.isEmpty()) return;
+  // if the search field has no current input... (i.e. the clear button has been pressed)
+  if (name.isEmpty())
+  {
+    // ... clear the lookup data from before ...
+    searchedHosts=QHostInfo();
+    // ... and bail out. We do not need to do more regarding this matter.
+    return;
+  }
 
-    QHostInfo momHostInfo = QHostInfo::fromName(name);
+  // search for the search field input
+  searchedHosts = QHostInfo::fromName(name);
 
-    if (momHostInfo.error()==QHostInfo::NoError) qDebug("valid and found %u addresses.",momHostInfo.addresses().count());
-    else qDebug("Error: %s",qPrintable(momHostInfo.errorString()));
+  // some debug output...
+  if (searchedHosts.error()==QHostInfo::NoError) qDebug("valid and found %u addresses.",searchedHosts.addresses().count());
+  else qDebug("Error: %s",qPrintable(searchedHosts.errorString()));
+
+  // now this object knows about the searched hosts. The referring Pins will be placed in the next redraw:
+  repaint();
+
 }
 
 
@@ -292,7 +305,8 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
     // TEST Render of SVG
     QSvgRenderer momRenderer(tr(":pin.svg"));
-    QRectF momRect(100.0,100.0,line_height,line_height);
+    // 1.3 is the aspect ratio of the pin graphic... Hey, stop staring. constant values gurantee quick calcs. ;)
+    QRectF momRect(100.0,100.0,line_height,line_height*1.3);
     momRenderer.render(&painter, momRect);
 
     // Put everything back in the state we found it in (Is this even necessary?!).
