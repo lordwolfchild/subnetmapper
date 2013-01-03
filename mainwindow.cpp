@@ -28,6 +28,7 @@
 #include <QLineEdit>
 #include <QSettings>
 #include <QApplication>
+#include <QSize>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -71,11 +72,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // About Dialog
     QAction *aboutAction = helpMenu->addAction(tr("&About SubnetMapper"));
     aboutAction->setIcon(QIcon(":/appicon.svg"));
-
-    resize(
-          settings.value("mainwindow/width",800).toUInt(),
-          settings.value("mainwindow/height",400).toUInt()
-          );
 
     setupModel();
     setupViews();
@@ -132,6 +128,7 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbar->addWidget(searchButton);
     toolbar->addWidget(clearSearchButton);
 
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 }
 
@@ -139,13 +136,22 @@ MainWindow::~MainWindow()
 {
   QSettings settings;
 
-  settings.setValue("mainwindow/width",width());
-  settings.setValue("mainwindow/height",height());
+  settings.setValue("mainwindow/width",window()->width());
+  settings.setValue("mainwindow/height",window()->height());
+}
+
+QSize MainWindow::sizeHint() const
+{
+    QSettings settings;
+    QSize size;
+    size.setWidth(settings.value("mainwindow/width",800).toUInt());
+    size.setHeight(settings.value("mainwindow/height",600).toUInt());
+    return size;
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
-    map->upscale();
+    //map->upscale();
     QWidget::resizeEvent(event);
 }
 
