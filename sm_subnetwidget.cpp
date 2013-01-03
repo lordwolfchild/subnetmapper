@@ -97,6 +97,8 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     // Subnet Helpers for conversion all the time. ;)
     QMap< QString, QList<uint> > ipv6cache;
 
+    // stores a list of coordinates for placement of the host pins, if a search is available
+    QList<QPoint*> pinList;
 
     // Iterate the Model and store the data we need to prepare our little drawing.
     for (int i=0;i<model->rowCount();i++) {
@@ -259,11 +261,33 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
                 }
             }
             painter.setBrush( Qt::NoBrush );
+
+            // check subnet for searched hosts
+            for (int i=0;i<searchedHosts.addresses().count();i++)
+            {
+              quint32 addr=searchedHosts.addresses().at(i).toIPv4Address();
+              if (momNet->containsHost(addr)) {
+                quint32 pinPos=(((quint32)255)&(addr));
+                QPoint *pinPoint=  new QPoint();
+                if (pinPos<128) {
+                  // upper row
+                  pinPoint->setX(general_margin+x_offset+(((float)x_width/128)*pinPos));
+                  pinPoint->setY(y_block1_offset+(line_height*(line+1)));
+                } else {
+                  // lower row
+                  pinPoint->setX(general_margin+x_offset+(((float)x_width/128)*(pinPos-128)));
+                  pinPoint->setY(y_block2_offset+(line_height*(line+1)));
+                };
+                pinList.append(pinPoint);
+              }
+            }
         }
     }
 
 
     // 1.3 Draw Extras for IPv4
+
+    /* OK, I killed the IPv6 drawing for now. Thats something for the next minor release... :P (or if I actually need it myself)
 
     // stores the offset which the ipv6 block always has through the ipv4 block
     uint y_offset_ipv6 = general_margin + ((y_offset + (line_height*(ipv4cache.count()+1)))*2) + y_internetwork_spacer + y_interversion_spacer;
@@ -286,7 +310,9 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
     // 2.3 Draw Extras for IPv6
 
-    // resize the widget to the needed size
+    */
+
+    // resize the widget to the needed size WITHOUT IPv6 networks
     resize((2*general_margin)+(2*x_offset)+x_width, y_local_offset+(line_height*(ipv4cache.count()+1))+y_offset+general_margin);
 
     // 3 Draw Selection Boxes
@@ -303,11 +329,26 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
         painter.setPen(Qt::black);
     }
 
-    // TEST Render of SVG
+
+    // 4 Draw Search Pins
+    // the SVG Renderer we use for drawing our host-pin
     QSvgRenderer momRenderer(tr(":pin.svg"));
-    // 1.3 is the aspect ratio of the pin graphic... Hey, stop staring. constant values gurantee quick calcs. ;)
-    QRectF momRect(100.0,100.0,line_height,line_height*1.3);
-    momRenderer.render(&painter, momRect);
+
+    // iterate the found host coordinates cache
+    for (int i=0;i<pinList.count();i++) {
+      // 1.3 is the aspect ratio of the pin graphic... Hey, stop staring. constant values guarantee quick calcs. ;) The rest are the offsets for the
+      // needle tip position.
+      QRectF momRect(pinList.at(i)->x()-(line_height*0.1),pinList.at(i)->y()-((line_height*1.3)/2.0),line_height,line_height*1.3);
+
+      // now draw it into the constructed rectangle
+      momRenderer.render(&painter, momRect);
+    }
+
+    // clear the pinList cache and delete it's contents (Ok, the other way around, so we do not loose the references to our cached objects)
+    for (int i=0;i<pinList.count();i++) {
+      delete pinList.at(i);
+    };
+    pinList.clear();
 
     // Put everything back in the state we found it in (Is this even necessary?!).
     painter.restore();
