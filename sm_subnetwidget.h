@@ -57,6 +57,8 @@ private:
 
     uint line_height;
 
+    uint general_margin;
+
     QHostInfo searchedHosts;
 
 };

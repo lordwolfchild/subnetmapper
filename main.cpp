@@ -9,7 +9,13 @@
 
 int main(int argc, char *argv[])
 {
+
    QApplication a(argc, argv);
+   a.setOrganizationName("wolfchild.de");
+   a.setOrganizationDomain("wolfchild.de");
+   a.setApplicationName("SubnetMapper");
+   a.setApplicationVersion("2.0.0");
+
    MainWindow w;
    w.show();
 

@@ -8,10 +8,13 @@
 #include <QtNetwork/QHostInfo>
 #include <QIcon>
 #include <QSvgRenderer>
+#include <QSettings>
 
 SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     QWidget(parent)
 {
+    QSettings settings;
+
     setModel(NULL);
     setSelectionModel(NULL);
     setMinimumSize(400,400);
@@ -21,8 +24,15 @@ SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     connect(selAnimTimer, SIGNAL(timeout()), this, SLOT(selAnimTimerTriggered()));
     selAnimTimer->start(50);
 
+    /* pre-QSettings defaults
+
     x_width = 600;
     line_height = 20;
+    general_margin = 30; */
+
+    x_width = settings.value("ipv4widget/x_width",600).toUInt();
+    line_height = settings.value("ipv4widget/line_height",20).toUInt();
+    general_margin = settings.value("ipv4widget/general_margin",30).toUInt();
 
 }
 
@@ -115,8 +125,7 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     };
 
 
-    // define some constants for drawing calculations TODO: Move them to options file/dialog
-    uint general_margin = 30;
+    // define some helpers for drawing calculations
 
     uint text_offset = x_width/150;
 
@@ -534,6 +543,13 @@ void SM_SubnetWidget::selectionChangedInTable(const QModelIndex &current, const 
 
 SM_SubnetWidget::~SM_SubnetWidget()
 {
+    QSettings settings;
+
     clearCache();
     selAnimTimer->stop();
+
+    settings.setValue("ipv4widget/x_width",QVariant(x_width));
+    settings.setValue("ipv4widget/line_height",QVariant(line_height));
+    settings.setValue("ipv4widget/general_margin",QVariant(general_margin));
+
 }

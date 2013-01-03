@@ -26,10 +26,14 @@
 #include <QPrintDialog>
 #include <QPainter>
 #include <QLineEdit>
+#include <QSettings>
+#include <QApplication>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
+    QSettings settings;
+
     QMenu *fileMenu = new QMenu(tr("&File"), this);
     QMenu *editMenu = new QMenu(tr("&Edit"), this);
     QMenu *helpMenu = new QMenu(tr("&Help"), this);
@@ -68,7 +72,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QAction *aboutAction = helpMenu->addAction(tr("&About SubnetMapper"));
     aboutAction->setIcon(QIcon(":/appicon.svg"));
 
-    resize(800,400);
+    resize(
+          settings.value("mainwindow/width",800).toUInt(),
+          settings.value("mainwindow/height",400).toUInt()
+          );
 
     setupModel();
     setupViews();
@@ -100,7 +107,7 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbar->addAction(quitAction);
     toolbar->insertSeparator(aboutAction);
 
-    setWindowTitle(tr("SubnetMapper V2.0.0"));
+    setWindowTitle(tr("SubnetMapper V")+qApp->applicationVersion());
 
     setWindowIcon(QIcon(":/appicon.svg"));
 
@@ -130,6 +137,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+  QSettings settings;
+
+  settings.setValue("mainwindow/width",width());
+  settings.setValue("mainwindow/height",height());
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

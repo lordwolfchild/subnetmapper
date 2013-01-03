@@ -6,6 +6,7 @@ SM_AboutDialog::SM_AboutDialog(QWidget *parent) :
     ui(new Ui::SM_AboutDialog)
 {
     ui->setupUi(this);
+    ui->versionLabel->setText(tr("Version ")+qApp->applicationVersion());
 }
 
 SM_AboutDialog::~SM_AboutDialog()
