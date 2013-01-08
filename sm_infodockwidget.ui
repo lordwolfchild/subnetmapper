@@ -1,4 +1,4 @@
-<?xml version='1.0'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>SM_InfoDockWidget</class>
  <widget class="QDockWidget" name="SM_InfoDockWidget">
@@ -6,13 +6,96 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>655</width>
+    <height>788</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>DockWidget</string>
+  <property name="floating">
+   <bool>false</bool>
   </property>
-  <widget class="QWidget" name="dockWidgetContents"/>
+  <property name="windowTitle">
+   <string>Subnet Info</string>
+  </property>
+  <widget class="QWidget" name="dockWidgetContents">
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>20</y>
+      <width>431</width>
+      <height>161</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>General Info</string>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>23</x>
+       <y>33</y>
+       <width>49</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Name:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>23</x>
+       <y>55</y>
+       <width>89</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Description:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="sn_name">
+     <property name="geometry">
+      <rect>
+       <x>225</x>
+       <y>33</y>
+       <width>24</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>n/a</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="sn_desc">
+     <property name="geometry">
+      <rect>
+       <x>225</x>
+       <y>55</y>
+       <width>24</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>n/a</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
  </widget>
+ <resources/>
+ <connections/>
 </ui>
