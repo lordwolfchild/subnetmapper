@@ -6,7 +6,6 @@
 #include <iostream>
 #include <QtGlobal>
 #include <QSysInfo>
-#include <PythonQt/PythonQt.h>
 
 int main(int argc, char *argv[])
 {
@@ -16,13 +15,6 @@ int main(int argc, char *argv[])
    a.setOrganizationDomain("wolfchild.de");
    a.setApplicationName("SubnetMapper");
    a.setApplicationVersion("2.0.0");
-
-   PythonQt::init();
-   PythonQtObjectPtr mainModule =
-                             PythonQt::self()->getMainModule();
-   QVariant result = mainModule.evalScript(
-                           "19*2+4", Py_eval_input);
-   qDebug("Pythontest: %u", result.toUInt());
 
    MainWindow w;
    w.show();

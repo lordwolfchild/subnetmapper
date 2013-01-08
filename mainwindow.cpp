@@ -151,7 +151,11 @@ QSize MainWindow::sizeHint() const
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
-    //map->upscale();
+    QSettings settings;
+
+    // If desired, autoscale the map following a window resize.
+    if (settings.value("mainwindow/autoresize",0)==1) map->upscale();
+
     QWidget::resizeEvent(event);
 }
 
