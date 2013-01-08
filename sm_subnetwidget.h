@@ -17,7 +17,7 @@ public:
     void setModel(SM_DataModel *newmodel);
     void setSelectionModel(QItemSelectionModel *newselectionmodel);
 
-    void searchHosts( QString name );
+    bool searchHosts( QString name );
 
 protected:
     void paintEvent(QPaintEvent *event);

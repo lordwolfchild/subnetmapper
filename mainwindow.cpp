@@ -413,7 +413,14 @@ void MainWindow::addIPv6Subnet()
 
 void MainWindow::searchFieldChanged()
 {
-    map->searchHosts(searchField->text());
+    if (map->searchHosts(searchField->text()))
+    {
+        if (searchField->text().isEmpty()) searchField->setStyleSheet("QLineEdit { background-color: white; }");
+        else  searchField->setStyleSheet("QLineEdit { background-color: lightgreen; }");
+
+    } else {
+        searchField->setStyleSheet("QLineEdit { background-color: #FF8080; }");
+    }
 }
 
 void MainWindow::searchFieldCleared()

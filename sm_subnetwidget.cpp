@@ -47,7 +47,7 @@ void SM_SubnetWidget::setSelectionModel(QItemSelectionModel *newselectionmodel)
     if (selectionModel) connect(selectionModel,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(selectionChangedInTable(QModelIndex,QModelIndex)));
 }
 
-void SM_SubnetWidget::searchHosts(QString name)
+bool SM_SubnetWidget::searchHosts(QString name)
 {
   // if the search field has no current input... (i.e. the clear button has been pressed)
   if (name.isEmpty())
@@ -55,18 +55,26 @@ void SM_SubnetWidget::searchHosts(QString name)
     // ... clear the lookup data from before ...
     searchedHosts=QHostInfo();
     // ... and bail out. We do not need to do more regarding this matter.
-    return;
+    return true;
   }
 
   // search for the search field input
   searchedHosts = QHostInfo::fromName(name);
 
-  // some debug output...
-  if (searchedHosts.error()==QHostInfo::NoError) qDebug("valid and found %u addresses.",searchedHosts.addresses().count());
-  else qDebug("Error: %s",qPrintable(searchedHosts.errorString()));
-
   // now this object knows about the searched hosts. The referring Pins will be placed in the next redraw:
   repaint();
+
+  if (searchedHosts.error()==QHostInfo::NoError)
+  {
+      qDebug("valid and found %u addresses.",searchedHosts.addresses().count());
+      return true;
+
+  } else {
+      qDebug("Error: %s",qPrintable(searchedHosts.errorString()));
+      return false;
+  };
+
+
 
 }
 

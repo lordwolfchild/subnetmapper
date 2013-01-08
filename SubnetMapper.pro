@@ -9,6 +9,8 @@ QT       += core gui xml network svg
 TARGET = SubnetMapper
 TEMPLATE = app
 
+INCLUDEPATH += /usr/include/python2.7 \
+    /usr/include/PythonQt
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -40,3 +42,11 @@ FORMS    += \
 
 RESOURCES += \
     sm_res.qrc
+
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../usr/lib/release/ -lPythonQt
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../usr/lib/debug/ -lPythonQt
+else:symbian: LIBS += -lPythonQt -lpython2.7
+else:unix: LIBS += -L/usr/lib/ -lPythonQt -lpython2.7
+
+DEPENDPATH += /usr/include
