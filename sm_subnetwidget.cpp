@@ -68,13 +68,10 @@ bool SM_SubnetWidget::searchHosts(QString name)
   {
       qDebug("valid and found %u addresses.",searchedHosts.addresses().count());
       return true;
-
   } else {
       qDebug("Error: %s",qPrintable(searchedHosts.errorString()));
       return false;
   };
-
-
 
 }
 
@@ -406,6 +403,45 @@ void SM_SubnetWidget::mousePressEvent(QMouseEvent *event)
 
 void SM_SubnetWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
+    editCurrentSubnet();
+    QWidget::mouseDoubleClickEvent(event);
+}
+
+void SM_SubnetWidget::clearCache()
+{
+    for (int i=0;i<rectCache1_v4.count();i++) {
+        delete rectCache1_v4.at(i);
+    }
+    rectCache1_v4.clear();
+
+    for (int i=0;i<rectCache2_v4.count();i++) {
+        delete rectCache2_v4.at(i);
+    }
+    rectCache2_v4.clear();
+
+    for (int i=0;i<rectCache1_v6.count();i++) {
+        delete rectCache1_v6.at(i);
+    }
+    rectCache1_v6.clear();
+
+    for (int i=0;i<rectCache2_v6.count();i++) {
+        delete rectCache2_v6.at(i);
+    }
+    rectCache2_v6.clear();
+
+    // this ones members we do not need to delete - all the Rects have already been deleted in the statements before through their respective cache cleanups
+    selectionCache.clear();
+}
+
+void SM_SubnetWidget::selAnimTimerTriggered()
+{
+    selAnimState++;
+    if (selAnimState>5) selAnimState=0;
+    repaint();
+}
+
+void SM_SubnetWidget::editCurrentSubnet()
+{
     if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) {
 
         Subnet *momsubnet=model->getSubnet(selectionModel->currentIndex().row());
@@ -468,41 +504,6 @@ void SM_SubnetWidget::mouseDoubleClickEvent(QMouseEvent *event)
         }
 
     }
-
-    QWidget::mouseDoubleClickEvent(event);
-}
-
-void SM_SubnetWidget::clearCache()
-{
-    for (int i=0;i<rectCache1_v4.count();i++) {
-        delete rectCache1_v4.at(i);
-    }
-    rectCache1_v4.clear();
-
-    for (int i=0;i<rectCache2_v4.count();i++) {
-        delete rectCache2_v4.at(i);
-    }
-    rectCache2_v4.clear();
-
-    for (int i=0;i<rectCache1_v6.count();i++) {
-        delete rectCache1_v6.at(i);
-    }
-    rectCache1_v6.clear();
-
-    for (int i=0;i<rectCache2_v6.count();i++) {
-        delete rectCache2_v6.at(i);
-    }
-    rectCache2_v6.clear();
-
-    // this ones members we do not need to delete - all the Rects have already been deleted in the statements before through their respective cache cleanups
-    selectionCache.clear();
-}
-
-void SM_SubnetWidget::selAnimTimerTriggered()
-{
-    selAnimState++;
-    if (selAnimState>5) selAnimState=0;
-    repaint();
 }
 
 void SM_SubnetWidget::xWidthPlus()

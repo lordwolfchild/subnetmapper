@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QMenu *fileMenu = new QMenu(tr("&File"), this);
     QMenu *editMenu = new QMenu(tr("&Edit"), this);
+    QMenu *viewMenu = new QMenu(tr("&View"), this);
     QMenu *helpMenu = new QMenu(tr("&Help"), this);
 
     // Open File
@@ -69,6 +70,21 @@ MainWindow::MainWindow(QWidget *parent) :
     addIPv6Action->setShortcut(QKeySequence(tr("Ctrl+Shift+N")));
     addIPv6Action->setIcon(QIcon(":/addipv6.svg"));
 
+    // Add Edit Subnet
+    QAction *editAction = editMenu->addAction(tr("Edit Subnet"));
+    editAction->setShortcut(QKeySequence(tr("Ctrl+Shift+E")));
+    editAction->setIcon(QIcon(":/edit.svg"));
+
+    // Add Delete Subnet
+    QAction *deleteAction = editMenu->addAction(tr("Delete Subnet"));
+    deleteAction->setShortcut(QKeySequence(tr("Ctrl+Del")));
+    deleteAction->setIcon(QIcon(":/delete.svg"));
+
+    // Add Subnet Info
+    QAction *showInfoAction = viewMenu->addAction(tr("Show Subnet Info"));
+    showInfoAction->setShortcut(QKeySequence(tr("Ctrl+I")));
+    showInfoAction->setIcon(QIcon(":/info.svg"));
+
     // About Dialog
     QAction *aboutAction = helpMenu->addAction(tr("&About SubnetMapper"));
     aboutAction->setIcon(QIcon(":/appicon.svg"));
@@ -84,9 +100,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
     connect(printAction,SIGNAL(triggered()),this,SLOT(printFile()));
     connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),map,SLOT(dataHasChanged()));
+    connect(editAction, SIGNAL(triggered()),this,SLOT(editCurrentSubnet()));
+    connect(deleteAction,SIGNAL(triggered()),this,SLOT(deleteCurrentSubnet()));
+    connect(showInfoAction,SIGNAL(triggered()),this,SLOT(showInfoPane()));
 
     this->menuBar()->addMenu(fileMenu);
     this->menuBar()->addMenu(editMenu);
+    this->menuBar()->addMenu(viewMenu);
     this->menuBar()->addMenu(helpMenu);
     statusBar();
 
@@ -99,9 +119,12 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbar->addAction(addIPv4Action);
     toolbar->insertSeparator(addIPv4Action);
     toolbar->addAction(addIPv6Action);
+    toolbar->addAction(editAction);
+    toolbar->addAction(deleteAction);
+    toolbar->addAction(showInfoAction);
+    toolbar->insertSeparator(showInfoAction);
     toolbar->addAction(aboutAction);
     toolbar->addAction(quitAction);
-    toolbar->insertSeparator(aboutAction);
 
     setWindowTitle(tr("SubnetMapper V")+qApp->applicationVersion());
 
@@ -219,7 +242,7 @@ void MainWindow::setupViews()
     // Do not try fancy stuff with this class (without knowing what you do, of course)!
     table->setModel(model);
 
-    QItemSelectionModel *selectionModel = new QItemSelectionModel(model);
+    selectionModel = new QItemSelectionModel(model);
     table->setSelectionModel(selectionModel);
     table->setSortingEnabled(false);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -431,4 +454,19 @@ void MainWindow::searchFieldCleared()
 {
     searchField->clear();
     searchFieldChanged();
+}
+
+void MainWindow::deleteCurrentSubnet()
+{
+    if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) model->removeRows(selectionModel->currentIndex().row(),1);
+}
+
+void MainWindow::editCurrentSubnet()
+{
+    if (map) map->editCurrentSubnet();
+}
+
+void MainWindow::showInfoPane()
+{
+
 }

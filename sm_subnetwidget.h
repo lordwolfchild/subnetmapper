@@ -33,6 +33,8 @@ public slots:
     void selectionChangedInTable(const QModelIndex & current, const QModelIndex & previous);
     void selAnimTimerTriggered();
 
+    void editCurrentSubnet();
+
     void xWidthPlus();
     void xWidthMinus();
     void line_heightPlus();

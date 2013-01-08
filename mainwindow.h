@@ -34,6 +34,10 @@ private slots:
     void searchFieldChanged();
     void searchFieldCleared();
 
+    void deleteCurrentSubnet();
+    void editCurrentSubnet();
+    void showInfoPane();
+
 private:
     void setupModel();
     void setupViews();
