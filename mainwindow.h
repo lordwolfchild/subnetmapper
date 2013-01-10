@@ -7,6 +7,7 @@
 #include <QItemSelectionModel>
 #include <QTableView>
 #include "sm_datamodel.h"
+#include "sm_infodockwidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -38,6 +39,8 @@ private slots:
     void editCurrentSubnet();
     void showInfoPane();
 
+    void selectionChanged();
+
 private:
     void setupModel();
     void setupViews();
@@ -47,6 +50,7 @@ private:
     QItemSelectionModel *selectionModel;
     QTableView *table;
     QLineEdit *searchField;
+    SM_InfoDockWidget *infoDock;
 
 };
 

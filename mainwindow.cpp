@@ -100,6 +100,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
     connect(printAction,SIGNAL(triggered()),this,SLOT(printFile()));
     connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),map,SLOT(dataHasChanged()));
+    connect(selectionModel,SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),this,SLOT(selectionChanged()));
     connect(editAction, SIGNAL(triggered()),this,SLOT(editCurrentSubnet()));
     connect(deleteAction,SIGNAL(triggered()),this,SLOT(deleteCurrentSubnet()));
     connect(showInfoAction,SIGNAL(triggered()),this,SLOT(showInfoPane()));
@@ -196,6 +197,14 @@ void MainWindow::setupViews()
     table = new QTableView;
     QScrollArea *scroller = new QScrollArea;
     map = new SM_SubnetWidget(this);
+    infoDock = new SM_InfoDockWidget(0,this);
+    infoDock->setAllowedAreas(Qt::RightDockWidgetArea);
+    addDockWidget(Qt::RightDockWidgetArea, infoDock);
+
+    QSettings settings;
+
+    if (settings.value("mainwindow/infoPaneState",1)==1) infoDock->setVisible(true);
+    else infoDock->setVisible(false);
 
     scroller->setWidget(map);
     scroller->setWidgetResizable(false);
@@ -468,5 +477,14 @@ void MainWindow::editCurrentSubnet()
 
 void MainWindow::showInfoPane()
 {
+    QSettings settings;
+    infoDock->setVisible(!(infoDock->isVisible()));
+    if (infoDock->isVisible()) settings.setValue("mainwindow/infoPaneState",1);
+    else settings.setValue("mainwindow/infoPaneState",0);
+    qDebug("infoPaneState: %u",settings.value("mainwindow/infoPaneState",1).toUInt());
+}
 
+void MainWindow::selectionChanged()
+{
+    infoDock->setSubnet(model->getSubnet(selectionModel->currentIndex().row()));
 }
