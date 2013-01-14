@@ -89,6 +89,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QAction *aboutAction = helpMenu->addAction(tr("&About SubnetMapper"));
     aboutAction->setIcon(QIcon(":/appicon.svg"));
 
+    autoResizeOption = new QCheckBox("autoresize Map", this);
+    if (settings.value("mainwindow/autoresize",0)==0)
+        autoResizeOption->setChecked(false);
+    else
+        autoResizeOption->setChecked(true);
+
     setupModel();
     setupViews();
 
@@ -146,6 +152,7 @@ MainWindow::MainWindow(QWidget *parent) :
     empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 
     toolbar->addSeparator();
+    toolbar->addWidget(autoResizeOption);
     toolbar->addWidget(empty);
     toolbar->addWidget(searchLabel);
     toolbar->addWidget(searchField);
@@ -153,6 +160,8 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbar->addWidget(clearSearchButton);
 
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
+
 
 }
 
@@ -248,6 +257,13 @@ void MainWindow::setupViews()
     connect(buttonYminus,SIGNAL(clicked()),map,SLOT(line_heightMinus()));
     connect(buttonUpscale,SIGNAL(clicked()),map,SLOT(upscale()));
 
+    connect(buttonXplus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
+    connect(buttonXminus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
+    connect(buttonYplus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
+    connect(buttonYminus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
+
+    connect(autoResizeOption,SIGNAL(clicked()),this,SLOT(autoResizeClicked()));
+
     connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),infoDock,SLOT(updateSubnet()));
 
     // bind our model to the views. Be advised that SM_subnetwidget is  not a Model/View aware class, but
@@ -272,8 +288,6 @@ void MainWindow::setupViews()
     headerSideView->hide();
 
     setCentralWidget(splitter);
-
-    map->upscale();
 
 }
 
@@ -494,4 +508,22 @@ void MainWindow::selectionChanged()
     if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) {
         infoDock->setSubnet(model->getSubnet(selectionModel->currentIndex().row()));
     } else infoDock->setSubnet(0);
+}
+
+void MainWindow::autoResizeClicked()
+{
+    QSettings settings;
+
+    if (autoResizeOption->isChecked()) {
+        settings.setValue("mainwindow/autoresize",1);
+        map->upscale();
+    } else
+        settings.setValue("mainwindow/autoresize",0);
+}
+
+void MainWindow::killAutoResize()
+{
+    QSettings settings;
+    settings.setValue("mainwindow/autoresize",0);
+    autoResizeOption->setChecked(false);
 }

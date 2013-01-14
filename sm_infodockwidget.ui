@@ -178,7 +178,7 @@
           <rect>
            <x>130</x>
            <y>60</y>
-           <width>291</width>
+           <width>231</width>
            <height>18</height>
           </rect>
          </property>
@@ -191,7 +191,7 @@
           <rect>
            <x>130</x>
            <y>40</y>
-           <width>291</width>
+           <width>231</width>
            <height>18</height>
           </rect>
          </property>
@@ -396,6 +396,43 @@
          <property name="text">
           <string>n/a</string>
          </property>
+        </widget>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="geometry">
+          <rect>
+           <x>370</x>
+           <y>20</y>
+           <width>61</width>
+           <height>61</height>
+          </rect>
+         </property>
+         <property name="title">
+          <string>IPv</string>
+         </property>
+         <widget class="QLabel" name="sn_ipver">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>20</y>
+            <width>41</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>22</pointsize>
+            <weight>75</weight>
+            <italic>true</italic>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
         </widget>
        </widget>
       </item>

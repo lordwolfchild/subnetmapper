@@ -8,6 +8,7 @@
 #include <QTableView>
 #include "sm_datamodel.h"
 #include "sm_infodockwidget.h"
+#include <QCheckBox>
 
 class MainWindow : public QMainWindow
 {
@@ -41,6 +42,9 @@ private slots:
 
     void selectionChanged();
 
+    void autoResizeClicked();
+    void killAutoResize();
+
 private:
     void setupModel();
     void setupViews();
@@ -51,6 +55,7 @@ private:
     QTableView *table;
     QLineEdit *searchField;
     SM_InfoDockWidget *infoDock;
+    QCheckBox *autoResizeOption;
 
 };
 

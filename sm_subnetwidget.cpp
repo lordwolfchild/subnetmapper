@@ -24,12 +24,6 @@ SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     connect(selAnimTimer, SIGNAL(timeout()), this, SLOT(selAnimTimerTriggered()));
     selAnimTimer->start(50);
 
-    /* pre-QSettings defaults
-
-    x_width = 600;
-    line_height = 20;
-    general_margin = 30; */
-
     x_width = settings.value("ipv4widget/x_width",600).toUInt();
     line_height = settings.value("ipv4widget/line_height",20).toUInt();
     general_margin = settings.value("ipv4widget/general_margin",30).toUInt();
@@ -145,7 +139,7 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     QPen grayDashed= QPen( Qt::gray,1,Qt::DashLine);
 
     uint y_internetwork_spacer = 2*line_height;
-    uint y_interversion_spacer = 5*line_height;
+    //uint y_interversion_spacer = 5*line_height;
 
     // a helper to make the point calculations more readable. holds the offset for each block of the graphs.
     uint y_local_offset = general_margin + y_offset;
@@ -509,30 +503,46 @@ void SM_SubnetWidget::editCurrentSubnet()
 
 void SM_SubnetWidget::xWidthPlus()
 {
+    QSettings settings;
+    settings.setValue("ipv4widget/x_width",QVariant(x_width));
+
     x_width+=15;
     repaint();
 }
 
 void SM_SubnetWidget::xWidthMinus()
 {
+    QSettings settings;
+    settings.setValue("ipv4widget/x_width",QVariant(x_width));
+
     x_width-=15;
     repaint();
 }
 
 void SM_SubnetWidget::line_heightPlus()
 {
+    QSettings settings;
+    settings.setValue("ipv4widget/line_height",QVariant(line_height));
+
     line_height++;
     repaint();
 }
 
 void SM_SubnetWidget::line_heightMinus()
 {
+    QSettings settings;
+    settings.setValue("ipv4widget/line_height",QVariant(line_height));
+
     line_height--;
     repaint();
 }
 
 void SM_SubnetWidget::upscale()
 {
+    QSettings settings;
+    settings.setValue("ipv4widget/x_width",QVariant(x_width));
+    settings.setValue("ipv4widget/line_height",QVariant(line_height));
+
     x_width=parentWidget()->width()/3*2;
     line_height=x_width/30;
     repaint();

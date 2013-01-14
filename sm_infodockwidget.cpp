@@ -39,6 +39,7 @@ void SM_InfoDockWidget::updateSubnet()
         ui->sn_notes->setText("n/a");
         ui->sn_size->setText("n/a");
         ui->sn_wc->setText("n/a");
+        ui->sn_ipver->setText("--");
 
         ui->sn_notes->setReadOnly(true);
 
@@ -65,6 +66,7 @@ void SM_InfoDockWidget::updateSubnet()
         ui->sn_notes->setText(momnet->getNotes());
         ui->sn_size->setText(QString::number(momnet->getSize()));
         ui->sn_wc->setText(momnet->IP2String(wildcard));
+        ui->sn_ipver->setText("4");
 
         ui->sn_notes->setReadOnly(false);
 
@@ -88,6 +90,7 @@ void SM_InfoDockWidget::updateSubnet()
         ui->sn_notes->setText(momnet->getNotes());
         ui->sn_size->setText(QString::number(wildcard.second));
         ui->sn_wc->setText(momnet->reduceIP(momnet->IP2String(wildcard)));
+        ui->sn_ipver->setText("6");
 
         ui->sn_notes->setReadOnly(false);
 
