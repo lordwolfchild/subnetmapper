@@ -17,6 +17,12 @@ public:
     ~SM_InfoDockWidget();
 
     void setSubnet(Subnet *sn);
+    void updateSubnet();
+
+public slots:
+
+    void notesEdited();
+
 
 private:
     Ui::SM_InfoDockWidget *ui;

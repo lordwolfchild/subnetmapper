@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
     connect(printAction,SIGNAL(triggered()),this,SLOT(printFile()));
     connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),map,SLOT(dataHasChanged()));
-    connect(selectionModel,SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),this,SLOT(selectionChanged()));
+    connect(selectionModel,SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(selectionChanged()));
     connect(editAction, SIGNAL(triggered()),this,SLOT(editCurrentSubnet()));
     connect(deleteAction,SIGNAL(triggered()),this,SLOT(deleteCurrentSubnet()));
     connect(showInfoAction,SIGNAL(triggered()),this,SLOT(showInfoPane()));
@@ -486,5 +486,7 @@ void MainWindow::showInfoPane()
 
 void MainWindow::selectionChanged()
 {
-    infoDock->setSubnet(model->getSubnet(selectionModel->currentIndex().row()));
+    if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) {
+        infoDock->setSubnet(model->getSubnet(selectionModel->currentIndex().row()));
+    } else infoDock->setSubnet(0);
 }
