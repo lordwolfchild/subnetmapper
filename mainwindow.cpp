@@ -215,7 +215,11 @@ void MainWindow::setupModel()
     model = new SM_DataModel(this);
     //((SM_DataModel*)model)->addDemos();
 
-    if (!(settings.value("mainwindow/autoload_map","").toString()=="")) openFile(settings.value("mainwindow/autoload_map","").toString());
+    if (((qApp->arguments().count())>1)&&(!(qApp->arguments().at(1).isEmpty())))
+    {
+        openFile(qApp->arguments().at(1));
+    }
+    else if (!(settings.value("mainwindow/autoload_map","").toString()=="")) openFile(settings.value("mainwindow/autoload_map","").toString());
 }
 
 void MainWindow::setupViews()
