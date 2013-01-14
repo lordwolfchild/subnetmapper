@@ -211,6 +211,7 @@ void MainWindow::setupViews()
     infoDock = new SM_InfoDockWidget(0,this);
     infoDock->setAllowedAreas(Qt::RightDockWidgetArea);
     addDockWidget(Qt::RightDockWidgetArea, infoDock);
+    infoDock->setSubnet(0);
 
     QSettings settings;
 
@@ -378,17 +379,16 @@ void MainWindow::printFile()
     dialog->setWindowTitle(tr("Print Document"));
     if (dialog->exec() != QDialog::Accepted) return;
 
+    // PAGINATION TODO!!!! Until now the map will only be scaled to fit a page.
+
     QPainter painter;
     painter.begin(&printer);
     double xscale = printer.pageRect().width()/double(map->width());
     double yscale = printer.pageRect().height()/double(map->height());
     double scale = qMin(xscale, yscale);
-    //painter.translate(printer.paperRect().x() + printer.pageRect().width()/2,
-                      //printer.paperRect().y() + printer.pageRect().height()/2);
     painter.scale(scale, scale);
-    //painter.translate(-width()/2, -height()/2);
-
-    map->render(&painter);
+    map->paintJob(&painter,printer.pageRect());
+    painter.end();
 };
 
 void MainWindow::addIPv4Subnet()

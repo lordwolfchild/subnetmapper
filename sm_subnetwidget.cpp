@@ -69,19 +69,25 @@ bool SM_SubnetWidget::searchHosts(QString name)
 
 }
 
-
-void SM_SubnetWidget::paintEvent(QPaintEvent *event)
+void SM_SubnetWidget::renderprt(QPainter *painter, int width, int height)
 {
-    QPainter painter(this);
 
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::black);
+    int orig_x_width=x_width;
+    int orig_line_height=line_height;
 
-    // Store the original state of the painter...
-    painter.save();
+    x_width=width;
+    line_height=x_width/30;
 
-    // clear the widget, we need to redraw completely
-    painter.fillRect(event->rect(),Qt::white);
+    render(painter);
+
+    x_width=orig_x_width;
+    line_height=orig_line_height;
+
+}
+
+void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
+{
+    painter->fillRect(paintArea,Qt::white);
 
     // prepare our model and metadata for drawing of the map
     model->sortData();
@@ -131,9 +137,9 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     uint x_offset = x_width/5;
     uint y_offset = line_height;
 
-    QFont newFont = painter.font();
+    QFont newFont = painter->font();
     newFont.setPixelSize(line_height-(text_offset*2));
-    painter.setFont(newFont);
+    painter->setFont(newFont);
 
     QPen grayDotted= QPen( Qt::gray,1,Qt::DotLine);
     QPen grayDashed= QPen( Qt::gray,1,Qt::DashLine);
@@ -145,36 +151,36 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     uint y_local_offset = general_margin + y_offset;
 
     // 1.1 Draw legend for IPv4
-    painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv4cache.count()+1))));
-    painter.setPen(grayDotted);
-    painter.drawLine(QPoint(general_margin+x_offset+(x_width/4), y_local_offset),QPoint(general_margin+x_offset+(x_width/4),general_margin+(y_local_offset+(line_height*(ipv4cache.count()+1)))*2));
-    painter.setPen(grayDashed);
-    painter.drawLine(QPoint(general_margin+x_offset+(x_width/2), y_local_offset),QPoint(general_margin+x_offset+(x_width/2),general_margin+(y_local_offset+(line_height*(ipv4cache.count()+1)))*2));
-    painter.setPen(grayDotted);
-    painter.drawLine(QPoint(general_margin+x_offset+((x_width/4)*3), y_local_offset),QPoint(general_margin+x_offset+((x_width/4)*3),general_margin+(y_local_offset+(line_height*(ipv4cache.count()+1)))*2));
-    painter.setPen(Qt::black);
-    painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv4cache.count()+1))));
-    painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
-    painter.setPen(Qt::gray);
-    painter.drawText(general_margin+x_offset+((x_width/4)*0)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".0");
-    painter.drawText(general_margin+x_offset+((x_width/4)*1)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".32");
-    painter.drawText(general_margin+x_offset+((x_width/4)*2)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".64");
-    painter.drawText(general_margin+x_offset+((x_width/4)*3)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".96");
-    painter.drawText(general_margin+x_offset+((x_width/4)*4)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".127");
-    painter.setPen(Qt::black);
+    painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv4cache.count()+1))));
+    painter->setPen(grayDotted);
+    painter->drawLine(QPoint(general_margin+x_offset+(x_width/4), y_local_offset),QPoint(general_margin+x_offset+(x_width/4),general_margin+(y_local_offset+(line_height*(ipv4cache.count()+1)))*2));
+    painter->setPen(grayDashed);
+    painter->drawLine(QPoint(general_margin+x_offset+(x_width/2), y_local_offset),QPoint(general_margin+x_offset+(x_width/2),general_margin+(y_local_offset+(line_height*(ipv4cache.count()+1)))*2));
+    painter->setPen(grayDotted);
+    painter->drawLine(QPoint(general_margin+x_offset+((x_width/4)*3), y_local_offset),QPoint(general_margin+x_offset+((x_width/4)*3),general_margin+(y_local_offset+(line_height*(ipv4cache.count()+1)))*2));
+    painter->setPen(Qt::black);
+    painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv4cache.count()+1))));
+    painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+    painter->setPen(Qt::gray);
+    painter->drawText(general_margin+x_offset+((x_width/4)*0)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".0");
+    painter->drawText(general_margin+x_offset+((x_width/4)*1)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".32");
+    painter->drawText(general_margin+x_offset+((x_width/4)*2)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".64");
+    painter->drawText(general_margin+x_offset+((x_width/4)*3)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".96");
+    painter->drawText(general_margin+x_offset+((x_width/4)*4)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".127");
+    painter->setPen(Qt::black);
 
     y_local_offset = general_margin + y_offset + (line_height*(ipv4cache.count()+1)) + y_internetwork_spacer;
 
-    painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv4cache.count()+1))));
-    painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv4cache.count()+1))));
-    painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
-    painter.setPen(Qt::gray);
-    painter.drawText(general_margin+x_offset+((x_width/4)*0)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".128");
-    painter.drawText(general_margin+x_offset+((x_width/4)*1)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".160");
-    painter.drawText(general_margin+x_offset+((x_width/4)*2)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".192");
-    painter.drawText(general_margin+x_offset+((x_width/4)*3)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".224");
-    painter.drawText(general_margin+x_offset+((x_width/4)*4)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".255");
-    painter.setPen(Qt::black);
+    painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv4cache.count()+1))));
+    painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv4cache.count()+1))));
+    painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+    painter->setPen(Qt::gray);
+    painter->drawText(general_margin+x_offset+((x_width/4)*0)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".128");
+    painter->drawText(general_margin+x_offset+((x_width/4)*1)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".160");
+    painter->drawText(general_margin+x_offset+((x_width/4)*2)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".192");
+    painter->drawText(general_margin+x_offset+((x_width/4)*3)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".224");
+    painter->drawText(general_margin+x_offset+((x_width/4)*4)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".255");
+    painter->setPen(Qt::black);
 
     // 1.2 Draw IPv4 subnets
 
@@ -187,8 +193,8 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
         // drawing the net legend (/24 Network Address on the left side of the map)
         QString legend_str=Subnet_v4::IP2String(ipv4cache.keys()[line]);
         legend_str=legend_str.left(legend_str.lastIndexOf('.'))+".*";
-        painter.drawText(general_margin+text_offset,y_block1_offset+(line_height*(line+1)),x_offset-(2*text_offset),line_height,Qt::AlignVCenter,legend_str);
-        painter.drawText(general_margin+text_offset,y_block2_offset+(line_height*(line+1)),x_offset-(2*text_offset),line_height,Qt::AlignVCenter,legend_str);
+        painter->drawText(general_margin+text_offset,y_block1_offset+(line_height*(line+1)),x_offset-(2*text_offset),line_height,Qt::AlignVCenter,legend_str);
+        painter->drawText(general_margin+text_offset,y_block2_offset+(line_height*(line+1)),x_offset-(2*text_offset),line_height,Qt::AlignVCenter,legend_str);
 
         for (int net=0;net<ipv4cache[index].count();net++) {
             Subnet_v4 *momNet=(Subnet_v4*)model->getSubnet(ipv4cache[index].at(net));
@@ -199,7 +205,7 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
             quint32 end_position = (((quint32)255)&(momNet->getBroadcast()));
             quint32 size = momNet->getSize();
 
-            painter.setBrush( QBrush( momNet->getColor() ));
+            painter->setBrush( QBrush( momNet->getColor() ));
 
             qreal r,g,b;
             QColor invColor;
@@ -217,15 +223,15 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
                     rectCache1_v4.append(momRect1);
                     rectCache2_v4.append(momRect2);
 
-                    painter.drawRect(*momRect1);
-                    painter.setPen(invColor);
-                    painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
-                    painter.setPen(Qt::black);
-                    painter.drawRect(*momRect2);
-                    painter.setPen(invColor);
-                    painter.drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset),line_height,Qt::AlignVCenter,momNet->getIdentifier());
-                    painter.setPen(Qt::black);
-                    if (momNet->getSize()>256) painter.drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter|Qt::AlignRight,tr("+"));
+                    painter->drawRect(*momRect1);
+                    painter->setPen(invColor);
+                    painter->drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
+                    painter->setPen(Qt::black);
+                    painter->drawRect(*momRect2);
+                    painter->setPen(invColor);
+                    painter->drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset),line_height,Qt::AlignVCenter,momNet->getIdentifier());
+                    painter->setPen(Qt::black);
+                    if (momNet->getSize()>256) painter->drawText(text_offset+general_margin+x_offset,y_block2_offset+(line_height*(line+1)),x_width-(text_offset*2),line_height,Qt::AlignVCenter|Qt::AlignRight,tr("+"));
 
                     if (momNet->getSelected()) {
                         selectionCache.append(momRect1);
@@ -241,10 +247,10 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
                     rectCache1_v4.append(momRect1);
                     rectCache2_v4.append(momRect2);
 
-                    painter.drawRect(*momRect1);
-                    painter.setPen(invColor);
-                    painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*size)-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
-                    painter.setPen(Qt::black);
+                    painter->drawRect(*momRect1);
+                    painter->setPen(invColor);
+                    painter->drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*start_position),y_block1_offset+(line_height*(line+1)),(((float)x_width/128)*size)-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
+                    painter->setPen(Qt::black);
 
                     if (momNet->getSelected()) {
                         selectionCache.append(momRect1);
@@ -259,16 +265,16 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
                 rectCache1_v4.append(momRect1);
                 rectCache2_v4.append(momRect2);
 
-                painter.drawRect(*momRect2);
-                painter.setPen(invColor);
-                painter.drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size)-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
-                painter.setPen(Qt::black);
+                painter->drawRect(*momRect2);
+                painter->setPen(invColor);
+                painter->drawText(text_offset+general_margin+x_offset+(((float)x_width/128)*(start_position-128)),y_block2_offset+(line_height*(line+1)),(((float)x_width/128)*size)-(text_offset*2),line_height,Qt::AlignVCenter,momNet->getIdentifier());
+                painter->setPen(Qt::black);
 
                 if (momNet->getSelected()) {
                     selectionCache.append(momRect2);
                 }
             }
-            painter.setBrush( Qt::NoBrush );
+            painter->setBrush( Qt::NoBrush );
 
             // check subnet for searched hosts
             for (int i=0;i<searchedHosts.addresses().count();i++)
@@ -304,15 +310,15 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
 
     // 2.1 Draw legend for IPv6
 
-    painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
-    painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
-    painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+    painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
+    painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
+    painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
 
     y_local_offset = y_offset_ipv6 + y_offset + (line_height*(ipv6cache.count()+1)) + y_internetwork_spacer;
 
-    painter.drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
-    painter.drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
-    painter.drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+    painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
+    painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
+    painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
 
     // 2.2 Draw IPv6 subnets
 
@@ -328,13 +334,13 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
     QPen selectedPenDown = QPen( Qt::blue,3.4,Qt::SolidLine);
 
     for (int selIndex=0;selIndex<selectionCache.count();selIndex++) {
-        painter.setBrush(Qt::transparent);
-        painter.setPen(selectedPenDown);
-        painter.drawRect(*(selectionCache.at(selIndex)));
+        painter->setBrush(Qt::transparent);
+        painter->setPen(selectedPenDown);
+        painter->drawRect(*(selectionCache.at(selIndex)));
         selectedPenUp.setDashOffset((qreal)selAnimState);
-        painter.setPen(selectedPenUp);
-        painter.drawRect(*(selectionCache.at(selIndex)));
-        painter.setPen(Qt::black);
+        painter->setPen(selectedPenUp);
+        painter->drawRect(*(selectionCache.at(selIndex)));
+        painter->setPen(Qt::black);
     }
 
 
@@ -349,7 +355,7 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
       QRectF momRect(pinList.at(i)->x()-(line_height*0.1),pinList.at(i)->y()-((line_height*1.3)/2.0),line_height,line_height*1.3);
 
       // now draw it into the constructed rectangle
-      momRenderer.render(&painter, momRect);
+      momRenderer.render(painter, momRect);
     }
 
     // clear the pinList cache and delete it's contents (Ok, the other way around, so we do not loose the references to our cached objects)
@@ -357,6 +363,21 @@ void SM_SubnetWidget::paintEvent(QPaintEvent *event)
       delete pinList.at(i);
     };
     pinList.clear();
+
+}
+
+
+void SM_SubnetWidget::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::black);
+
+    // Store the original state of the painter...
+    painter.save();
+
+    paintJob(&painter,event->rect());
 
     // Put everything back in the state we found it in (Is this even necessary?!).
     painter.restore();

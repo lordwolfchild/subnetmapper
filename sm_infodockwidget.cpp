@@ -26,8 +26,6 @@ void SM_InfoDockWidget::setSubnet(Subnet *sn)
 
 void SM_InfoDockWidget::updateSubnet()
 {
-    qDebug("updatesubnet() called");
-
     if (referencedSubnet==0) {
         ui->sn_addr->setText("n/a");
         ui->sn_bc->setText("n/a");
@@ -39,7 +37,7 @@ void SM_InfoDockWidget::updateSubnet()
         ui->sn_notes->setText("n/a");
         ui->sn_size->setText("n/a");
         ui->sn_wc->setText("n/a");
-        ui->sn_ipver->setText("--");
+        ui->sn_ipver->setText("X");
 
         ui->sn_notes->setReadOnly(true);
 
