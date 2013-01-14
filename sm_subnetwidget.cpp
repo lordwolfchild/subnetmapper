@@ -9,6 +9,7 @@
 #include <QIcon>
 #include <QSvgRenderer>
 #include <QSettings>
+#include "mainwindow.h"
 
 SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
     QWidget(parent)
@@ -482,6 +483,7 @@ void SM_SubnetWidget::editCurrentSubnet()
                         momsubnet_v4->setIdentifier(momid);
                         momsubnet_v4->setColor(momcolor);
                         model->reset();
+                        ((MainWindow*)window())->mapWasAltered();
                     } else {
                         QMessageBox msgBox;
                         msgBox.setText("The Subnet you specified overlaps with an existing subnet.");

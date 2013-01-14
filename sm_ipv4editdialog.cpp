@@ -138,9 +138,10 @@ void sm_IPv4EditDialog::updateCIDR()
 void sm_IPv4EditDialog::colorClicked()
 {
     QColorDialog colorDialog(selectedColor);
-    colorDialog.exec();
-    selectedColor=colorDialog.selectedColor();
-    ui->colorBox->setStyleSheet("QFrame { background-color: "+selectedColor.name()+" }");
+    if (colorDialog.exec()) {
+        selectedColor=colorDialog.selectedColor();
+        ui->colorBox->setStyleSheet("QFrame { background-color: "+selectedColor.name()+" }");
+    }
 };
 
 void sm_IPv4EditDialog::setDescription(QString description)

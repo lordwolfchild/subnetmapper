@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     QSettings settings;
 
+    changedButNotSaved=false;
+
     QMenu *fileMenu = new QMenu(tr("&File"), this);
     QMenu *editMenu = new QMenu(tr("&Edit"), this);
     QMenu *viewMenu = new QMenu(tr("&View"), this);
@@ -133,7 +135,7 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbar->addAction(aboutAction);
     toolbar->addAction(quitAction);
 
-    setWindowTitle(tr("SubnetMapper V")+qApp->applicationVersion());
+    resetTitle();
 
     setWindowIcon(QIcon(":/appicon.svg"));
 
@@ -169,6 +171,14 @@ MainWindow::~MainWindow()
 {
   QSettings settings;
 
+  if (changedButNotSaved) {
+
+      if (QMessageBox::question(this,"SubnetMap not saved!","this map has been altered, but not saved. Do you want to save it now before exit?",QMessageBox::Ok,QMessageBox::Cancel)==QMessageBox::Ok)
+      {
+          saveFile();
+      }
+  }
+
   infoDock->setSubnet(0);
 
   settings.setValue("mainwindow/width",window()->width());
@@ -198,7 +208,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 void MainWindow::setupModel()
 {
     model = new SM_DataModel(this);
-    ((SM_DataModel*)model)->addDemos();
+    //((SM_DataModel*)model)->addDemos();
 }
 
 void MainWindow::setupViews()
@@ -302,6 +312,14 @@ void MainWindow::showAboutDialog()
 
 void MainWindow::openFile(const QString &path)
 {
+    if (changedButNotSaved) {
+
+        if (QMessageBox::question(this,"SubnetMap not saved!","this map has been altered, but not saved. Do you want to save it now before opening another map?",QMessageBox::Ok,QMessageBox::Cancel)==QMessageBox::Ok)
+        {
+            saveFile();
+        }
+    }
+
     QString fileName;
     if (path.isNull())
         fileName = QFileDialog::getOpenFileName(this, tr("Choose a data file"),
@@ -341,6 +359,8 @@ void MainWindow::openFile(const QString &path)
 
             if (result) {
                 statusBar()->showMessage(tr("Loaded %1").arg(fileName), 5000);
+                changedButNotSaved=false;
+                resetTitle();
             } else statusBar()->showMessage(tr("Failed to parse SubnetMap %1").arg(fileName),5000);
         } else {
 
@@ -369,6 +389,8 @@ void MainWindow::saveFile()
 
         file.close();
         statusBar()->showMessage(tr("Saved %1").arg(fileName), 5000);
+        resetTitle();
+        changedButNotSaved=false;
     }
 }
 
@@ -428,6 +450,7 @@ void MainWindow::addIPv4Subnet()
         }
 
         if (isNotOverlappingWithAnything) {
+            mapWasAltered();
             map->repaint();
         };
 
@@ -458,6 +481,7 @@ void MainWindow::addIPv6Subnet()
 
         ((SM_DataModel*)model)->addSubnet(newSubnet);
 
+        mapWasAltered();
         map->repaint();
 
     }
@@ -486,7 +510,10 @@ void MainWindow::searchFieldCleared()
 void MainWindow::deleteCurrentSubnet()
 {
     infoDock->setSubnet(0);
-    if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) model->removeRows(selectionModel->currentIndex().row(),1);
+    if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) {
+        model->removeRows(selectionModel->currentIndex().row(),1);
+        mapWasAltered();
+    };
 }
 
 void MainWindow::editCurrentSubnet()
@@ -526,4 +553,15 @@ void MainWindow::killAutoResize()
     QSettings settings;
     settings.setValue("mainwindow/autoresize",0);
     autoResizeOption->setChecked(false);
+}
+
+void MainWindow::mapWasAltered()
+{
+    setWindowTitle(this->windowTitle()+" (*)");
+    changedButNotSaved=true;
+}
+
+void MainWindow::resetTitle()
+{
+    setWindowTitle(tr("SubnetMapper V")+qApp->applicationVersion());
 }

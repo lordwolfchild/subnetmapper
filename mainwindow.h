@@ -45,7 +45,12 @@ private slots:
     void autoResizeClicked();
     void killAutoResize();
 
+public slots:
+
+    void mapWasAltered();
+
 private:
+    void resetTitle();
     void setupModel();
     void setupViews();
 
@@ -56,6 +61,8 @@ private:
     QLineEdit *searchField;
     SM_InfoDockWidget *infoDock;
     QCheckBox *autoResizeOption;
+
+    bool changedButNotSaved;
 
 };
 
