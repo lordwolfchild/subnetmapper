@@ -160,6 +160,8 @@ MainWindow::~MainWindow()
 {
   QSettings settings;
 
+  infoDock->setSubnet(0);
+
   settings.setValue("mainwindow/width",window()->width());
   settings.setValue("mainwindow/height",window()->height());
 }
