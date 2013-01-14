@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <QApplication>
 #include <QSize>
+#include <QList>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -41,11 +42,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QMenu *editMenu = new QMenu(tr("&Edit"), this);
     QMenu *viewMenu = new QMenu(tr("&View"), this);
     QMenu *helpMenu = new QMenu(tr("&Help"), this);
+    recentDocsMenu = new QMenu(tr("&Recent Documents"), this);
 
     // Open File
     QAction *openAction = fileMenu->addAction(tr("&Open..."));
     openAction->setShortcuts(QKeySequence::Open);
     openAction->setIcon(QIcon(":/open.svg"));
+
+    fileMenu->addMenu(recentDocsMenu);
 
     // Save File
     QAction *saveAction = fileMenu->addAction(tr("&Save As..."));
@@ -163,7 +167,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
-
+    parseRecentDocuments();
 
 }
 
@@ -207,8 +211,11 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::setupModel()
 {
+    QSettings settings;
     model = new SM_DataModel(this);
     //((SM_DataModel*)model)->addDemos();
+
+    if (!(settings.value("mainwindow/autoload_map","").toString()=="")) openFile(settings.value("mainwindow/autoload_map","").toString());
 }
 
 void MainWindow::setupViews()
@@ -302,6 +309,54 @@ void MainWindow::setupViews()
 
 }
 
+void MainWindow::addRecentDocument(QString filename)
+{
+    QSettings settings;
+
+    int max_docs=settings.value("mainwindow/number_of_recent_docs",5).toInt();
+
+    recentDocs.append(filename);
+
+    while (recentDocs.count()>max_docs)
+        recentDocs.removeLast();
+
+    for (int i=0;i<recentDocs.count();i++)
+    {
+        settings.setValue("mainwindow/recent_doc_"+QString::number(i),recentDocs.at(i));
+    }
+
+    generateRecentDocsMenu();
+}
+
+void MainWindow::parseRecentDocuments()
+{
+    QSettings settings;
+
+    int max_docs=settings.value("mainwindow/number_of_recent_docs",5).toInt();
+
+    recentDocs.clear();
+
+    for (int i=0;i<max_docs;i++)
+    {
+        recentDocs.append(settings.value("mainwindow/recent_doc_"+QString::number(i),"").toString());
+    }
+
+    generateRecentDocsMenu();
+}
+
+void MainWindow::generateRecentDocsMenu()
+{
+    recentDocsMenu->clear();
+
+    for (int i=0;i<recentDocs.count();i++) {
+        if (!recentDocs.at(i).isEmpty()) {
+            QAction *momAction = recentDocsMenu->addAction(QIcon(),recentDocs.at(i).split('/').last(),this,SLOT(recentDocsMenuTrigger()));
+            momAction->setData(recentDocs.at(i));
+        };
+    }
+
+}
+
 void MainWindow::showAboutDialog()
 {
     SM_AboutDialog aboutDialog(this);
@@ -361,6 +416,7 @@ void MainWindow::openFile(const QString &path)
                 statusBar()->showMessage(tr("Loaded %1").arg(fileName), 5000);
                 changedButNotSaved=false;
                 resetTitle();
+                addRecentDocument(fileName);
             } else statusBar()->showMessage(tr("Failed to parse SubnetMap %1").arg(fileName),5000);
         } else {
 
@@ -553,6 +609,11 @@ void MainWindow::killAutoResize()
     QSettings settings;
     settings.setValue("mainwindow/autoresize",0);
     autoResizeOption->setChecked(false);
+}
+
+void MainWindow::recentDocsMenuTrigger()
+{
+    openFile(((QAction*)sender())->data().toString());
 }
 
 void MainWindow::mapWasAltered()

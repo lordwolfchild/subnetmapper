@@ -9,6 +9,8 @@
 #include "sm_datamodel.h"
 #include "sm_infodockwidget.h"
 #include <QCheckBox>
+#include <QList>
+#include <QMenu>
 
 class MainWindow : public QMainWindow
 {
@@ -45,6 +47,9 @@ private slots:
     void autoResizeClicked();
     void killAutoResize();
 
+    void recentDocsMenuTrigger();
+
+
 public slots:
 
     void mapWasAltered();
@@ -54,6 +59,11 @@ private:
     void setupModel();
     void setupViews();
 
+    void addRecentDocument(QString filename);
+    void parseRecentDocuments();
+    void generateRecentDocsMenu();
+
+    QList<QString> recentDocs;
     SM_DataModel *model;
     SM_SubnetWidget *map;
     QItemSelectionModel *selectionModel;
@@ -61,6 +71,7 @@ private:
     QLineEdit *searchField;
     SM_InfoDockWidget *infoDock;
     QCheckBox *autoResizeOption;
+    QMenu *recentDocsMenu;
 
     bool changedButNotSaved;
 
