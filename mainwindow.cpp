@@ -196,7 +196,7 @@ void MainWindow::setupViews()
     splitter->setOrientation(Qt::Vertical);
     table = new QTableView;
     QScrollArea *scroller = new QScrollArea;
-    map = new SM_SubnetWidget(this);
+    map = new SM_SubnetWidget(scroller);
     infoDock = new SM_InfoDockWidget(0,this);
     infoDock->setAllowedAreas(Qt::RightDockWidgetArea);
     addDockWidget(Qt::RightDockWidgetArea, infoDock);
@@ -245,6 +245,8 @@ void MainWindow::setupViews()
     connect(buttonYplus,SIGNAL(clicked()),map,SLOT(line_heightPlus()));
     connect(buttonYminus,SIGNAL(clicked()),map,SLOT(line_heightMinus()));
     connect(buttonUpscale,SIGNAL(clicked()),map,SLOT(upscale()));
+
+    connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),infoDock,SLOT(updateSubnet()));
 
     // bind our model to the views. Be advised that SM_subnetwidget is  not a Model/View aware class, but
     // only emulates this behaviour in necessary boundaries to retrieve its data from the model and the selection.

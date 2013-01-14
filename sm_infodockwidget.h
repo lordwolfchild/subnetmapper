@@ -17,11 +17,11 @@ public:
     ~SM_InfoDockWidget();
 
     void setSubnet(Subnet *sn);
-    void updateSubnet();
 
 public slots:
 
     void notesEdited();
+    void updateSubnet();
 
 
 private:

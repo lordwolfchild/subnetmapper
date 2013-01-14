@@ -532,7 +532,7 @@ void SM_SubnetWidget::line_heightMinus()
 
 void SM_SubnetWidget::upscale()
 {
-    x_width=window()->width()/3*2;
+    x_width=parentWidget()->width()/3*2;
     line_height=x_width/30;
     repaint();
 }
