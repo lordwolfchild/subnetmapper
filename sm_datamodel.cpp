@@ -551,7 +551,7 @@ void SM_DataModel::dumpAllSubnets()
     qDebug("---vv START vv----------------------------------------------------> dumpAllSubnets() <---");
     for (int i=0;i<SubnetList.count();i++) qDebug("%s",qPrintable(SubnetList.at(i)->toString()));
     qDebug("---^^  END  ^^----------------------------------------------------> dumpAllSubnets() <---");
-};
+}
 
 void SM_DataModel::reset()
 {

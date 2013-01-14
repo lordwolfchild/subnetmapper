@@ -469,6 +469,7 @@ void MainWindow::searchFieldCleared()
 
 void MainWindow::deleteCurrentSubnet()
 {
+    infoDock->setSubnet(0);
     if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) model->removeRows(selectionModel->currentIndex().row(),1);
 }
 
