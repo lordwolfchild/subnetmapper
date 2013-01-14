@@ -100,6 +100,9 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     // stores a list of coordinates for placement of the host pins, if a search is available
     QList<QPoint*> pinList;
 
+    // stores a list of coordinates for placement of the notes icon, if notes are featured in a subnet
+    QList<QPoint*> notesList;
+
     // Iterate the Model and store the data we need to prepare our little drawing.
     for (int i=0;i<model->rowCount();i++) {
         if (model->data(model->index(i,1),Qt::UserRole)=="IPv4") {
@@ -280,6 +283,22 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
                 pinList.append(pinPoint);
               }
             }
+
+            if ((momNet->getNotes()!="n/a")&(momNet->getNotes()!="")) {
+                quint32 notesPos=end_position;
+                QPoint *notesPoint= new QPoint();
+                if (notesPos<128) {
+                  // upper row
+                  notesPoint->setX(general_margin+x_offset+(((float)x_width/128)*notesPos));
+                  notesPoint->setY(y_block1_offset+(line_height*(line+1)));
+                } else {
+                  // lower row
+                  notesPoint->setX(general_margin+x_offset+(((float)x_width/128)*(notesPos-128)));
+                  notesPoint->setY(y_block2_offset+(line_height*(line+1)));
+                };
+                notesList.append(notesPoint);
+
+            }
         }
     }
 
@@ -343,11 +362,31 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
       momRenderer.render(painter, momRect);
     }
 
+    // 5 Draw Notes Marker
+    // the SVG Renderer we use for drawing our info-sign
+    QSvgRenderer notesRenderer(tr(":info.svg"));
+
+    // iterate the found host coordinates cache
+    for (int i=0;i<notesList.count();i++) {
+      // 1.3 is the aspect ratio of the pin graphic... Hey, stop staring. constant values guarantee quick calcs. ;) The rest are the offsets for the
+      // needle tip position.
+      QRectF momRect(notesList.at(i)->x()-(line_height/2.5),notesList.at(i)->y(),line_height,line_height);
+
+      // now draw it into the constructed rectangle
+      notesRenderer.render(painter, momRect);
+    }
+
     // clear the pinList cache and delete it's contents (Ok, the other way around, so we do not loose the references to our cached objects)
     for (int i=0;i<pinList.count();i++) {
       delete pinList.at(i);
     };
     pinList.clear();
+
+    // clear the pinList cache and delete it's contents (Ok, the other way around, so we do not loose the references to our cached objects)
+    for (int i=0;i<notesList.count();i++) {
+      delete notesList.at(i);
+    };
+    notesList.clear();
 
 }
 

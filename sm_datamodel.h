@@ -30,7 +30,6 @@ public:
     bool insertRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
 
-    void addDemos();
     void addSubnet(Subnet *subnet);
 
     void reset();

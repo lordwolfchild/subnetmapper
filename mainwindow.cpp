@@ -213,8 +213,11 @@ void MainWindow::setupModel()
 {
     QSettings settings;
     model = new SM_DataModel(this);
-    //((SM_DataModel*)model)->addDemos();
 
+    // check if there was a filename specified at the command line. If yes, load it.
+    // otherwise check for autoload_map feature and use this.
+    // this only works because of the &&, which skips the second part of the check if the first one failed already... Otherwise
+    // this would force a SIGABRT because of an Array index failure.
     if (((qApp->arguments().count())>1)&&(!(qApp->arguments().at(1).isEmpty())))
     {
         openFile(qApp->arguments().at(1));
