@@ -69,22 +69,6 @@ bool SM_SubnetWidget::searchHosts(QString name)
 
 }
 
-void SM_SubnetWidget::renderprt(QPainter *painter, int width, int height)
-{
-
-    int orig_x_width=x_width;
-    int orig_line_height=line_height;
-
-    x_width=width;
-    line_height=x_width/30;
-
-    render(painter);
-
-    x_width=orig_x_width;
-    line_height=orig_line_height;
-
-}
-
 void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
 {
     painter->fillRect(paintArea,Qt::white);

@@ -18,11 +18,11 @@ public:
 
     void setSubnet(Subnet *sn);
 
+
 public slots:
 
     void notesEdited();
     void updateSubnet();
-
 
 private:
     Ui::SM_InfoDockWidget *ui;

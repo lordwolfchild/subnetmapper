@@ -2,6 +2,7 @@
 #include "ui_sm_infodockwidget.h"
 #include "subnet_v4.h"
 #include "subnet_v6.h"
+#include "mainwindow.h"
 
 SM_InfoDockWidget::SM_InfoDockWidget(Subnet *sn, QWidget *parent) :
     QDockWidget(parent),
@@ -11,6 +12,7 @@ SM_InfoDockWidget::SM_InfoDockWidget(Subnet *sn, QWidget *parent) :
     referencedSubnet=sn;
 
     connect(ui->sn_notes,SIGNAL(textChanged()),this,SLOT(notesEdited()));
+    connect(ui->editButton,SIGNAL(clicked()),(MainWindow*)parentWidget(),SLOT(editCurrentSubnet()));
 }
 
 SM_InfoDockWidget::~SM_InfoDockWidget()
@@ -38,6 +40,7 @@ void SM_InfoDockWidget::updateSubnet()
         ui->sn_size->setText("n/a");
         ui->sn_wc->setText("n/a");
         ui->sn_ipver->setText("X");
+        ui->sn_color->setStyleSheet("");
 
         ui->sn_notes->setReadOnly(true);
 
@@ -65,6 +68,9 @@ void SM_InfoDockWidget::updateSubnet()
         ui->sn_size->setText(QString::number(momnet->getSize()));
         ui->sn_wc->setText(momnet->IP2String(wildcard));
         ui->sn_ipver->setText("4");
+        ui->sn_color->setStyleSheet("QLabel { background:"
+                                    + momnet->getColor().name()
+                                    + "; } ");
 
         ui->sn_notes->setReadOnly(false);
 
@@ -89,6 +95,9 @@ void SM_InfoDockWidget::updateSubnet()
         ui->sn_size->setText(QString::number(wildcard.second));
         ui->sn_wc->setText(momnet->reduceIP(momnet->IP2String(wildcard)));
         ui->sn_ipver->setText("6");
+        ui->sn_color->setStyleSheet("QLabel { background:"
+                                    + momnet->getColor().name()
+                                    + "; } ");
 
         ui->sn_notes->setReadOnly(false);
 

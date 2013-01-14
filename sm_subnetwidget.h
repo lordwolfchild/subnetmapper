@@ -19,8 +19,6 @@ public:
 
     bool searchHosts( QString name );
 
-    void renderprt(QPainter *painter,int width,int height);
-
     void paintJob(QPainter *painter, QRect paintArea);
 
 protected:
