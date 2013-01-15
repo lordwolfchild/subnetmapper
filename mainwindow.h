@@ -41,6 +41,7 @@ private slots:
     void deleteCurrentSubnet();
     void editCurrentSubnet();
     void showInfoPane();
+    void showConfigDialog();
 
     void selectionChanged();
 

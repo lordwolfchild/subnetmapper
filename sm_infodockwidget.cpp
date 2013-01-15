@@ -106,7 +106,7 @@ void SM_InfoDockWidget::updateSubnet()
 
 void SM_InfoDockWidget::notesEdited()
 {
-    QString notes = ui->sn_notes->toHtml();
+    QString notes = ui->sn_notes->toPlainText();
     if (referencedSubnet) referencedSubnet->setNotes(notes);
 }
 

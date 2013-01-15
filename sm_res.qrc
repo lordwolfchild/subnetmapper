@@ -11,5 +11,6 @@
         <file alias="edit.svg">images/edit.svg</file>
         <file alias="info.svg">images/info.svg</file>
         <file alias="delete.svg">images/delete.svg</file>
+        <file alias="config.svg">images/config.svg</file>
     </qresource>
 </RCC>

@@ -30,6 +30,7 @@
 #include <QApplication>
 #include <QSize>
 #include <QList>
+#include "sm_configdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -60,6 +61,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QAction *printAction = fileMenu->addAction(tr("&Print..."));
     printAction->setShortcut(QKeySequence(tr("Ctrl+P")));
     printAction->setIcon(QIcon(":/printer.svg"));
+
+    // config Action
+    QAction *configAction = fileMenu->addAction(tr("Configure..."));
+    configAction->setShortcut((QKeySequence(tr("Ctrl+Shift+C"))));
+    configAction->setIcon(QIcon(":/config.svg"));
 
     // Quit Program
     QAction *quitAction = fileMenu->addAction(tr("E&xit"));
@@ -116,6 +122,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(editAction, SIGNAL(triggered()),this,SLOT(editCurrentSubnet()));
     connect(deleteAction,SIGNAL(triggered()),this,SLOT(deleteCurrentSubnet()));
     connect(showInfoAction,SIGNAL(triggered()),this,SLOT(showInfoPane()));
+    connect(configAction, SIGNAL(triggered()),this,SLOT(showConfigDialog()));
 
     this->menuBar()->addMenu(fileMenu);
     this->menuBar()->addMenu(editMenu);
@@ -136,6 +143,7 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbar->addAction(deleteAction);
     toolbar->addAction(showInfoAction);
     toolbar->insertSeparator(showInfoAction);
+    toolbar->addAction(configAction);
     toolbar->addAction(aboutAction);
     toolbar->addAction(quitAction);
 
@@ -222,7 +230,7 @@ void MainWindow::setupModel()
     {
         openFile(qApp->arguments().at(1));
     }
-    else if (!(settings.value("mainwindow/autoload_map","").toString()=="")) openFile(settings.value("mainwindow/autoload_map","").toString());
+    else if (settings.value("mainwindow/autoload_map",0)!=0) openFile(settings.value("mainwindow/autoload_map_path","").toString());
 }
 
 void MainWindow::setupViews()
@@ -604,6 +612,16 @@ void MainWindow::showInfoPane()
     if (infoDock->isVisible()) settings.setValue("mainwindow/infoPaneState",1);
     else settings.setValue("mainwindow/infoPaneState",0);
     qDebug("infoPaneState: %u",settings.value("mainwindow/infoPaneState",1).toUInt());
+}
+
+void MainWindow::showConfigDialog()
+{
+    SM_ConfigDialog configDialog(this);
+
+    if (configDialog.exec()==QDialog::Accepted) {
+        parseRecentDocuments();
+        generateRecentDocsMenu();
+    }
 }
 
 void MainWindow::selectionChanged()

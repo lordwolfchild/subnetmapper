@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     ipv6validator.cpp \
     sm_subnetwidget.cpp \
     sm_aboutdialog.cpp \
-    sm_infodockwidget.cpp
+    sm_infodockwidget.cpp \
+    sm_configdialog.cpp
 
 HEADERS  += mainwindow.h \
     subnet.h \
@@ -32,13 +33,15 @@ HEADERS  += mainwindow.h \
     ipv6validator.h \
     sm_subnetwidget.h \
     sm_aboutdialog.h \
-    sm_infodockwidget.h
+    sm_infodockwidget.h \
+    sm_configdialog.h
 
 FORMS    += \
     sm_ipv4editdialog.ui \
     sm_ipv6editdialog.ui \
     sm_aboutdialog.ui \
-    sm_infodockwidget.ui
+    sm_infodockwidget.ui \
+    sm_configdialog.ui
 
 RESOURCES += \
     sm_res.qrc

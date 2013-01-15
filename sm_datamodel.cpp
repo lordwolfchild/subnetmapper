@@ -508,7 +508,10 @@ void SM_DataModel::dumpAllSubnets()
 
 void SM_DataModel::reset()
 {
-    emit(dataChanged(QModelIndex(),QModelIndex()));
+    // I really cannot remember why I added the line below. It does not make any sense and in the end
+    // it causes a certain SIGV when clearing the whole model for the loading of another file.
+    // so I comment it out in the good hope that it will not break anything...
+    //emit(dataChanged(QModelIndex(),QModelIndex()));
     QAbstractTableModel::reset();
 };
 
