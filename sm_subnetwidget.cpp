@@ -287,7 +287,7 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
             if ((momNet->getNotes()!="n/a")&(momNet->getNotes()!="")) {
                 quint32 notesPos=end_position+1;
                 QPoint *notesPoint= new QPoint();
-                if (notesPos<128) {
+                if (notesPos<=128) {
                   // upper row
                   notesPoint->setX((general_margin+x_offset+(((float)x_width/128)*notesPos))-line_height);
                   notesPoint->setY(y_block1_offset+(line_height*(line+1)));
