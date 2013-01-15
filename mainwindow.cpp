@@ -459,12 +459,12 @@ void MainWindow::saveFile()
 
 void MainWindow::printFile()
 {
+    // Quick and dirty hack to get it working. No real features here, but the result is ok...
+
     QPrinter printer;
     QPrintDialog *dialog = new QPrintDialog(&printer, this);
     dialog->setWindowTitle(tr("Print Document"));
     if (dialog->exec() != QDialog::Accepted) return;
-
-    // PAGINATION TODO!!!! Until now the map will only be scaled to fit a page.
 
     QPainter painter;
     painter.begin(&printer);
@@ -540,9 +540,22 @@ void MainWindow::addIPv6Subnet()
         newSubnet->setDescription(momdesc);
         newSubnet->setIdentifier(momid);
 
-        // TODO: check if subnet overlaps something we already have in this map
+        bool isNotOverlappingWithAnything=true;
 
-        ((SM_DataModel*)model)->addSubnet(newSubnet);
+        for (int i=0;i<((SM_DataModel*)model)->rowCount();i++) {
+            if (((SM_DataModel*)model)->getSubnet(i)->isV6())
+                if (((Subnet_v6*)(((SM_DataModel*)model)->getSubnet(i)))->overlapsWith(*((Subnet_v6*)newSubnet)))
+                    isNotOverlappingWithAnything=false;
+        }
+
+        if (isNotOverlappingWithAnything) ((SM_DataModel*)model)->addSubnet(newSubnet);
+        else {
+            QMessageBox msgBox;
+            msgBox.setText("The Subnet you specified overlaps with an existing subnet.");
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setDetailedText("The overlapping of subnets in a single map is not allowed in SubnetMapper. The author of this program cannot think of a situation in the real world where this could be an advisable situation. If you find yourself in a mess like this, please think it over, stuff like that always catches up with you at a later point in time, when you are actually least expecting it.");
+            msgBox.exec();
+        }
 
         mapWasAltered();
         map->repaint();

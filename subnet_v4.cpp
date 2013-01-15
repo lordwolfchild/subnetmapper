@@ -135,7 +135,6 @@ quint32& Subnet_v4::getIP()
 }
 
 
-// TODO
 quint32 Subnet_v4::getLastUsableIP()
 {
     if (getCIDR()<31)
@@ -144,7 +143,6 @@ quint32 Subnet_v4::getLastUsableIP()
         return getBroadcast();
 }
 
-// TODO
 quint32 Subnet_v4::getFirstUsableIP()
 {
     if (getCIDR()<31)
@@ -153,19 +151,16 @@ quint32 Subnet_v4::getFirstUsableIP()
         return getIP();
 }
 
-// TODO
 quint32 Subnet_v4::getWildcard()
 {
     return ~(*_netmask);
 }
 
-// TODO
 quint32 Subnet_v4::getBroadcast()
 {
     return (getIP()|getWildcard());
 }
 
-// TODO
 quint32 Subnet_v4::getSize()
 {
     quint32 nm = getNM();
@@ -174,7 +169,6 @@ quint32 Subnet_v4::getSize()
     return wc;
 }
 
-// TODO
 quint32 Subnet_v4::getCIDR()
 {
     unsigned char cidr=32;
@@ -319,7 +313,6 @@ QString Subnet_v4::toString()
     return outp;
 }
 
-// TODO
 bool Subnet_v4::containsHost(quint32 &host)
 {
     normalize();

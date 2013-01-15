@@ -285,15 +285,15 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
             }
 
             if ((momNet->getNotes()!="n/a")&(momNet->getNotes()!="")) {
-                quint32 notesPos=end_position;
+                quint32 notesPos=end_position+1;
                 QPoint *notesPoint= new QPoint();
                 if (notesPos<128) {
                   // upper row
-                  notesPoint->setX(general_margin+x_offset+(((float)x_width/128)*notesPos));
+                  notesPoint->setX((general_margin+x_offset+(((float)x_width/128)*notesPos))-line_height);
                   notesPoint->setY(y_block1_offset+(line_height*(line+1)));
                 } else {
                   // lower row
-                  notesPoint->setX(general_margin+x_offset+(((float)x_width/128)*(notesPos-128)));
+                  notesPoint->setX((general_margin+x_offset+(((float)x_width/128)*(notesPos-128)))-line_height);
                   notesPoint->setY(y_block2_offset+(line_height*(line+1)));
                 };
                 notesList.append(notesPoint);
@@ -348,7 +348,19 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     }
 
 
-    // 4 Draw Search Pins
+    // 4 Draw Notes Marker
+    // the SVG Renderer we use for drawing our info-sign
+    QSvgRenderer notesRenderer(tr(":info.svg"));
+
+    // iterate the found host coordinates cache
+    for (int i=0;i<notesList.count();i++) {
+      QRectF momRect(notesList.at(i)->x(),notesList.at(i)->y(),line_height,line_height);
+
+      // now draw it into the constructed rectangle
+      notesRenderer.render(painter, momRect);
+    }
+
+    // 5 Draw Search Pins
     // the SVG Renderer we use for drawing our host-pin
     QSvgRenderer momRenderer(tr(":pin.svg"));
 
@@ -360,20 +372,6 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
 
       // now draw it into the constructed rectangle
       momRenderer.render(painter, momRect);
-    }
-
-    // 5 Draw Notes Marker
-    // the SVG Renderer we use for drawing our info-sign
-    QSvgRenderer notesRenderer(tr(":info.svg"));
-
-    // iterate the found host coordinates cache
-    for (int i=0;i<notesList.count();i++) {
-      // 1.3 is the aspect ratio of the pin graphic... Hey, stop staring. constant values guarantee quick calcs. ;) The rest are the offsets for the
-      // needle tip position.
-      QRectF momRect(notesList.at(i)->x()-(line_height/2.5),notesList.at(i)->y(),line_height,line_height);
-
-      // now draw it into the constructed rectangle
-      notesRenderer.render(painter, momRect);
     }
 
     // clear the pinList cache and delete it's contents (Ok, the other way around, so we do not loose the references to our cached objects)

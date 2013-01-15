@@ -7,11 +7,6 @@
 
 /*
 
- TODO: Implement this. At the time, this class is just a copy of the IPv4 Subnet Class.
- I do not even think, that this is a very good idea to inherit Subnet like this. Maybe
- a restructurization would be in order? Maybe when issuing a model which uses polymorphic
- methods for storing and/or accessing its data...
-
  Technically the implementation of IPv6 calculations is very similar to IPv4. The
  arithmetics are the same, just the address space has quadrupled to a 128bit string.
 

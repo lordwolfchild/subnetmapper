@@ -596,7 +596,7 @@ QString Subnet_v6::toString()
 
 bool   Subnet_v6::containsHost(QPair<quint64,quint64> &host)
 {
-    // make sure the network is noralized, otherwise this function will not give correct answers.
+    // make sure the network is normalized, otherwise this function will not give correct answers.
     normalize();
 
     QPair<quint64,quint64> momip = getIP();
