@@ -287,17 +287,19 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
             if ((momNet->getNotes()!="n/a")&(!(momNet->getNotes().isEmpty()))) {
                 quint32 notesPos=end_position+1;
                 QPoint *notesPoint= new QPoint();
-                if (notesPos<=128) {
+                if ((notesPos-1)<128) {
                   // upper row
                   notesPoint->setX((general_margin+x_offset+(((float)x_width/128)*notesPos))-line_height);
                   notesPoint->setY(y_block1_offset+(line_height*(line+1)));
                   notesList.append(notesPoint);
                 } else {
                   // lower row
-                  notesPoint->setX((general_margin+x_offset+(((float)x_width/128)*(notesPos-128)))-line_height);
-                  notesPoint->setY(y_block1_offset+(line_height*(line+1)));
-                  notesList.append(notesPoint);
-                  notesPoint = new QPoint();
+                    if (size>127) {
+                        notesPoint->setX((general_margin+x_offset+(((float)x_width/128)*(notesPos-128)))-line_height);
+                        notesPoint->setY(y_block1_offset+(line_height*(line+1)));
+                        notesList.append(notesPoint);
+                        notesPoint = new QPoint();
+                    }
                   notesPoint->setX((general_margin+x_offset+(((float)x_width/128)*(notesPos-128)))-line_height);
                   notesPoint->setY(y_block2_offset+(line_height*(line+1)));
                   notesList.append(notesPoint);
