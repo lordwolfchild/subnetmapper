@@ -45,3 +45,5 @@ FORMS    += \
 
 RESOURCES += \
     sm_res.qrc
+
+REV = $$system(hg id -n)

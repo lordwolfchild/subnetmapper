@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
    a.setOrganizationName("wolfchild.de");
    a.setOrganizationDomain("wolfchild.de");
    a.setApplicationName("SubnetMapper");
-   a.setApplicationVersion("2.0.86");
+   a.setApplicationVersion("2.0.87");
 
    MainWindow w;
    w.show();
