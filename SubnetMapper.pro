@@ -34,7 +34,8 @@ HEADERS  += mainwindow.h \
     sm_subnetwidget.h \
     sm_aboutdialog.h \
     sm_infodockwidget.h \
-    sm_configdialog.h
+    sm_configdialog.h \
+    generated_version.h
 
 FORMS    += \
     sm_ipv4editdialog.ui \

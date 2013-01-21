@@ -6,6 +6,7 @@
 #include <iostream>
 #include <QtGlobal>
 #include <QSysInfo>
+#include "generated_version.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,7 +15,7 @@ int main(int argc, char *argv[])
    a.setOrganizationName("wolfchild.de");
    a.setOrganizationDomain("wolfchild.de");
    a.setApplicationName("SubnetMapper");
-   a.setApplicationVersion("2.0.86");
+   a.setApplicationVersion("2.0."+QString::number(COMMIT_NO));
 
    MainWindow w;
    w.show();
