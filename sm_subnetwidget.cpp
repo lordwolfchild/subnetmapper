@@ -546,6 +546,57 @@ void SM_SubnetWidget::editCurrentSubnet()
 
             } else {
                 //edit IPv6
+                SM_IPv6EditDialog editor(this);
+                Subnet_v6 *momsubnet_v6 = (Subnet_v6*)momsubnet;
+                QColor momColor=momsubnet->getColor();
+
+                QPair<quint64,quint64> ip = momsubnet_v6->getIP();
+                QPair<quint64,quint64> nm = momsubnet_v6->getNM();
+
+                editor.setDescription(momsubnet_v6->getDescription());
+                editor.setIdentifier(momsubnet_v6->getIdentifier());
+                editor.setIP(Subnet_v6::IP2String(ip));
+                editor.setNM(Subnet_v6::IP2String(nm));
+                editor.setColor(momColor);
+
+                editor.setModal(true);
+                if (editor.exec()==QDialog::Accepted) {
+
+                    QString momdesc = editor.getDescription();
+                    QString momid = editor.getIdentifier();
+                    QColor momcolor = editor.getColor();
+                    QString momIP = editor.getIP();
+                    QString momNM = editor.getNM();
+
+                    bool isNotOverlappingWithAnything=true;
+
+                    for (int i=0;i<((SM_DataModel*)model)->rowCount();i++) {
+                        if (((SM_DataModel*)model)->getSubnet(i)->isV6())
+                            if (((Subnet_v6*)(((SM_DataModel*)model)->getSubnet(i)))->overlapsWith(*(momsubnet_v6)))
+                                isNotOverlappingWithAnything=false;
+                    }
+
+                    if (isNotOverlappingWithAnything) {
+                        momsubnet_v6->setIP(momIP);
+                        momsubnet_v6->setNM(momNM);
+                        momsubnet_v6->setDescription(momdesc);
+                        momsubnet_v6->setIdentifier(momid);
+                        momsubnet_v6->setColor(momcolor);
+                        model->reset();
+                        ((MainWindow*)window())->mapWasAltered();
+                    } else {
+                        QMessageBox msgBox;
+                        msgBox.setText("The Subnet you specified overlaps with an existing subnet.");
+                        msgBox.setIcon(QMessageBox::Critical);
+                        msgBox.setDetailedText("The overlapping of subnets in a single map is not allowed in SubnetMapper. The author of this program cannot think of a situation in the real world where this could be an advisable situation. If you find yourself in a mess like this, please think it over, stuff like that always catches up with you at a later point in time, when you are actually least expecting it.");
+                        msgBox.exec();
+                    }
+
+                    if (isNotOverlappingWithAnything) {
+                        repaint();
+                    };
+                }
+
             }
         }
 

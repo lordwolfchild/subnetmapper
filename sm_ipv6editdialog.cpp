@@ -1,6 +1,7 @@
 #include "sm_ipv6editdialog.h"
 #include "ui_sm_ipv6editdialog.h"
 #include "ipv6validator.h"
+#include <QColorDialog>
 
 SM_IPv6EditDialog::SM_IPv6EditDialog(QWidget *parent) :
     QDialog(parent),
@@ -29,6 +30,16 @@ QString SM_IPv6EditDialog::getNM()
     return ui->netmask->text();
 }
 
+void SM_IPv6EditDialog::setIP(QString ip)
+{
+    ui->address->setText(ip);
+}
+
+void SM_IPv6EditDialog::setNM(QString nm)
+{
+    ui->netmask->setText(nm);
+}
+
 QString SM_IPv6EditDialog::getDescription()
 {
     return ui->description->text();
@@ -47,6 +58,17 @@ void SM_IPv6EditDialog::setDescription(QString description)
 void SM_IPv6EditDialog::setIdentifier(QString identifier)
 {
     ui->identifier->setText(identifier);
+}
+
+QColor SM_IPv6EditDialog::getColor()
+{
+    return selectedColor;
+}
+
+void SM_IPv6EditDialog::setColor(QColor &color)
+{
+    selectedColor=color;
+    ui->colorBox->setStyleSheet("QFrame { background-color: "+selectedColor.name()+" }");
 }
 
 void SM_IPv6EditDialog::updateFields()
@@ -92,6 +114,13 @@ void SM_IPv6EditDialog::updateCIDR()
     ui->firstUsableAddress->setText(helperSubnet->reduceIP(helperSubnet->IP2String(momfip)));
     ui->lastUsableAddress->setText(helperSubnet->reduceIP(helperSubnet->IP2String(momlip)));
 
+}
 
-
+void SM_IPv6EditDialog::colorClicked()
+{
+    QColorDialog colorDialog(selectedColor);
+    if (colorDialog.exec()) {
+        selectedColor=colorDialog.selectedColor();
+        ui->colorBox->setStyleSheet("QFrame { background-color: "+selectedColor.name()+" }");
+    }
 }

@@ -20,14 +20,21 @@ public:
     QString getIP();
     QString getNM();
 
+    void setIP(QString ip);
+    void setNM(QString nm);
+
     QString getDescription();
     QString getIdentifier();
     void setDescription(QString description);
     void setIdentifier(QString identifier);
 
+    QColor getColor();
+    void setColor(QColor &color);
+
 protected slots:
     void updateFields();
     void updateCIDR();
+    void colorClicked();
 
 protected:
     Subnet_v6* helperSubnet;
@@ -35,6 +42,7 @@ protected:
 
 private:
     Ui::SM_IPv6EditDialog *ui;
+    QColor selectedColor;
 };
 
 #endif // SM_IPV6EDITDIALOG_H

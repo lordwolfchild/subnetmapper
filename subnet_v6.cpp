@@ -657,6 +657,8 @@ bool Subnet_v6::overlapsWith(Subnet_v6 &other_subnet)
     QPair<quint64,quint64> myIP  = this->getIP();
     QPair<quint64,quint64> hisIP = other_subnet.getIP();
 
+    // if this is the subnet that is checked, return false. We do not overlap ourselves. (sic!)
+    if (((void*)this)==((void*)&other_subnet)) return false;
 
     if (containsHost(hisIP)) return true;
     if (other_subnet.containsHost(myIP)) return true;

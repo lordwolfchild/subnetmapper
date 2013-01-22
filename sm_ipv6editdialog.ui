@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>465</width>
-    <height>383</height>
+    <height>418</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -606,14 +606,66 @@
       </layout>
      </item>
      <item>
-      <widget class="QDialogButtonBox" name="buttonBox">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QFrame" name="colorBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>40</horstretch>
+           <verstretch>40</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>40</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton">
+         <property name="text">
+          <string>choose Color</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QDialogButtonBox" name="buttonBox">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="standardButtons">
+          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -628,8 +680,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>228</x>
-     <y>420</y>
+     <x>458</x>
+     <y>404</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -644,8 +696,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>296</x>
-     <y>426</y>
+     <x>458</x>
+     <y>404</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -692,12 +744,28 @@
    <slot>updateCIDR()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>549</x>
-     <y>153</y>
+     <x>448</x>
+     <y>163</y>
     </hint>
     <hint type="destinationlabel">
-     <x>599</x>
+     <x>464</x>
      <y>143</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>SM_IPv6EditDialog</receiver>
+   <slot>colorClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>114</x>
+     <y>392</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>418</y>
     </hint>
    </hints>
   </connection>
@@ -705,5 +773,6 @@
  <slots>
   <slot>updateFields()</slot>
   <slot>updateCIDR()</slot>
+  <slot>colorClicked()</slot>
  </slots>
 </ui>
