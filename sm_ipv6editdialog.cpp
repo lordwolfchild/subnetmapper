@@ -82,6 +82,8 @@ void SM_IPv6EditDialog::updateFields()
     ui->CIDRSuffix->setValue(helperSubnet->getCIDR());
 
     QPair<quint64,quint64> momwc=helperSubnet->getWildcard();
+    QPair<quint64,quint64> momipnum=helperSubnet->getIP();
+    QPair<quint64,quint64> momnmnum=helperSubnet->getNM();
     QPair<quint64,quint64> mombc=helperSubnet->getBroadcast();
     QPair<quint64,quint64> momlip=helperSubnet->getLastUsableIP();
     QPair<quint64,quint64> momfip=helperSubnet->getFirstUsableIP();
@@ -91,6 +93,10 @@ void SM_IPv6EditDialog::updateFields()
     ui->broadcastAddress->setText(helperSubnet->reduceIP(helperSubnet->IP2String(mombc)));
     ui->firstUsableAddress->setText(helperSubnet->reduceIP(helperSubnet->IP2String(momfip)));
     ui->lastUsableAddress->setText(helperSubnet->reduceIP(helperSubnet->IP2String(momlip)));
+
+    if (sender()==ui->address) ui->address->setText(helperSubnet->reduceIP(helperSubnet->IP2String(momipnum)));
+    if (sender()==ui->netmask) ui->netmask->setText(helperSubnet->reduceIP(helperSubnet->IP2String(momnmnum)));
+
 
 }
 
