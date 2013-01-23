@@ -558,6 +558,7 @@ void SM_SubnetWidget::editCurrentSubnet()
                 editor.setIP(Subnet_v6::IP2String(ip));
                 editor.setNM(Subnet_v6::IP2String(nm));
                 editor.setColor(momColor);
+                editor.updateFields();
 
                 editor.setModal(true);
                 if (editor.exec()==QDialog::Accepted) {

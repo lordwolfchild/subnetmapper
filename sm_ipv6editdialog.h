@@ -31,8 +31,10 @@ public:
     QColor getColor();
     void setColor(QColor &color);
 
-protected slots:
+public slots:
     void updateFields();
+
+protected slots:
     void updateCIDR();
     void colorClicked();
 

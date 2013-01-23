@@ -32,12 +32,14 @@ QString SM_IPv6EditDialog::getNM()
 
 void SM_IPv6EditDialog::setIP(QString ip)
 {
-    ui->address->setText(ip);
+    //ui->address->setText(ip);
+    ui->address->setText(helperSubnet->reduceIP(ip));
 }
 
 void SM_IPv6EditDialog::setNM(QString nm)
 {
-    ui->netmask->setText(nm);
+    //ui->netmask->setText(nm);
+    ui->netmask->setText(helperSubnet->reduceIP(nm));
 }
 
 QString SM_IPv6EditDialog::getDescription()
@@ -96,7 +98,6 @@ void SM_IPv6EditDialog::updateFields()
 
     if (sender()==ui->address) ui->address->setText(helperSubnet->reduceIP(helperSubnet->IP2String(momipnum)));
     if (sender()==ui->netmask) ui->netmask->setText(helperSubnet->reduceIP(helperSubnet->IP2String(momnmnum)));
-
 
 }
 
