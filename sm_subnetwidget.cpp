@@ -133,7 +133,7 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     QPen grayDashed= QPen( Qt::gray,1,Qt::DashLine);
 
     uint y_internetwork_spacer = 2*line_height;
-    //uint y_interversion_spacer = 5*line_height;
+    uint y_interversion_spacer = 5*line_height;
 
     // a helper to make the point calculations more readable. holds the offset for each block of the graphs.
     uint y_local_offset = general_margin + y_offset;
@@ -155,6 +155,7 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     painter->drawText(general_margin+x_offset+((x_width/4)*2)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".64");
     painter->drawText(general_margin+x_offset+((x_width/4)*3)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".96");
     painter->drawText(general_margin+x_offset+((x_width/4)*4)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".127");
+    painter->drawText(general_margin,y_local_offset,x_offset,line_height,Qt::AlignLeft|Qt::AlignVCenter,"IPv4 Block 1");
     painter->setPen(Qt::black);
 
     y_local_offset = general_margin + y_offset + (line_height*(ipv4cache.count()+1)) + y_internetwork_spacer;
@@ -168,6 +169,7 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     painter->drawText(general_margin+x_offset+((x_width/4)*2)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".192");
     painter->drawText(general_margin+x_offset+((x_width/4)*3)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".224");
     painter->drawText(general_margin+x_offset+((x_width/4)*4)+text_offset,y_local_offset,(x_width/8)-(2*text_offset),line_height,Qt::AlignVCenter,".255");
+    painter->drawText(general_margin,y_local_offset,x_offset,line_height,Qt::AlignLeft|Qt::AlignVCenter,"IPv4 Block 2");
     painter->setPen(Qt::black);
 
     // 1.2 Draw IPv4 subnets
@@ -312,8 +314,6 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
 
     // 1.3 Draw Extras for IPv4
 
-    /* OK, I killed the IPv6 drawing for now. Thats something for the next minor release... :P (or if I actually need it myself)
-
     // stores the offset which the ipv6 block always has through the ipv4 block
     uint y_offset_ipv6 = general_margin + ((y_offset + (line_height*(ipv4cache.count()+1)))*2) + y_internetwork_spacer + y_interversion_spacer;
 
@@ -324,18 +324,24 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
     painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
     painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+    painter->setPen(Qt::gray);
+    painter->drawText(general_margin,y_local_offset,x_offset,line_height,Qt::AlignLeft|Qt::AlignVCenter,"IPv6 Block 1");
+    painter->setPen(Qt::black);
+
 
     y_local_offset = y_offset_ipv6 + y_offset + (line_height*(ipv6cache.count()+1)) + y_internetwork_spacer;
 
     painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
     painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
     painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+    painter->setPen(Qt::gray);
+    painter->drawText(general_margin,y_local_offset,x_offset,line_height,Qt::AlignLeft|Qt::AlignVCenter,"IPv6 Block 2");
+    painter->setPen(Qt::black);
+
 
     // 2.2 Draw IPv6 subnets
 
     // 2.3 Draw Extras for IPv6
-
-    */
 
     // resize the widget to the needed size WITHOUT IPv6 networks
     resize((2*general_margin)+(2*x_offset)+x_width, y_local_offset+(line_height*(ipv4cache.count()+1))+y_offset+general_margin);

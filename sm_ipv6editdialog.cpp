@@ -11,7 +11,6 @@ SM_IPv6EditDialog::SM_IPv6EditDialog(QWidget *parent) :
     ui->setupUi(this);
     ui->address->setValidator(&validator);
     ui->netmask->setValidator(&validator);
-    updateFields();
 }
 
 SM_IPv6EditDialog::~SM_IPv6EditDialog()
