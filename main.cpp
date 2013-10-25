@@ -23,7 +23,6 @@ int main(int argc, char *argv[])
    a.setOrganizationDomain("wolfchild.de");
    a.setApplicationName("SubnetMapper");
    a.setApplicationVersion("2.0."+QString::number(COMMIT_NO));
-   QApplication::setStyle(QStyleFactory::create("Windows"));
 
    MainWindow w;
    w.show();
