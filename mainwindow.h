@@ -6,9 +6,11 @@
 #include "sm_subnetwidget.h"
 #include <QItemSelectionModel>
 #include <QTableView>
+#include <QTabWidget>
 #include "sm_datamodel.h"
 #include "sm_infodockwidget.h"
 #include <QCheckBox>
+#include <QSpinBox>
 #include <QList>
 #include <QMenu>
 
@@ -64,12 +66,19 @@ private:
     void parseRecentDocuments();
     void generateRecentDocsMenu();
 
+    QToolBar *toolbar;
+    QToolBar *ipv4toolbar;
+    QToolBar *ipv6toolbar;
+
+    QTabWidget *tabArea;
+
     QList<QString> recentDocs;
     SM_DataModel *model;
     SM_SubnetWidget *map;
     QItemSelectionModel *selectionModel;
     QTableView *table;
     QLineEdit *searchField;
+    QSpinBox *ipv6Scale;
     SM_InfoDockWidget *infoDock;
     QCheckBox *autoResizeOption;
     QMenu *recentDocsMenu;

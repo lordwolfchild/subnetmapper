@@ -12,5 +12,10 @@
         <file alias="info.svg">images/info.svg</file>
         <file alias="delete.svg">images/delete.svg</file>
         <file alias="config.svg">images/config.svg</file>
+        <file alias="autoscale.svg">images/autoscale.svg</file>
+        <file alias="xminus.svg">images/xminus.svg</file>
+        <file alias="xplus.svg">images/xplus.svg</file>
+        <file alias="yminus.svg">images/yminus.svg</file>
+        <file alias="yplus.svg">images/yplus.svg</file>
     </qresource>
 </RCC>

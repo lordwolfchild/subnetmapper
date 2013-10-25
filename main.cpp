@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 #include "mainwindow.h"
 #include <stdio.h>
 #include "subnet_v6.h"
@@ -6,6 +6,7 @@
 #include <iostream>
 #include <QtGlobal>
 #include <QSysInfo>
+#include <QStyleFactory>
 
 // this include file contains just a preprocessor directive to store the current local node number
 // of this source commit from mercurial. (COMMIT_NO) It is only used here.
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
    a.setOrganizationDomain("wolfchild.de");
    a.setApplicationName("SubnetMapper");
    a.setApplicationVersion("2.0."+QString::number(COMMIT_NO));
+   QApplication::setStyle(QStyleFactory::create("Windows"));
 
    MainWindow w;
    w.show();

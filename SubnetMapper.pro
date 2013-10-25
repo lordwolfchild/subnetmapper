@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml network svg
+QT       += core gui xml network svg printsupport
 
 TARGET = SubnetMapper
 TEMPLATE = app

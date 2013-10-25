@@ -401,8 +401,14 @@
            <height>61</height>
           </rect>
          </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
          <property name="title">
           <string>IPv</string>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
          </property>
          <widget class="QLabel" name="sn_ipver">
           <property name="geometry">

@@ -321,22 +321,22 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
 
     // 2.1 Draw legend for IPv6
 
-    painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
-    painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
-    painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
-    painter->setPen(Qt::gray);
-    painter->drawText(general_margin,y_local_offset,x_offset,line_height,Qt::AlignLeft|Qt::AlignVCenter,"IPv6 Block 1");
-    painter->setPen(Qt::black);
+//    painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
+//    painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
+//    painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+//    painter->setPen(Qt::gray);
+//    painter->drawText(general_margin,y_local_offset,x_offset,line_height,Qt::AlignLeft|Qt::AlignVCenter,"IPv6 Block 1");
+//    painter->setPen(Qt::black);
 
 
-    y_local_offset = y_offset_ipv6 + y_offset + (line_height*(ipv6cache.count()+1)) + y_internetwork_spacer;
+//    y_local_offset = y_offset_ipv6 + y_offset + (line_height*(ipv6cache.count()+1)) + y_internetwork_spacer;
 
-    painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
-    painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
-    painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
-    painter->setPen(Qt::gray);
-    painter->drawText(general_margin,y_local_offset,x_offset,line_height,Qt::AlignLeft|Qt::AlignVCenter,"IPv6 Block 2");
-    painter->setPen(Qt::black);
+//    painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
+//    painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
+//    painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
+//    painter->setPen(Qt::gray);
+//    painter->drawText(general_margin,y_local_offset,x_offset,line_height,Qt::AlignLeft|Qt::AlignVCenter,"IPv6 Block 2");
+//    painter->setPen(Qt::black);
 
 
     // 2.2 Draw IPv6 subnets

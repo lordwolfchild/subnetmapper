@@ -30,6 +30,7 @@
 #include <QApplication>
 #include <QSize>
 #include <QList>
+#include <QHBoxLayout>
 #include "sm_configdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -107,6 +108,10 @@ MainWindow::MainWindow(QWidget *parent) :
     else
         autoResizeOption->setChecked(true);
 
+    toolbar = new QToolBar("Main Toolbar",this);
+    ipv4toolbar = new QToolBar("IPv4 Toolbar",this);
+    ipv6toolbar = new QToolBar("IPv6 Toolbar",this);
+
     setupModel();
     setupViews();
 
@@ -130,7 +135,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->menuBar()->addMenu(helpMenu);
     statusBar();
 
-    QToolBar *toolbar = new QToolBar("Main Toolbar",this);
     this->addToolBar(Qt::TopToolBarArea,toolbar);
     toolbar->setOrientation(Qt::Horizontal);
     toolbar->addAction(openAction);
@@ -165,13 +169,57 @@ MainWindow::MainWindow(QWidget *parent) :
     QWidget* empty = new QWidget();
     empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 
-    toolbar->addSeparator();
-    toolbar->addWidget(autoResizeOption);
     toolbar->addWidget(empty);
+
+    // ToolBar buttons for Map control
+    QAction *xMinusAction = new QAction(tr("x-"),this);
+    xMinusAction->setIcon(QIcon(":/xminus.svg"));
+    ipv4toolbar->addAction(xMinusAction);
+    connect(xMinusAction,SIGNAL(triggered()),map,SLOT(xWidthMinus()));
+
+    QAction *xPlusAction = new QAction(tr("x+"),this);
+    xPlusAction->setIcon(QIcon(":/xplus.svg"));
+    ipv4toolbar->addAction(xPlusAction);
+    connect(xPlusAction,SIGNAL(triggered()),map,SLOT(xWidthPlus()));
+
+    QAction *yMinusAction = new QAction(tr("y-"),this);
+    yMinusAction->setIcon(QIcon(":/yminus.svg"));
+    ipv4toolbar->addAction(yMinusAction);
+    connect(yMinusAction,SIGNAL(triggered()),map,SLOT(line_heightMinus()));
+
+    QAction *yPlusAction = new QAction(tr("y+"),this);
+    yPlusAction->setIcon(QIcon(":/yplus.svg"));
+    ipv4toolbar->addAction(yPlusAction);
+    connect(yPlusAction,SIGNAL(triggered()),map,SLOT(line_heightPlus()));
+
+    QAction *autoResizeAction = new QAction(tr("<-auto->"),this);
+    autoResizeAction->setIcon(QIcon(":/autoscale.svg"));
+    ipv4toolbar->addAction(autoResizeAction);
+    connect(autoResizeAction,SIGNAL(triggered()),map,SLOT(upscale()));
+
+    connect(xMinusAction,SIGNAL(triggered()),this,SLOT(killAutoResize()));
+    connect(yMinusAction,SIGNAL(triggered()),this,SLOT(killAutoResize()));
+    connect(xPlusAction,SIGNAL(triggered()),this,SLOT(killAutoResize()));
+    connect(yPlusAction,SIGNAL(triggered()),this,SLOT(killAutoResize()));
+
+    toolbar->addSeparator();
+
+    ipv6Scale = new QSpinBox(this);
+    ipv6Scale->setMaximumWidth(100);
+    ipv6Scale->setMinimum(32);
+    ipv6Scale->setMaximum(64);
+    ipv6toolbar->addWidget(new QLabel("IPv6 Display: /",this));
+    ipv6toolbar->addWidget(ipv6Scale);
+
+    ipv4toolbar->addSeparator();
+    ipv4toolbar->addWidget(autoResizeOption);
+    ipv4toolbar->addSeparator();
     toolbar->addWidget(searchLabel);
     toolbar->addWidget(searchField);
     toolbar->addWidget(searchButton);
     toolbar->addWidget(clearSearchButton);
+
+
 
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
@@ -237,9 +285,12 @@ void MainWindow::setupViews()
 {
     QSplitter *splitter = new QSplitter;
     splitter->setOrientation(Qt::Vertical);
+    tabArea=new QTabWidget(this);
+
     table = new QTableView;
     QScrollArea *scroller = new QScrollArea;
     map = new SM_SubnetWidget(scroller);
+
     infoDock = new SM_InfoDockWidget(0,this);
     infoDock->setAllowedAreas(Qt::RightDockWidgetArea);
     addDockWidget(Qt::RightDockWidgetArea, infoDock);
@@ -256,44 +307,60 @@ void MainWindow::setupViews()
     scroller->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scroller->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
-    splitter->addWidget(scroller);
+    QVBoxLayout *ipv4layout=new QVBoxLayout;
+    ipv4layout->addWidget(ipv4toolbar);
+    ipv4layout->addWidget(scroller);
+    QWidget *momipv4widget= new QWidget;
+    momipv4widget->setLayout(ipv4layout);
+
+    tabArea->addTab(momipv4widget,tr("IPv4 Map"));
+
+    QVBoxLayout *ipv6layout=new QVBoxLayout;
+    ipv6layout->addWidget(ipv6toolbar);
+    // TODO: Add real map here
+    ipv6layout->addWidget(new QWidget());
+    QWidget *momipv6widget= new QWidget;
+    momipv6widget->setLayout(ipv6layout);
+
+    tabArea->addTab(momipv6widget,tr("IPv6 Map"));
+
+    splitter->addWidget(tabArea);
     splitter->addWidget(table);
     splitter->setStretchFactor(0, 2);
     splitter->setStretchFactor(1, 1);
 
-    QPushButton *buttonXplus  = new QPushButton("+",this);
-    QPushButton *buttonXminus = new QPushButton("-",this);
-    QPushButton *buttonYplus  = new QPushButton("+",this);
-    QPushButton *buttonYminus = new QPushButton("-",this);
-    QPushButton *buttonUpscale = new QPushButton("o",this);
-    buttonXplus->setMaximumWidth(30);
-    buttonXminus->setMaximumWidth(30);
-    buttonYplus->setMaximumWidth(30);
-    buttonYminus->setMaximumWidth(30);
-    buttonUpscale->setMaximumWidth(15);
+//    QPushButton *buttonXplus  = new QPushButton("+",this);
+//    QPushButton *buttonXminus = new QPushButton("-",this);
+//    QPushButton *buttonYplus  = new QPushButton("+",this);
+//    QPushButton *buttonYminus = new QPushButton("-",this);
+//    QPushButton *buttonUpscale = new QPushButton("o",this);
+//    buttonXplus->setMaximumWidth(30);
+//    buttonXminus->setMaximumWidth(30);
+//    buttonYplus->setMaximumWidth(30);
+//    buttonYminus->setMaximumWidth(30);
+//    buttonUpscale->setMaximumWidth(15);
 
-    scroller->addScrollBarWidget(buttonXplus,Qt::AlignRight);
-    scroller->addScrollBarWidget(buttonXminus,Qt::AlignRight);
-    scroller->addScrollBarWidget(buttonUpscale,Qt::AlignBottom);
-    scroller->addScrollBarWidget(buttonYplus,Qt::AlignBottom);
-    scroller->addScrollBarWidget(buttonYminus,Qt::AlignBottom);
+//    scroller->addScrollBarWidget(buttonXplus,Qt::AlignRight);
+//    scroller->addScrollBarWidget(buttonXminus,Qt::AlignRight);
+//    scroller->addScrollBarWidget(buttonUpscale,Qt::AlignBottom);
+//    scroller->addScrollBarWidget(buttonYplus,Qt::AlignBottom);
+//    scroller->addScrollBarWidget(buttonYminus,Qt::AlignBottom);
 
+//    (scroller->horizontalScrollBar())->setMinimumWidth(width());
+//    (scroller->verticalScrollBar())->setMinimumHeight(height());
+//    (scroller->verticalScrollBar())->setBaseSize(200,20);
+//    (scroller->horizontalScrollBar())->setBaseSize(20,200);
 
-    (scroller->horizontalScrollBar())->setMinimumWidth(width());
-    (scroller->verticalScrollBar())->setMinimumHeight(height());
-    (scroller->verticalScrollBar())->setBaseSize(200,20);
-    (scroller->horizontalScrollBar())->setBaseSize(20,200);
+//    connect(buttonXplus,SIGNAL(clicked()),map,SLOT(xWidthPlus()));
+//    connect(buttonXminus,SIGNAL(clicked()),map,SLOT(xWidthMinus()));
+//    connect(buttonYplus,SIGNAL(clicked()),map,SLOT(line_heightPlus()));
+//    connect(buttonYminus,SIGNAL(clicked()),map,SLOT(line_heightMinus()));
+//    connect(buttonUpscale,SIGNAL(clicked()),map,SLOT(upscale()));
 
-    connect(buttonXplus,SIGNAL(clicked()),map,SLOT(xWidthPlus()));
-    connect(buttonXminus,SIGNAL(clicked()),map,SLOT(xWidthMinus()));
-    connect(buttonYplus,SIGNAL(clicked()),map,SLOT(line_heightPlus()));
-    connect(buttonYminus,SIGNAL(clicked()),map,SLOT(line_heightMinus()));
-    connect(buttonUpscale,SIGNAL(clicked()),map,SLOT(upscale()));
-
-    connect(buttonXplus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
-    connect(buttonXminus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
-    connect(buttonYplus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
-    connect(buttonYminus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
+//    connect(buttonXplus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
+//    connect(buttonXminus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
+//    connect(buttonYplus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
+//    connect(buttonYminus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
 
     connect(autoResizeOption,SIGNAL(clicked()),this,SLOT(autoResizeClicked()));
 
@@ -314,7 +381,7 @@ void MainWindow::setupViews()
     map->setSelectionModel(selectionModel);
 
     QHeaderView *headerView = table->horizontalHeader();
-    headerView->setResizeMode(QHeaderView::ResizeToContents);
+    //headerView->setResizeMode(QHeaderView::ResizeToContents);
     headerView->setStretchLastSection(true);
 
     QHeaderView *headerSideView = table->verticalHeader();

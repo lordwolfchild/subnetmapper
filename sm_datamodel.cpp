@@ -512,7 +512,7 @@ void SM_DataModel::reset()
     // it causes a certain SIGV when clearing the whole model for the loading of another file.
     // so I comment it out in the good hope that it will not break anything...
     //emit(dataChanged(QModelIndex(),QModelIndex()));
-    QAbstractTableModel::reset();
+    //QAbstractTableModel::reset();
 };
 
 
