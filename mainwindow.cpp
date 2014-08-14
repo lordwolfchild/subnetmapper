@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <iostream>
 #include "sm_datamodel.h"
 #include <QSplitter>
 #include <QTableView>
@@ -15,6 +16,8 @@
 #include "sm_ipv4editdialog.h"
 #include "sm_ipv6editdialog.h"
 #include "sm_subnetwidget.h"
+#include "sm_subnet6widget.h"
+#include "sm_model6proxy.h"
 #include <QScrollArea>
 #include <QMessageBox>
 #include <QSlider>
@@ -123,6 +126,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
     connect(printAction,SIGNAL(triggered()),this,SLOT(printFile()));
     connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),map,SLOT(dataHasChanged()));
+    connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),this,SLOT(modelDataHasChanged()));
     connect(selectionModel,SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(selectionChanged()));
     connect(editAction, SIGNAL(triggered()),this,SLOT(editCurrentSubnet()));
     connect(deleteAction,SIGNAL(triggered()),this,SLOT(deleteCurrentSubnet()));
@@ -219,8 +223,6 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbar->addWidget(searchButton);
     toolbar->addWidget(clearSearchButton);
 
-
-
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
     parseRecentDocuments();
@@ -267,8 +269,11 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::setupModel()
 {
+    qDebug("Setting up Models...");
     QSettings settings;
     model = new SM_DataModel(this);
+    model6 = new SM_Model6Proxy(model);
+    model6->setSourceModel(model);
 
     // check if there was a filename specified at the command line. If yes, load it.
     // otherwise check for autoload_map feature and use this.
@@ -283,6 +288,7 @@ void MainWindow::setupModel()
 
 void MainWindow::setupViews()
 {
+    qDebug("Setting up Views...");
     QSplitter *splitter = new QSplitter;
     splitter->setOrientation(Qt::Vertical);
     tabArea=new QTabWidget(this);
@@ -316,9 +322,11 @@ void MainWindow::setupViews()
     tabArea->addTab(momipv4widget,tr("IPv4 Map"));
 
     QVBoxLayout *ipv6layout=new QVBoxLayout;
+    map6 = new SM_Subnet6Widget();
     ipv6layout->addWidget(ipv6toolbar);
     // TODO: Add real map here
-    ipv6layout->addWidget(new QWidget());
+    //ipv6layout->addWidget(new QWidget());
+    ipv6layout->addWidget(map6);
     QWidget *momipv6widget= new QWidget;
     momipv6widget->setLayout(ipv6layout);
 
@@ -380,8 +388,14 @@ void MainWindow::setupViews()
     map->setModel((SM_DataModel*)model);
     map->setSelectionModel(selectionModel);
 
+    map6->setModel(model6);
+    map6->setSelectionModel(selectionModel);
+    map6->setSortingEnabled(false);
+    map6->setSelectionBehavior(QAbstractItemView::SelectRows);
+    map6->setSelectionMode(QAbstractItemView::SingleSelection);
+
     QHeaderView *headerView = table->horizontalHeader();
-    //headerView->setResizeMode(QHeaderView::ResizeToContents);
+    headerView->setSectionResizeMode(QHeaderView::ResizeToContents);
     headerView->setStretchLastSection(true);
 
     QHeaderView *headerSideView = table->verticalHeader();
@@ -689,6 +703,12 @@ void MainWindow::showConfigDialog()
         parseRecentDocuments();
         generateRecentDocsMenu();
     }
+}
+
+void MainWindow::modelDataHasChanged()
+{
+    std::cout << "TEST" << std::endl;
+    table->reset();
 }
 
 void MainWindow::selectionChanged()

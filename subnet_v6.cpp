@@ -1,5 +1,6 @@
 #include "subnet_v6.h"
 #include <QRegExp>
+#include <arpa/inet.h>
 
 Subnet_v6::Subnet_v6(QObject *parent) :
     Subnet(parent)
@@ -100,7 +101,6 @@ Subnet_v6::Subnet_v6(QString cidr, QString id, QString description, QString note
     setNotes(notes);
 
     setNM(CIDR);
-
 
 }
 

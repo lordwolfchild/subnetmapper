@@ -187,6 +187,8 @@ void SM_DataModel::addSubnet(Subnet *subnet)
     SubnetList.append(subnet);
     insertRows(rowCount(),1);
 
+    emit dataChanged(QModelIndex(),QModelIndex());
+
     reset();
 }
 
@@ -317,7 +319,7 @@ bool SM_DataModel::loadFromDomDoc(QDomDocument &doc)
     if (docElem.nodeName()=="SubnetMap") {
         if (docElem.hasAttribute("fileformat")) {
             if ((docElem.attribute("fileformat")).toInt()!=2) {
-                msgBox.setText("Warning: the SubnetMap xou were trying to load has the wrong format. This Version of SubnetMapper can only read format version 2.");
+                msgBox.setText("Warning: the SubnetMap you were trying to load has the wrong format. This Version of SubnetMapper can only read format version 2.");
                 msgBox.setIcon(QMessageBox::Warning);
                 msgBox.setDetailedText("The fileformat attribute of the SubnetMap node has a version number that is not equal to 2. Update SubnetMapper to the most recent version to read this file.");
                 msgBox.exec();

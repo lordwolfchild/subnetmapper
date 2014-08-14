@@ -21,7 +21,9 @@ SOURCES += main.cpp\
     sm_subnetwidget.cpp \
     sm_aboutdialog.cpp \
     sm_infodockwidget.cpp \
-    sm_configdialog.cpp
+    sm_configdialog.cpp \
+    sm_subnet6widget.cpp \
+    sm_model6proxy.cpp
 
 HEADERS  += mainwindow.h \
     subnet.h \
@@ -35,7 +37,9 @@ HEADERS  += mainwindow.h \
     sm_aboutdialog.h \
     sm_infodockwidget.h \
     sm_configdialog.h \
-    generated_version.h
+    generated_version.h \
+    sm_subnet6widget.h \
+    sm_model6proxy.h
 
 FORMS    += \
     sm_ipv4editdialog.ui \
@@ -48,3 +52,5 @@ RESOURCES += \
     sm_res.qrc
 
 REV = $$system(hg id -n)
+
+CONFIG += console

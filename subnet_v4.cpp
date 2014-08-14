@@ -217,20 +217,18 @@ QString Subnet_v4::IP2String(quint32 &ip)
 {
     QString outp;
 
+
     // I'm using pointer aritmethics to calculate the netmask octets...
-    // get the ip into something we cannot destroy by accident. ;)
-    unsigned long int ul_ip = ip;
-    // Now we do the bad stuff. Get the ptr to the first byte of the ulong above.
-    unsigned char* ptr = (unsigned char*)&ul_ip;
-    // now use this address as an offset to select the subsequent bytes from the long.
-    // Don't forget to use clean casting, or the compiler will get unhappy.
-    unsigned char oct1 = *(unsigned char*)(ptr+3);
-    unsigned char oct2 = *(unsigned char*)(ptr+2);
-    unsigned char oct3 = *(unsigned char*)(ptr+1);
-    unsigned char oct4 = *(unsigned char*)(ptr);
+    unsigned char oct[4];
+
+    // select the single bytes through shifting and mask all irrelevant bits by ANDing 0xFF.
+    oct[0] = ip & 0xFF;
+    oct[1] = (ip >> 8) & 0xFF;
+    oct[2] = (ip >> 16) & 0xFF;
+    oct[3] = (ip >> 24) & 0xFF;
 
     // Now put it in the string which we will return afterwards.
-    outp.sprintf("%u.%u.%u.%u",oct1,oct2,oct3,oct4);
+    outp.sprintf("%u.%u.%u.%u",oct[3],oct[2],oct[1],oct[0]);
 
     // finished!
     return outp;

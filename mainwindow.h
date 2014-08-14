@@ -4,11 +4,13 @@
 #include <QMainWindow>
 #include <QAbstractTableModel>
 #include "sm_subnetwidget.h"
+#include "sm_subnet6widget.h"
 #include <QItemSelectionModel>
 #include <QTableView>
 #include <QTabWidget>
 #include "sm_datamodel.h"
 #include "sm_infodockwidget.h"
+#include "sm_model6proxy.h"
 #include <QCheckBox>
 #include <QSpinBox>
 #include <QList>
@@ -46,6 +48,7 @@ private slots:
     void showConfigDialog();
 
     void selectionChanged();
+    void modelDataHasChanged();
 
     void autoResizeClicked();
     void killAutoResize();
@@ -74,7 +77,9 @@ private:
 
     QList<QString> recentDocs;
     SM_DataModel *model;
+    SM_Model6Proxy *model6;
     SM_SubnetWidget *map;
+    SM_Subnet6Widget *map6;
     QItemSelectionModel *selectionModel;
     QTableView *table;
     QLineEdit *searchField;
