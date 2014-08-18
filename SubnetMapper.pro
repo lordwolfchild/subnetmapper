@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     sm_infodockwidget.cpp \
     sm_configdialog.cpp \
     sm_subnet6widget.cpp \
-    sm_model6proxy.cpp
+    sm_model6proxy.cpp \
+    sm_modelbackend.cpp
 
 HEADERS  += mainwindow.h \
     subnet.h \
@@ -37,9 +38,9 @@ HEADERS  += mainwindow.h \
     sm_aboutdialog.h \
     sm_infodockwidget.h \
     sm_configdialog.h \
-    generated_version.h \
     sm_subnet6widget.h \
-    sm_model6proxy.h
+    sm_model6proxy.h \
+    sm_modelbackend.h
 
 FORMS    += \
     sm_ipv4editdialog.ui \
@@ -51,6 +52,7 @@ FORMS    += \
 RESOURCES += \
     sm_res.qrc
 
-REV = $$system(hg id -n)
-
 CONFIG += console
+
+OTHER_FILES += \
+    COPYING

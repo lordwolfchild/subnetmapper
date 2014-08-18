@@ -19,35 +19,19 @@
  *
  */
 
-#include "subnet.h"
-#include <stdio.h>
-#include "subnet_v4.h"
-#include "subnet_v6.h"
+#include "sm_modelbackend.h"
 
-Subnet::Subnet(QObject *parent) :
+SM_ModelBackend::SM_ModelBackend(QObject *parent) :
     QObject(parent)
 {
-}
 
-QColor Subnet::getColor()
-{
-    return *_color;
-}
 
-void Subnet::setColor(QColor &color)
-{
-    *_color=color;
-}
 
-bool Subnet::isV4()
-{
-    if (getIPversion()==Subnet::IPv4) return true;
-    return false;
-}
 
-bool Subnet::isV6()
-{
-    if (getIPversion()==Subnet::IPv6) return true;
-    return false;
-}
+    private:
 
+    QList<Subnet*>  SubnetList;
+    QList<Subnet*>  Subnet4List;
+    QList<Subnet*>  Subnet6List;
+
+}
