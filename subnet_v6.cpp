@@ -20,6 +20,7 @@
  */
 
 #include "subnet_v6.h"
+#include "subnet_v6.h"
 #include <QRegExp>
 #include <arpa/inet.h>
 

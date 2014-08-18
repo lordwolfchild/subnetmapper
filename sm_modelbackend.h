@@ -23,16 +23,48 @@
 #define SM_MODELBACKEND_H
 
 #include <QObject>
+#include "subnet_v4.h"
+#include "subnet_v6.h"
+#include "subnet.h"
+#include <QXmlStreamWriter>
+#include <QFile>
+#include <QDomDocument>
 
 class SM_ModelBackend : public QObject
 {
     Q_OBJECT
 public:
     explicit SM_ModelBackend(QObject *parent = 0);
+    ~SM_ModelBackend();
+
+    Subnet* getSubnet(int index);
+    void addSubnet(Subnet *subnet);
+    void clearData();
+
+    int count();
+    int count6();
+    int count4();
+
+    bool loadFromXmlStream (QXmlStreamReader &stream);
+    bool loadFromDomDoc (QDomDocument &doc);
+
+    bool saveToXmlStream(QXmlStreamWriter &stream);
+
+    static bool SubnetLessThan(const Subnet* s1, const Subnet* s2);
+    void sortData();
+
+    void dumpAllSubnets();
 
 signals:
 
 public slots:
+
+private:
+
+    QList<Subnet*>  SubnetList;
+    QList<Subnet*>  Subnet4List;
+    QList<Subnet*>  Subnet6List;
+
 
 };
 
