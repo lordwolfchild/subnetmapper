@@ -78,8 +78,6 @@ void SM_ModelBackend::clearData(bool noEmit)
 
     // removes all subnets from datastorage and releases the reserved heap memory.
     int count=SubnetList.count();
-    int count4=Subnet4List.count();
-    int count6=Subnet6List.count();
 
     for (int i=0;i<count;i++) {
         Subnet *subnet = SubnetList.at(0);
@@ -87,17 +85,10 @@ void SM_ModelBackend::clearData(bool noEmit)
         delete subnet;
     }
 
-    for (int i=0;i<count4;i++) {
-        Subnet *subnet = Subnet4List.at(0);
-        Subnet4List.removeAt(0);
-        delete subnet;
-    }
-
-    for (int i=0;i<count6;i++) {
-        Subnet *subnet = Subnet6List.at(0);
-        Subnet6List.removeAt(0);
-        delete subnet;
-    }
+    // As SubnetList already contained all pointers to our subnets,
+    // we can safely kill the two specialized lists without leaving leaks.
+    Subnet4List.clear();
+    Subnet6List.clear();
 
     if (!noEmit) {
         emit dataChanged();
@@ -190,6 +181,7 @@ bool SM_ModelBackend::loadFromDomDoc (QDomDocument &doc)
                 newSubnet->setColor(momColor);
 
                 SubnetList.append(newSubnet);
+                Subnet4List.append(newSubnet);
 
 
             } else if (currentSubnetNode.attribute("ipversion")=="IPv6") {
@@ -215,6 +207,7 @@ bool SM_ModelBackend::loadFromDomDoc (QDomDocument &doc)
                 newSubnet->setColor(momColor);
 
                 SubnetList.append(newSubnet);
+                Subnet6List.append(newSubnet);
 
             } else {
 
@@ -252,6 +245,8 @@ bool SM_ModelBackend::loadFromDomDoc (QDomDocument &doc)
     emit data4Changed();
     emit data6Changed();
     emit dataChanged();
+
+    dumpAllSubnets();
 
     return true;
 

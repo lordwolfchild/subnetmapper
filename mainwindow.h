@@ -32,6 +32,7 @@
 #include "sm_datamodel.h"
 #include "sm_infodockwidget.h"
 #include "sm_model6proxy.h"
+#include "sm_modelbackend.h"
 #include <QCheckBox>
 #include <QSpinBox>
 #include <QList>
@@ -98,7 +99,7 @@ private:
 
     QList<QString> recentDocs;
     SM_DataModel *model;
-    SM_Model6Proxy *model6;
+    SM_ModelBackend *modelBackend;
     SM_SubnetWidget *map;
     SM_Subnet6Widget *map6;
     QItemSelectionModel *selectionModel;

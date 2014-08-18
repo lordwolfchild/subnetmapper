@@ -266,6 +266,12 @@ MainWindow::~MainWindow()
 
   settings.setValue("mainwindow/width",window()->width());
   settings.setValue("mainwindow/height",window()->height());
+
+  modelBackend->clearData();
+  delete modelBackend;
+
+  model->clearData();
+  delete model;
 }
 
 QSize MainWindow::sizeHint() const
@@ -293,8 +299,9 @@ void MainWindow::setupModel()
     qDebug("Setting up Models...");
     QSettings settings;
     model = new SM_DataModel(this);
-    model6 = new SM_Model6Proxy(model);
-    model6->setSourceModel(model);
+
+    // initialize the new model backend
+    modelBackend = new SM_ModelBackend(this);
 
     // check if there was a filename specified at the command line. If yes, load it.
     // otherwise check for autoload_map feature and use this.
@@ -409,7 +416,7 @@ void MainWindow::setupViews()
     map->setModel((SM_DataModel*)model);
     map->setSelectionModel(selectionModel);
 
-    map6->setModel(model6);
+    map6->setModel(model);
     map6->setSelectionModel(selectionModel);
     map6->setSortingEnabled(false);
     map6->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -526,6 +533,7 @@ void MainWindow::openFile(const QString &path)
 
             result=false;
             result=((SM_DataModel*)model)->loadFromDomDoc(doc);
+            result=modelBackend->loadFromDomDoc(doc);
 
             file.close();
 
