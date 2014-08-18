@@ -57,6 +57,11 @@ void SM_SubnetWidget::setModel(SM_DataModel *newmodel)
     model=newmodel;
 }
 
+void SM_SubnetWidget::setModelBackend(SM_ModelBackend *newmodel)
+{
+    modelBackend=newmodel;
+}
+
 void SM_SubnetWidget::setSelectionModel(QItemSelectionModel *newselectionmodel)
 {
     selectionModel=newselectionmodel;

@@ -25,6 +25,7 @@
 #include <QWidget>
 #include <QItemSelectionModel>
 #include <sm_datamodel.h>
+#include "sm_modelbackend.h"
 #include <QTimer>
 #include <QHostInfo>
 
@@ -36,6 +37,7 @@ public:
     ~SM_SubnetWidget();
 
     void setModel(SM_DataModel *newmodel);
+    void setModelBackend(SM_ModelBackend *newmodel);
     void setSelectionModel(QItemSelectionModel *newselectionmodel);
 
     bool searchHosts( QString name );
@@ -66,6 +68,7 @@ public slots:
 
 private:
     SM_DataModel *model;
+    SM_ModelBackend *modelBackend;
     QItemSelectionModel *selectionModel;
 
     QList<QRect*> rectCache1_v4;

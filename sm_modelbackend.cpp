@@ -246,7 +246,8 @@ bool SM_ModelBackend::loadFromDomDoc (QDomDocument &doc)
     emit data6Changed();
     emit dataChanged();
 
-    dumpAllSubnets();
+    // uncomment for debugging purposes, prints all objects in model
+    // dumpAllSubnets();
 
     return true;
 

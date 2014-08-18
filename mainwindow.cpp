@@ -414,6 +414,7 @@ void MainWindow::setupViews()
     table->setSelectionMode(QAbstractItemView::SingleSelection);
 
     map->setModel((SM_DataModel*)model);
+    map->setModelBackend(modelBackend);
     map->setSelectionModel(selectionModel);
 
     map6->setModel(model);
