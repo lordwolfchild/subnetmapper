@@ -101,7 +101,7 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     painter->fillRect(paintArea,Qt::white);
 
     // prepare our model and metadata for drawing of the map
-    model->sortData();
+    modelBackend->sortData();
     clearCache();
 
     int countV6=0;
@@ -130,14 +130,14 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     QList<QPoint*> notesList;
 
     // Iterate the Model and store the data we need to prepare our little drawing.
-    for (int i=0;i<model->rowCount();i++) {
-        if (model->data(model->index(i,1),Qt::UserRole)=="IPv4") {
+    for (int i=0;i<modelBackend->count();i++) {
+        if (modelBackend->getSubnet(i)->isV4()) {
             subnetsV4.insert(i);
             ipv4cache[((((Subnet_v4*)(model->getSubnet(i)))->getIP())&(~((quint32)255)))].append(i);
             countV4++;
         } else {
             subnetsV6.insert(i);
-            QString momip = (model->data(model->index(i,2),Qt::UserRole)).toString();
+            QString momip = (modelBackend->getSubnet(i)->toString());
             ipv6cache[momip.left(34)].append(i);
             countV6++;
         };
@@ -213,7 +213,7 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
         painter->drawText(general_margin+text_offset,y_block2_offset+(line_height*(line+1)),x_offset-(2*text_offset),line_height,Qt::AlignVCenter,legend_str);
 
         for (int net=0;net<ipv4cache[index].count();net++) {
-            Subnet_v4 *momNet=(Subnet_v4*)model->getSubnet(ipv4cache[index].at(net));
+            Subnet_v4 *momNet=(Subnet_v4*)modelBackend->getSubnet(ipv4cache[index].at(net));
 
             // We have our subnet, now we need to decide, where we put it. To achieve this, we have to analyze its size and its position.
 
@@ -454,20 +454,20 @@ void SM_SubnetWidget::mousePressEvent(QMouseEvent *event)
             if ((rectCache1_v4.at(i)->contains(event->x(),event->y()))|
                     (rectCache2_v4.at(i)->contains(event->x(),event->y())))
             {
-                (model->getSubnet(i))->setSelected(true);
+                (modelBackend->getSubnet(i))->setSelected(true);
                 selectionModel->setCurrentIndex(model->index(i,0),QItemSelectionModel::Select|QItemSelectionModel::Rows|QItemSelectionModel::Clear);
                 foundClickedSubnet=true;
-            } else (model->getSubnet(i))->setSelected(false);
+            } else (modelBackend->getSubnet(i))->setSelected(false);
         }
 
         for (int i=0;i<rectCache1_v6.count();i++) {
             if ((rectCache1_v6.at(i)->contains(event->x(),event->y()))|
                     (rectCache2_v6.at(i)->contains(event->x(),event->y())))
             {
-                (model->getSubnet(i))->setSelected(true);
+                (modelBackend->getSubnet(i))->setSelected(true);
                 selectionModel->setCurrentIndex(model->index(i,0),QItemSelectionModel::Select|QItemSelectionModel::Rows|QItemSelectionModel::Clear);
                 foundClickedSubnet=true;
-            } else (model->getSubnet(i))->setSelected(false);
+            } else (modelBackend->getSubnet(i))->setSelected(false);
         }
         if (!foundClickedSubnet) selectionModel->clearSelection();
 
@@ -520,7 +520,7 @@ void SM_SubnetWidget::editCurrentSubnet()
 {
     if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) {
 
-        Subnet *momsubnet=model->getSubnet(selectionModel->currentIndex().row());
+        Subnet *momsubnet=modelBackend->getSubnet(selectionModel->currentIndex().row());
 
         if (momsubnet) {
             if (momsubnet->isV4()) {
@@ -546,9 +546,9 @@ void SM_SubnetWidget::editCurrentSubnet()
 
                     bool isNotOverlappingWithAnything=true;
 
-                    for (int i=0;i<((SM_DataModel*)model)->rowCount();i++) {
-                        if (((SM_DataModel*)model)->getSubnet(i)->isV4())
-                            if (((Subnet_v4*)(((SM_DataModel*)model)->getSubnet(i)))->overlapsWith(*(momsubnet_v4)))
+                    for (int i=0;i<modelBackend->count();i++) {
+                        if (modelBackend->getSubnet(i)->isV4())
+                            if (((Subnet_v4*)(modelBackend->getSubnet(i)))->overlapsWith(*(momsubnet_v4)))
                                 isNotOverlappingWithAnything=false;
                     }
 
@@ -558,7 +558,6 @@ void SM_SubnetWidget::editCurrentSubnet()
                         momsubnet_v4->setDescription(momdesc);
                         momsubnet_v4->setIdentifier(momid);
                         momsubnet_v4->setColor(momcolor);
-                        model->reset();
                         ((MainWindow*)window())->mapWasAltered();
                     } else {
                         QMessageBox msgBox;
@@ -603,9 +602,9 @@ void SM_SubnetWidget::editCurrentSubnet()
 
                     bool isNotOverlappingWithAnything=true;
 
-                    for (int i=0;i<((SM_DataModel*)model)->rowCount();i++) {
-                        if (((SM_DataModel*)model)->getSubnet(i)->isV6())
-                            if (((Subnet_v6*)(((SM_DataModel*)model)->getSubnet(i)))->overlapsWith(*(momsubnet_v6)))
+                    for (int i=0;i<modelBackend->count();i++) {
+                        if (modelBackend->getSubnet(i)->isV6())
+                            if (((Subnet_v6*)(modelBackend->getSubnet(i)))->overlapsWith(*(momsubnet_v6)))
                                 isNotOverlappingWithAnything=false;
                     }
 
@@ -615,7 +614,6 @@ void SM_SubnetWidget::editCurrentSubnet()
                         momsubnet_v6->setDescription(momdesc);
                         momsubnet_v6->setIdentifier(momid);
                         momsubnet_v6->setColor(momcolor);
-                        model->reset();
                         ((MainWindow*)window())->mapWasAltered();
                     } else {
                         QMessageBox msgBox;
@@ -690,8 +688,8 @@ void SM_SubnetWidget::dataHasChanged()
 
 void SM_SubnetWidget::selectionChangedInTable(const QModelIndex &current, const QModelIndex &previous)
 {
-    if (previous.isValid()) model->getSubnet(previous.row())->setSelected(false);
-    if (current.isValid()) model->getSubnet(current.row())->setSelected(true);
+    if (previous.isValid()) modelBackend->getSubnet(previous.row())->setSelected(false);
+    if (current.isValid()) modelBackend->getSubnet(current.row())->setSelected(true);
 
     repaint();
 };
