@@ -24,11 +24,11 @@
 #include <QBrush>
 #include <QDomDocument>
 #include <QMessageBox>
+#include <QApplication>
 
 SM_ModelBackend::SM_ModelBackend(QObject *parent) :
     QObject(parent)
 {
-
 
 }
 
@@ -44,23 +44,42 @@ Subnet* SM_ModelBackend::getSubnet(int index)
 
 }
 
-void SM_ModelBackend::addSubnet(Subnet *subnet)
+Subnet* SM_ModelBackend::getSubnet4(int index)
 {
-    SubnetList.append(subnet);
-    if (subnet->isV4()) Subnet4List.append(subnet);
-    else Subnet6List.append(subnet);
-
-    //emit dataChanged(QModelIndex(),QModelIndex());
-
-    // reset();
+    if ((index>=0)&(index<Subnet4List.count())) return Subnet4List.at(index);
+    return NULL;
 
 }
 
-void SM_ModelBackend::clearData()
+Subnet* SM_ModelBackend::getSubnet6(int index)
+{
+    if ((index>=0)&(index<Subnet6List.count())) return Subnet6List.at(index);
+    return NULL;
+
+}
+
+
+void SM_ModelBackend::addSubnet(Subnet *subnet)
+{
+    SubnetList.append(subnet);
+    emit dataChanged();
+
+    if (subnet->isV4()) {
+        Subnet4List.append(subnet);
+        emit data4Changed();
+    } else {
+        Subnet6List.append(subnet);
+        emit data6Changed();
+    };
+}
+
+void SM_ModelBackend::clearData(bool noEmit)
 {
 
     // removes all subnets from datastorage and releases the reserved heap memory.
     int count=SubnetList.count();
+    int count4=Subnet4List.count();
+    int count6=Subnet6List.count();
 
     for (int i=0;i<count;i++) {
         Subnet *subnet = SubnetList.at(0);
@@ -68,14 +87,29 @@ void SM_ModelBackend::clearData()
         delete subnet;
     }
 
-    // reset();
+    for (int i=0;i<count4;i++) {
+        Subnet *subnet = Subnet4List.at(0);
+        Subnet4List.removeAt(0);
+        delete subnet;
+    }
 
+    for (int i=0;i<count6;i++) {
+        Subnet *subnet = Subnet6List.at(0);
+        Subnet6List.removeAt(0);
+        delete subnet;
+    }
+
+    if (!noEmit) {
+        emit dataChanged();
+        emit data4Changed();
+        emit data6Changed();
+        emit modelEmptied();
+    };
 
 }
 
 int SM_ModelBackend::count()
 {
-
     return SubnetList.count();
 }
 
@@ -87,101 +121,6 @@ int SM_ModelBackend::count6()
 int SM_ModelBackend::count4()
 {
     return Subnet4List.count();
-}
-
-bool SM_ModelBackend::loadFromXmlStream (QXmlStreamReader &stream)
-{
-    // remove existing Map from memory
-    clearData();
-    stream.setNamespaceProcessing(false);
-
-    bool foundMap=false;
-
-    stream.readNext();
-    while((!stream.name().toString().compare("SubnetMap"))&(!stream.atEnd())) stream.readNext();
-
-    if (!stream.atEnd()) {
-        foundMap=true;
-        qDebug("XML: Found SubnetMap Tag at line %llu...",stream.lineNumber());
-    }
-
-    // parse it all!!
-    while (!stream.atEnd()&foundMap) {
-
-        stream.readNext();
-
-        // subnet starts
-        if ((stream.name()=="subnet")&(!stream.isEndElement())) {
-
-            QXmlStreamAttributes attrs=stream.attributes();
-            if (attrs.hasAttribute("ipversion")) {
-
-                QStringRef ver = attrs.value("ipversion");
-
-                qDebug("subnet found! (%s)",qPrintable(ver.toString()));
-
-                Subnet *newSubnet=NULL;
-
-                if (ver=="IPv4") newSubnet = new Subnet_v4(this);
-                if (ver=="IPv6") newSubnet = new Subnet_v6(this);
-
-                QString currentSection="";
-
-                stream.readNext();
-
-                while ((!stream.atEnd())&((!(stream.name()=="subnet")))) {
-
-                    // check for Elememtn start. if yes, store the current element in currentSection.
-                    if (stream.isStartElement()) {
-
-                        qDebug("XML parser: Found %s section in line: %llu",qPrintable(stream.name().toString()),stream.lineNumber());
-
-                        currentSection=stream.name().toString();
-
-                        // If notan element start, parse the data into the fitting variable specified by currentSection.
-                    } else if ((stream.isCharacters())&!(stream.isWhitespace())) {
-
-                        qDebug("Data: %s (%s)",qPrintable(stream.text().toString()),qPrintable(stream.name().toString()));
-
-                        QString momData=stream.text().toString();
-
-                        if (currentSection=="identifier") newSubnet->setIdentifier(momData);
-                        if (currentSection=="description") newSubnet->setDescription(momData);
-                        if (currentSection=="notes") newSubnet->setDescription(momData);
-                        if (currentSection=="color") {
-                            QColor newcolor = QColor(momData);
-                            newSubnet->setColor(newcolor);
-                        }
-
-                        if (ver=="IPv4") {
-                            if (currentSection=="address") ((Subnet_v4*)newSubnet)->setIP(momData);
-                            if (currentSection=="netmask") ((Subnet_v4*)newSubnet)->setNM(momData);
-                        } else if (ver=="IPv6") {
-                            if (currentSection=="address") ((Subnet_v6*)newSubnet)->setIP(momData);
-                            if (currentSection=="netmask") ((Subnet_v6*)newSubnet)->setNM(momData);
-                        }
-
-                    }
-
-                    stream.readNext();
-                }
-
-                qDebug("XML Parser: End of Subnet Element. Saving object To Model. Dumping final object data:");
-                SubnetList.append(newSubnet);
-                newSubnet->dumpAll();
-
-            }
-
-            // subnet ends
-        }
-
-    };
-
-    // reset();
-
-    if (foundMap) return true;
-    else return false;
-
 }
 
 bool SM_ModelBackend::loadFromDomDoc (QDomDocument &doc)
@@ -206,7 +145,12 @@ bool SM_ModelBackend::loadFromDomDoc (QDomDocument &doc)
 
     // now we know its one of ours.
 
-    clearData();
+    // we can clear all data now, but we do emit only the message to notify
+    // everyone about the emptied model. The change-signals wil be emitted
+    // at the end of this function. This makes sure that no widget will work
+    // without a valid reason at this point.
+    clearData(true);
+    emit modelEmptied();
 
     QDomNodeList subnetNodes = docElem.elementsByTagName("subnet");
 
@@ -305,7 +249,9 @@ bool SM_ModelBackend::loadFromDomDoc (QDomDocument &doc)
 
     sortData();
 
-    // reset();
+    emit data4Changed();
+    emit data6Changed();
+    emit dataChanged();
 
     return true;
 
@@ -319,7 +265,7 @@ bool SM_ModelBackend::saveToXmlStream(QXmlStreamWriter &stream)
     stream.writeStartElement("SubnetMap");
     stream.writeAttribute("fileformat", "2");
     stream.writeAttribute("writer", "SubnetMapper");
-    stream.writeAttribute("version", "2.0.0");
+    stream.writeAttribute("version", qApp->applicationVersion().toUtf8());
 
     for (int row = 0; row < SubnetList.count(); ++row) {
 
@@ -388,8 +334,12 @@ void SM_ModelBackend::sortData()
 void SM_ModelBackend::dumpAllSubnets()
 {
 
-    qDebug("---vv START vv----------------------------------------------------> dumpAllSubnets() <---");
+    qDebug("--- START  | all vv-----------------------------------------------> dumpAllSubnets() <---");
     for (int i=0;i<SubnetList.count();i++) qDebug("%s",qPrintable(SubnetList.at(i)->toString()));
-    qDebug("---^^  END  ^^----------------------------------------------------> dumpAllSubnets() <---");
+    qDebug("--- all ^^ | IPv4 vv----------------------------------------------> dumpAllSubnets() <---");
+    for (int i=0;i<Subnet4List.count();i++) qDebug("%s",qPrintable(Subnet4List.at(i)->toString()));
+    qDebug("---IPv4 ^^ | IPv6 vv----------------------------------------------> dumpAllSubnets() <---");
+    for (int i=0;i<Subnet6List.count();i++) qDebug("%s",qPrintable(Subnet6List.at(i)->toString()));
+    qDebug("---IPv6 ^^ | END  ------------------------------------------------> dumpAllSubnets() <---");
 
 }

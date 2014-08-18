@@ -38,16 +38,17 @@ public:
     ~SM_ModelBackend();
 
     Subnet* getSubnet(int index);
+    Subnet* getSubnet4(int index);
+    Subnet* getSubnet6(int index);
+
     void addSubnet(Subnet *subnet);
-    void clearData();
+    void clearData(bool noEmit = false);
 
     int count();
     int count6();
     int count4();
 
-    bool loadFromXmlStream (QXmlStreamReader &stream);
     bool loadFromDomDoc (QDomDocument &doc);
-
     bool saveToXmlStream(QXmlStreamWriter &stream);
 
     static bool SubnetLessThan(const Subnet* s1, const Subnet* s2);
@@ -57,13 +58,24 @@ public:
 
 signals:
 
+    // all controllers who work with both IP versions should connect to this
+    void dataChanged();
+    // all controllers who only work with IPv4 should connect to this
+    // and update their views when emitted
+    void data4Changed();
+    // all controllers who only work with IPv6 should connect to this
+    // and update their views when emitted
+    void data6Changed();
+    // all controlles should connect to this and clear their views if emitted
+    void modelEmptied();
+
 public slots:
 
 private:
 
-    QList<Subnet*>  SubnetList;
-    QList<Subnet*>  Subnet4List;
-    QList<Subnet*>  Subnet6List;
+    QList<Subnet*> SubnetList;
+    QList<Subnet*> Subnet4List;
+    QList<Subnet*> Subnet6List;
 
 
 };
