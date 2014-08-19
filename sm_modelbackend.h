@@ -42,7 +42,11 @@ public:
     Subnet* getSubnet6(int index);
 
     void addSubnet(Subnet *subnet);
+    void removeSubnet(Subnet *subnet);
+    void removeSubnet(int index);
     void clearData(bool noEmit = false);
+
+    int getSelectedIndex();
 
     void changedData();
     void changedData4();

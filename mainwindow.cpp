@@ -21,7 +21,6 @@
 
 #include "mainwindow.h"
 #include <iostream>
-#include "sm_datamodel.h"
 #include <QSplitter>
 #include <QTableView>
 #include <QToolBar>
@@ -38,7 +37,6 @@
 #include "sm_ipv6editdialog.h"
 #include "sm_subnetwidget.h"
 #include "sm_subnet6widget.h"
-#include "sm_model6proxy.h"
 #include <QScrollArea>
 #include <QMessageBox>
 #include <QSlider>
@@ -146,9 +144,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(addIPv6Action, SIGNAL(triggered()), this, SLOT(addIPv6Subnet()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
     connect(printAction,SIGNAL(triggered()),this,SLOT(printFile()));
-    connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),map,SLOT(dataHasChanged()));
-    connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),this,SLOT(modelDataHasChanged()));
-    connect(selectionModel,SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(selectionChanged()));
+    connect(modelBackend,SIGNAL(dataChanged()),this,SLOT(modelDataHasChanged()));
+    connect(modelBackend,SIGNAL(data4Changed()),this,SLOT(modelDataHasChanged()));
+    connect(modelBackend,SIGNAL(data6Changed()),this,SLOT(modelDataHasChanged()));
     connect(editAction, SIGNAL(triggered()),this,SLOT(editCurrentSubnet()));
     connect(deleteAction,SIGNAL(triggered()),this,SLOT(deleteCurrentSubnet()));
     connect(showInfoAction,SIGNAL(triggered()),this,SLOT(showInfoPane()));
@@ -167,6 +165,7 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbar->addAction(printAction);
     toolbar->addAction(addIPv4Action);
     toolbar->insertSeparator(addIPv4Action);
+    toolbar->addAction(addIPv6Action);
     toolbar->addAction(addIPv6Action);
     toolbar->addAction(editAction);
     toolbar->addAction(deleteAction);
@@ -270,8 +269,6 @@ MainWindow::~MainWindow()
   modelBackend->clearData();
   delete modelBackend;
 
-  model->clearData();
-  delete model;
 }
 
 QSize MainWindow::sizeHint() const
@@ -293,12 +290,10 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     QWidget::resizeEvent(event);
 }
 
-
 void MainWindow::setupModel()
 {
     qDebug("Setting up Models...");
     QSettings settings;
-    model = new SM_DataModel(this);
 
     // initialize the new model backend
     modelBackend = new SM_ModelBackend(this);
@@ -400,25 +395,20 @@ void MainWindow::setupViews()
 
     connect(autoResizeOption,SIGNAL(clicked()),this,SLOT(autoResizeClicked()));
 
-    connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),infoDock,SLOT(updateSubnet()));
+    connect(modelBackend,SIGNAL(dataChanged()),infoDock,SLOT(updateSubnet()));
+    connect(modelBackend,SIGNAL(data4Changed()),infoDock,SLOT(updateSubnet()));
+    connect(modelBackend,SIGNAL(data6Changed()),infoDock,SLOT(updateSubnet()));
     connect(modelBackend,SIGNAL(data4Changed()),map,SLOT(dataHasChanged()));
     connect(modelBackend,SIGNAL(dataChanged()),map,SLOT(dataHasChanged()));
 
-    // bind our model to the views. Be advised that SM_subnetwidget is  not a Model/View aware class, but
-    // only emulates this behaviour in necessary boundaries to retrieve its data from the model and the selection.
-    // Do not try fancy stuff with this class (without knowing what you do, of course)!
-    table->setModel(model);
+    // bind our model to the views
 
-    selectionModel = new QItemSelectionModel(model);
-    table->setSelectionModel(selectionModel);
     table->setSortingEnabled(false);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
 
     map->setModelBackend(modelBackend);
 
-    map6->setModel(model);
-    map6->setSelectionModel(selectionModel);
     map6->setSortingEnabled(false);
     map6->setSelectionBehavior(QAbstractItemView::SelectRows);
     map6->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -533,7 +523,6 @@ void MainWindow::openFile(const QString &path)
 
 
             result=false;
-            result=((SM_DataModel*)model)->loadFromDomDoc(doc);
             result=modelBackend->loadFromDomDoc(doc);
 
             file.close();
@@ -565,8 +554,7 @@ void MainWindow::saveFile()
         QXmlStreamWriter stream(&file);
 
         if (file.open(QFile::WriteOnly | QFile::Text)) {
-
-            ((SM_DataModel*)model)->saveToXmlStream(stream);
+            modelBackend->saveToXmlStream(stream);
         }
 
         file.close();
@@ -616,13 +604,13 @@ void MainWindow::addIPv4Subnet()
 
         bool isNotOverlappingWithAnything=true;
 
-        for (int i=0;i<((SM_DataModel*)model)->rowCount();i++) {
-            if (((SM_DataModel*)model)->getSubnet(i)->isV4())
-                if (((Subnet_v4*)(((SM_DataModel*)model)->getSubnet(i)))->overlapsWith(*((Subnet_v4*)newSubnet)))
+        for (int i=0;i<modelBackend->count();i++) {
+            if (modelBackend->getSubnet(i)->isV4())
+                if (((Subnet_v4*)(modelBackend->getSubnet(i)))->overlapsWith(*((Subnet_v4*)newSubnet)))
                     isNotOverlappingWithAnything=false;
         }
 
-        if (isNotOverlappingWithAnything) ((SM_DataModel*)model)->addSubnet(newSubnet);
+        if (isNotOverlappingWithAnything) modelBackend->addSubnet(newSubnet);
         else {
             QMessageBox msgBox;
             msgBox.setText("The Subnet you specified overlaps with an existing subnet.");
@@ -630,11 +618,6 @@ void MainWindow::addIPv4Subnet()
             msgBox.setDetailedText("The overlapping of subnets in a single map is not allowed in SubnetMapper. The author of this program cannot think of a situation in the real world where this could be an advisable situation. If you find yourself in a mess like this, please think it over, stuff like that always catches up with you at a later point in time, when you are actually least expecting it.");
             msgBox.exec();
         }
-
-        /* if (isNotOverlappingWithAnything) {  // not really necessary anymore, addSubnet triggers redraw
-            mapWasAltered();
-            map->repaint();
-        };*/
 
     }
 
@@ -661,13 +644,13 @@ void MainWindow::addIPv6Subnet()
 
         bool isNotOverlappingWithAnything=true;
 
-        for (int i=0;i<((SM_DataModel*)model)->rowCount();i++) {
-            if (((SM_DataModel*)model)->getSubnet(i)->isV6())
-                if (((Subnet_v6*)(((SM_DataModel*)model)->getSubnet(i)))->overlapsWith(*((Subnet_v6*)newSubnet)))
+        for (int i=0;i<modelBackend->count();i++) {
+            if (modelBackend->getSubnet(i)->isV6())
+                if (((Subnet_v6*)(modelBackend->getSubnet(i)))->overlapsWith(*((Subnet_v6*)newSubnet)))
                     isNotOverlappingWithAnything=false;
         }
 
-        if (isNotOverlappingWithAnything) ((SM_DataModel*)model)->addSubnet(newSubnet);
+        if (isNotOverlappingWithAnything) modelBackend->addSubnet(newSubnet);
         else {
             QMessageBox msgBox;
             msgBox.setText("The Subnet you specified overlaps with an existing subnet.");
@@ -676,11 +659,7 @@ void MainWindow::addIPv6Subnet()
             msgBox.exec();
         }
 
-        mapWasAltered();
-        map->repaint();
-
     }
-
 
 }
 
@@ -705,9 +684,10 @@ void MainWindow::searchFieldCleared()
 void MainWindow::deleteCurrentSubnet()
 {
     infoDock->setSubnet(0);
-    if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) {
-        model->removeRows(selectionModel->currentIndex().row(),1);
-        mapWasAltered();
+
+    int selection=modelBackend->getSelectedIndex();
+    if (selection<=modelBackend->count()) {
+        modelBackend->removeSubnet(selection);
     };
 }
 
@@ -743,8 +723,10 @@ void MainWindow::modelDataHasChanged()
 
 void MainWindow::selectionChanged()
 {
-    if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) {
-        infoDock->setSubnet(model->getSubnet(selectionModel->currentIndex().row()));
+    int selection=modelBackend->getSelectedIndex();
+
+    if (selection<=modelBackend->count()) {
+        infoDock->setSubnet(modelBackend->getSubnet(selection));
     } else infoDock->setSubnet(0);
 }
 

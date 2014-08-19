@@ -447,19 +447,11 @@ void SM_SubnetWidget::selAnimTimerTriggered()
 
 void SM_SubnetWidget::editCurrentSubnet()
 {
-    bool selectedSubnetFound=false;
-    int selectedSubnetIndex=0;
+    int selection=modelBackend->getSelectedIndex();
 
-    for (int i=0;i<modelBackend->count();i++) {
-        if ((modelBackend->getSubnet(i)->isV4())&(((Subnet_v4*)modelBackend->getSubnet(i))->getSelected())) {
-            selectedSubnetFound=true;
-            selectedSubnetIndex=i;
-        };
-    };
+    if (selection<=modelBackend->count()) {
 
-    if (selectedSubnetFound) {
-
-        Subnet *momsubnet=modelBackend->getSubnet(selectedSubnetIndex);
+        Subnet *momsubnet=modelBackend->getSubnet(selection);
 
         if (momsubnet) {
             if (momsubnet->isV4()) {

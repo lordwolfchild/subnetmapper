@@ -58,6 +58,70 @@ Subnet* SM_ModelBackend::getSubnet6(int index)
 
 }
 
+// returns selected Index or subnetList.count+1
+int SM_ModelBackend::getSelectedIndex()
+{
+    bool selectedSubnetFound=false;
+    int selectedSubnetIndex=0;
+
+    for (int i=0;i<SubnetList.count();i++) {
+        if ((SubnetList.at(i)->isV4())&(((Subnet_v4*)SubnetList.at(i))->getSelected())) {
+            selectedSubnetFound=true;
+            selectedSubnetIndex=i;
+        };
+    };
+
+    if (selectedSubnetFound) return selectedSubnetIndex;
+    else return SubnetList.count()+1;
+}
+
+
+void SM_ModelBackend::removeSubnet(Subnet *subnet)
+{
+    QMessageBox msgBox;
+
+    if (subnet==NULL) return;
+    else {
+
+        int numberOfDeletions=SubnetList.removeAll(subnet)+Subnet4List.removeAll(subnet)+Subnet6List.removeAll(subnet);
+        if (numberOfDeletions==0) {
+            msgBox.setText("Warning: Deletion failed, no reference to this Subnet found.");
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setDetailedText("You tried to delete a subnet which was not found in the data backend. This should not happen and is most probably a bad bug in this software.");
+            msgBox.exec();
+            qDebug("Deletion failed, no reference to this Subnet found.");
+            return;
+        }
+        if (numberOfDeletions==2) {
+            delete subnet;
+            emit dataChanged();
+            emit data4Changed();
+            emit data6Changed();
+            return;
+        }
+        if (numberOfDeletions>2) {
+            msgBox.setText("Warning: Deletion failed, too many references to this Subnet found.");
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setDetailedText("You tried to delete a subnet which was found too often in the data backend. This should not happen and is most probably a bad bug in this software. The data storage seems to be massively inconsistent. Do not save this mess!");
+            msgBox.exec();
+            qDebug("Deletion failed, too many references to this Subnet found... Data inconsistent. Do not save this mess!");
+            // We delete it anyway, because we DO clean up after ourselves...
+            delete subnet;
+            emit dataChanged();
+            emit data4Changed();
+            emit data6Changed();
+            return;
+        }
+    };
+
+}
+
+void SM_ModelBackend::removeSubnet(int index)
+{
+
+    removeSubnet(SubnetList.at(index));
+
+}
 
 void SM_ModelBackend::addSubnet(Subnet *subnet)
 {

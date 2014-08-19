@@ -13,7 +13,6 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     subnet.cpp \
     subnet_v6.cpp \
-    sm_datamodel.cpp \
     subnet_v4.cpp \
     sm_ipv4editdialog.cpp \
     sm_ipv6editdialog.cpp \
@@ -23,13 +22,11 @@ SOURCES += main.cpp\
     sm_infodockwidget.cpp \
     sm_configdialog.cpp \
     sm_subnet6widget.cpp \
-    sm_model6proxy.cpp \
     sm_modelbackend.cpp
 
 HEADERS  += mainwindow.h \
     subnet.h \
     subnet_v6.h \
-    sm_datamodel.h \
     subnet_v4.h \
     sm_ipv4editdialog.h \
     sm_ipv6editdialog.h \
@@ -39,7 +36,6 @@ HEADERS  += mainwindow.h \
     sm_infodockwidget.h \
     sm_configdialog.h \
     sm_subnet6widget.h \
-    sm_model6proxy.h \
     sm_modelbackend.h
 
 FORMS    += \
