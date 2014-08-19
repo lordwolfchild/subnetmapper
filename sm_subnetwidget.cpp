@@ -498,6 +498,7 @@ void SM_SubnetWidget::editCurrentSubnet()
                         momsubnet_v4->setIdentifier(momid);
                         momsubnet_v4->setColor(momcolor);
                         ((MainWindow*)window())->mapWasAltered();
+                        modelBackend->changedData4();
                     } else {
                         QMessageBox msgBox;
                         msgBox.setText("The Subnet you specified overlaps with an existing subnet.");

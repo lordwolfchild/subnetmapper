@@ -44,6 +44,10 @@ public:
     void addSubnet(Subnet *subnet);
     void clearData(bool noEmit = false);
 
+    void changedData();
+    void changedData4();
+    void changedData6();
+
     int count();
     int count6();
     int count4();

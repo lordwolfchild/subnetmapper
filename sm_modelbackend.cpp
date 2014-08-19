@@ -73,6 +73,24 @@ void SM_ModelBackend::addSubnet(Subnet *subnet)
     };
 }
 
+void SM_ModelBackend::changedData()
+{
+    qDebug("SM_ModelBackend: emitting dataChanged()");
+    emit dataChanged();
+}
+
+void SM_ModelBackend::changedData4()
+{
+    qDebug("SM_ModelBackend: emitting data4Changed()");
+    emit data4Changed();
+}
+
+void SM_ModelBackend::changedData6()
+{
+    qDebug("SM_ModelBackend: emitting data6Changed()");
+    emit data6Changed();
+}
+
 void SM_ModelBackend::clearData(bool noEmit)
 {
 
