@@ -401,6 +401,8 @@ void MainWindow::setupViews()
     connect(autoResizeOption,SIGNAL(clicked()),this,SLOT(autoResizeClicked()));
 
     connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)),infoDock,SLOT(updateSubnet()));
+    connect(modelBackend,SIGNAL(data4Changed()),map,SLOT(dataHasChanged()));
+    connect(modelBackend,SIGNAL(dataChanged()),map,SLOT(dataHasChanged()));
 
     // bind our model to the views. Be advised that SM_subnetwidget is  not a Model/View aware class, but
     // only emulates this behaviour in necessary boundaries to retrieve its data from the model and the selection.
@@ -629,10 +631,10 @@ void MainWindow::addIPv4Subnet()
             msgBox.exec();
         }
 
-        if (isNotOverlappingWithAnything) {
+        /* if (isNotOverlappingWithAnything) {  // not really necessary anymore, addSubnet triggers redraw
             mapWasAltered();
             map->repaint();
-        };
+        };*/
 
     }
 
