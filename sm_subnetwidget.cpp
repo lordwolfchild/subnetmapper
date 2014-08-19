@@ -37,8 +37,6 @@ SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
 {
     QSettings settings;
 
-    setModel(NULL);
-    setSelectionModel(NULL);
     setMinimumSize(400,400);
     selAnimState=0;
 
@@ -52,20 +50,9 @@ SM_SubnetWidget::SM_SubnetWidget(QWidget *parent) :
 
 }
 
-void SM_SubnetWidget::setModel(SM_DataModel *newmodel)
-{
-    model=newmodel;
-}
-
 void SM_SubnetWidget::setModelBackend(SM_ModelBackend *newmodel)
 {
     modelBackend=newmodel;
-}
-
-void SM_SubnetWidget::setSelectionModel(QItemSelectionModel *newselectionmodel)
-{
-    selectionModel=newselectionmodel;
-    if (selectionModel) connect(selectionModel,SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(selectionChangedInTable(QModelIndex,QModelIndex)));
 }
 
 bool SM_SubnetWidget::searchHosts(QString name)
@@ -133,7 +120,7 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     for (int i=0;i<modelBackend->count();i++) {
         if (modelBackend->getSubnet(i)->isV4()) {
             subnetsV4.insert(i);
-            ipv4cache[((((Subnet_v4*)(model->getSubnet(i)))->getIP())&(~((quint32)255)))].append(i);
+            ipv4cache[((((Subnet_v4*)(modelBackend->getSubnet(i)))->getIP())&(~((quint32)255)))].append(i);
             countV4++;
         } else {
             subnetsV6.insert(i);
@@ -450,12 +437,12 @@ void SM_SubnetWidget::mousePressEvent(QMouseEvent *event)
     if (event->button()==Qt::LeftButton) {
 
         bool foundClickedSubnet=false;
+
         for (int i=0;i<rectCache1_v4.count();i++) {
             if ((rectCache1_v4.at(i)->contains(event->x(),event->y()))|
                     (rectCache2_v4.at(i)->contains(event->x(),event->y())))
             {
                 (modelBackend->getSubnet(i))->setSelected(true);
-                selectionModel->setCurrentIndex(model->index(i,0),QItemSelectionModel::Select|QItemSelectionModel::Rows|QItemSelectionModel::Clear);
                 foundClickedSubnet=true;
             } else (modelBackend->getSubnet(i))->setSelected(false);
         }
@@ -465,11 +452,14 @@ void SM_SubnetWidget::mousePressEvent(QMouseEvent *event)
                     (rectCache2_v6.at(i)->contains(event->x(),event->y())))
             {
                 (modelBackend->getSubnet(i))->setSelected(true);
-                selectionModel->setCurrentIndex(model->index(i,0),QItemSelectionModel::Select|QItemSelectionModel::Rows|QItemSelectionModel::Clear);
                 foundClickedSubnet=true;
             } else (modelBackend->getSubnet(i))->setSelected(false);
         }
-        if (!foundClickedSubnet) selectionModel->clearSelection();
+
+        // missed all of them, so kill all selections
+        if (!foundClickedSubnet) {
+            for (int i=0;i<modelBackend->count();i++) (modelBackend->getSubnet(i))->setSelected(false);
+        }
 
         repaint();
     }
@@ -518,9 +508,19 @@ void SM_SubnetWidget::selAnimTimerTriggered()
 
 void SM_SubnetWidget::editCurrentSubnet()
 {
-    if ((selectionModel->currentIndex().isValid())&(selectionModel->hasSelection())) {
+    bool selectedSubnetFound=false;
+    int selectedSubnetIndex=0;
 
-        Subnet *momsubnet=modelBackend->getSubnet(selectionModel->currentIndex().row());
+    for (int i=0;i<modelBackend->count();i++) {
+        if ((modelBackend->getSubnet(i)->isV4())&(((Subnet_v4*)modelBackend->getSubnet(i))->getSelected())) {
+            selectedSubnetFound=true;
+            selectedSubnetIndex=i;
+        };
+    };
+
+    if (selectedSubnetFound) {
+
+        Subnet *momsubnet=modelBackend->getSubnet(selectedSubnetIndex);
 
         if (momsubnet) {
             if (momsubnet->isV4()) {
