@@ -91,11 +91,10 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     modelBackend->sortData();
     clearCache();
 
-    int countV6=0;
     int countV4=0;
 
-    // caches the row indices of v4/v6 Subnets seperately.
-    QSet<uint> subnetsV4,subnetsV6;
+    // caches the row indices of v4/v6 Subnets separate.
+    QSet<uint> subnetsV4;
 
     // This will store a structure of prefixes that are to be rendered on the same line. Something like:
     // ipv4cache[Subnet::String2IP("192.168.0.0")].append(8);
@@ -103,12 +102,6 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     // ... if Index #8 and #10 are in the same subnet (and henceforth in the same line). Then we only need
     // to iterate this structure to ease up the whole rendering process.
     QMap< quint32, QList<uint> > ipv4cache;
-
-    // We would do the same for IPv6, but as we need longer prefixes here, we use string representations instead.
-    // As we would have to do some serious magic here to speed up things we just hope that string handling will not
-    // take too much cpu time... *fingerscrossed*. That method has the advantange, that we do not need the
-    // Subnet Helpers for conversion all the time. ;)
-    QMap< QString, QList<uint> > ipv6cache;
 
     // stores a list of coordinates for placement of the host pins, if a search is available
     QList<QPoint*> pinList;
@@ -122,11 +115,6 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
             subnetsV4.insert(i);
             ipv4cache[((((Subnet_v4*)(modelBackend->getSubnet(i)))->getIP())&(~((quint32)255)))].append(i);
             countV4++;
-        } else {
-            subnetsV6.insert(i);
-            QString momip = (modelBackend->getSubnet(i)->toString());
-            ipv6cache[momip.left(34)].append(i);
-            countV6++;
         };
     };
 
@@ -146,7 +134,6 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
     QPen grayDashed= QPen( Qt::gray,1,Qt::DashLine);
 
     uint y_internetwork_spacer = 2*line_height;
-    uint y_interversion_spacer = 5*line_height;
 
     // a helper to make the point calculations more readable. holds the offset for each block of the graphs.
     uint y_local_offset = general_margin + y_offset;
@@ -327,35 +314,6 @@ void SM_SubnetWidget::paintJob(QPainter *painter, QRect paintArea)
 
     // 1.3 Draw Extras for IPv4
 
-    // stores the offset which the ipv6 block always has through the ipv4 block
-    uint y_offset_ipv6 = general_margin + ((y_offset + (line_height*(ipv4cache.count()+1)))*2) + y_internetwork_spacer + y_interversion_spacer;
-
-    y_local_offset = y_offset_ipv6 + y_offset;
-
-    // 2.1 Draw legend for IPv6
-
-//    painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
-//    painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
-//    painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
-//    painter->setPen(Qt::gray);
-//    painter->drawText(general_margin,y_local_offset,x_offset,line_height,Qt::AlignLeft|Qt::AlignVCenter,"IPv6 Block 1");
-//    painter->setPen(Qt::black);
-
-
-//    y_local_offset = y_offset_ipv6 + y_offset + (line_height*(ipv6cache.count()+1)) + y_internetwork_spacer;
-
-//    painter->drawLine(QPoint(general_margin+x_offset,y_local_offset),QPoint(general_margin+x_offset, y_local_offset+(line_height*(ipv6cache.count()+1))));
-//    painter->drawLine(QPoint(general_margin+x_offset+x_width, y_local_offset),QPoint(general_margin+x_offset+x_width,y_local_offset+(line_height*(ipv6cache.count()+1))));
-//    painter->drawLine(QPoint(general_margin,y_local_offset+line_height),QPoint(general_margin+x_offset+x_width,y_local_offset+line_height));
-//    painter->setPen(Qt::gray);
-//    painter->drawText(general_margin,y_local_offset,x_offset,line_height,Qt::AlignLeft|Qt::AlignVCenter,"IPv6 Block 2");
-//    painter->setPen(Qt::black);
-
-
-    // 2.2 Draw IPv6 subnets
-
-    // 2.3 Draw Extras for IPv6
-
     // resize the widget to the needed size WITHOUT IPv6 networks
     resize((2*general_margin)+(2*x_offset)+x_width, y_local_offset+(line_height*(ipv4cache.count()+1))+y_offset+general_margin);
 
@@ -447,15 +405,6 @@ void SM_SubnetWidget::mousePressEvent(QMouseEvent *event)
             } else (modelBackend->getSubnet(i))->setSelected(false);
         }
 
-        for (int i=0;i<rectCache1_v6.count();i++) {
-            if ((rectCache1_v6.at(i)->contains(event->x(),event->y()))|
-                    (rectCache2_v6.at(i)->contains(event->x(),event->y())))
-            {
-                (modelBackend->getSubnet(i))->setSelected(true);
-                foundClickedSubnet=true;
-            } else (modelBackend->getSubnet(i))->setSelected(false);
-        }
-
         // missed all of them, so kill all selections
         if (!foundClickedSubnet) {
             for (int i=0;i<modelBackend->count();i++) (modelBackend->getSubnet(i))->setSelected(false);
@@ -484,16 +433,6 @@ void SM_SubnetWidget::clearCache()
         delete rectCache2_v4.at(i);
     }
     rectCache2_v4.clear();
-
-    for (int i=0;i<rectCache1_v6.count();i++) {
-        delete rectCache1_v6.at(i);
-    }
-    rectCache1_v6.clear();
-
-    for (int i=0;i<rectCache2_v6.count();i++) {
-        delete rectCache2_v6.at(i);
-    }
-    rectCache2_v6.clear();
 
     // this ones members we do not need to delete - all the Rects have already been deleted in the statements before through their respective cache cleanups
     selectionCache.clear();
@@ -571,61 +510,6 @@ void SM_SubnetWidget::editCurrentSubnet()
                         repaint();
                     };
 
-                }
-
-
-
-            } else {
-                //edit IPv6
-                SM_IPv6EditDialog editor(this);
-                Subnet_v6 *momsubnet_v6 = (Subnet_v6*)momsubnet;
-                QColor momColor=momsubnet->getColor();
-
-                QPair<quint64,quint64> ip = momsubnet_v6->getIP();
-                QPair<quint64,quint64> nm = momsubnet_v6->getNM();
-
-                editor.setDescription(momsubnet_v6->getDescription());
-                editor.setIdentifier(momsubnet_v6->getIdentifier());
-                editor.setIP(Subnet_v6::IP2String(ip));
-                editor.setNM(Subnet_v6::IP2String(nm));
-                editor.setColor(momColor);
-                editor.updateFields();
-
-                editor.setModal(true);
-                if (editor.exec()==QDialog::Accepted) {
-
-                    QString momdesc = editor.getDescription();
-                    QString momid = editor.getIdentifier();
-                    QColor momcolor = editor.getColor();
-                    QString momIP = editor.getIP();
-                    QString momNM = editor.getNM();
-
-                    bool isNotOverlappingWithAnything=true;
-
-                    for (int i=0;i<modelBackend->count();i++) {
-                        if (modelBackend->getSubnet(i)->isV6())
-                            if (((Subnet_v6*)(modelBackend->getSubnet(i)))->overlapsWith(*(momsubnet_v6)))
-                                isNotOverlappingWithAnything=false;
-                    }
-
-                    if (isNotOverlappingWithAnything) {
-                        momsubnet_v6->setIP(momIP);
-                        momsubnet_v6->setNM(momNM);
-                        momsubnet_v6->setDescription(momdesc);
-                        momsubnet_v6->setIdentifier(momid);
-                        momsubnet_v6->setColor(momcolor);
-                        ((MainWindow*)window())->mapWasAltered();
-                    } else {
-                        QMessageBox msgBox;
-                        msgBox.setText("The Subnet you specified overlaps with an existing subnet.");
-                        msgBox.setIcon(QMessageBox::Critical);
-                        msgBox.setDetailedText("The overlapping of subnets in a single map is not allowed in SubnetMapper. The author of this program cannot think of a situation in the real world where this could be an advisable situation. If you find yourself in a mess like this, please think it over, stuff like that always catches up with you at a later point in time, when you are actually least expecting it.");
-                        msgBox.exec();
-                    }
-
-                    if (isNotOverlappingWithAnything) {
-                        repaint();
-                    };
                 }
 
             }
