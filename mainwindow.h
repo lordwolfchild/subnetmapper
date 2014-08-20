@@ -27,6 +27,7 @@
 #include "sm_subnetwidget.h"
 #include "sm_subnet6widget.h"
 #include <QTableWidget>
+#include <QTreeWidget>
 #include <QTabWidget>
 #include "sm_infodockwidget.h"
 #include "sm_modelbackend.h"
@@ -79,6 +80,7 @@ public slots:
 
     void mapWasAltered();
     void updateSubnetTable();
+    void updateIPv6Map();
     void subnetTableItemChanged(QTableWidgetItem * current, QTableWidgetItem * previous);
     void subnetTableSelectRow(int index);
 
@@ -100,7 +102,7 @@ private:
     QList<QString> recentDocs;
     SM_ModelBackend *modelBackend;
     SM_SubnetWidget *map;
-    SM_Subnet6Widget *map6;
+    QTreeWidget *map6;
     QTableWidget *table;
     QLineEdit *searchField;
     QSpinBox *ipv6Scale;

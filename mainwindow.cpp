@@ -346,7 +346,7 @@ void MainWindow::setupViews()
     tabArea->addTab(momipv4widget,tr("IPv4 Map"));
 
     QVBoxLayout *ipv6layout=new QVBoxLayout;
-    map6 = new SM_Subnet6Widget();
+    map6 = new QTreeWidget();
     ipv6layout->addWidget(ipv6toolbar);
     // TODO: Add real map here
     //ipv6layout->addWidget(new QWidget());
@@ -782,6 +782,7 @@ void MainWindow::modelDataHasChanged()
 {
     std::cout << "MainWindow::modelDataHasChanged() called..." << std::endl;
     updateSubnetTable();
+    updateIPv6Map();
 }
 
 void MainWindow::selectionChanged()
@@ -848,3 +849,29 @@ void MainWindow::resetTitle()
     setWindowTitle(tr("SubnetMapper V")+qApp->applicationVersion());
 }
 
+void MainWindow::updateIPv6Map()
+{
+    map6->clear();
+
+
+    int selectedItem=modelBackend->getSelectedIndex();
+
+    //qDebug("MainWindow::updateSubnetTable(): %d subnets found. adding to table...",modelBackend->count());
+
+    for (int i=0;i<modelBackend->count();i++) {
+        QStringList mom;
+        mom.append(modelBackend->getSubnet(i)->getIdentifier());
+        QTreeWidgetItem *itemColIdentifier=new QTreeWidgetItem(mom);
+        map6->addTopLevelItem(itemColIdentifier);
+        //qDebug("MainWindow::updateSubnetTable(): %d. item of %d added.",i,modelBackend->count());
+        if (i==selectedItem) itemColIdentifier->setSelected(true);
+    };
+
+
+    //map6->scrollToItem(table->item(selectedItem,0),QAbstractItemView::PositionAtCenter);
+
+
+    qDebug("MainWindow::updateIPv6Map(): finished.");
+
+
+}
