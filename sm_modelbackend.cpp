@@ -65,11 +65,22 @@ int SM_ModelBackend::getSelectedIndex()
     int selectedSubnetIndex=0;
 
     for (int i=0;i<SubnetList.count();i++) {
-        if ((SubnetList.at(i)->isV4())&(((Subnet_v4*)SubnetList.at(i))->getSelected())) {
+
+        // && imperative!! otherwise the right operand will be checked anyways and will produce
+        // a SEGV, because it simply is no (Subnet_v4*) as checked for on the left side...
+        if ((SubnetList.at(i)->isV4())&&(((Subnet_v4*)SubnetList.at(i))->getSelected())) {
+            selectedSubnetFound=true;
+            selectedSubnetIndex=i;
+        };
+
+        // && imperative!! otherwise the right operand will be checked anyways and will produce
+        // a SEGV, because it simply is no (Subnet_v4*) as checked for on the left side...
+        if ((SubnetList.at(i)->isV6())&&(((Subnet_v6*)SubnetList.at(i))->getSelected())) {
             selectedSubnetFound=true;
             selectedSubnetIndex=i;
         };
     };
+
 
     if (selectedSubnetFound) return selectedSubnetIndex;
     else return SubnetList.count()+1;
@@ -83,35 +94,58 @@ void SM_ModelBackend::removeSubnet(Subnet *subnet)
     if (subnet==NULL) return;
     else {
 
-        int numberOfDeletions=SubnetList.removeAll(subnet)+Subnet4List.removeAll(subnet)+Subnet6List.removeAll(subnet);
-        if (numberOfDeletions==0) {
-            msgBox.setText("Warning: Deletion failed, no reference to this Subnet found.");
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setDetailedText("You tried to delete a subnet which was not found in the data backend. This should not happen and is most probably a bad bug in this software.");
-            msgBox.exec();
-            qDebug("Deletion failed, no reference to this Subnet found.");
-            return;
-        }
-        if (numberOfDeletions==2) {
+        if (subnet->isV4()) {
+            int numberOfDeletions=SubnetList.removeAll(subnet)+Subnet4List.removeAll(subnet);
             delete subnet;
-            emit dataChanged();
             emit data4Changed();
-            emit data6Changed();
-            return;
-        }
-        if (numberOfDeletions>2) {
-            msgBox.setText("Warning: Deletion failed, too many references to this Subnet found.");
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setDetailedText("You tried to delete a subnet which was found too often in the data backend. This should not happen and is most probably a bad bug in this software. The data storage seems to be massively inconsistent. Do not save this mess!");
-            msgBox.exec();
-            qDebug("Deletion failed, too many references to this Subnet found... Data inconsistent. Do not save this mess!");
-            // We delete it anyway, because we DO clean up after ourselves...
+            emit dataChanged();
+
+            if (numberOfDeletions<2)
+            {
+                msgBox.setText("Warning: Deletion failed, no reference to this Subnet found.");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setDetailedText("You tried to delete a subnet (V4) which was not found in the data backend. This should not happen and is most probably a bad bug in this software.");
+                msgBox.exec();
+                qDebug("SM_ModelBAckend::removeSubnet(Subnet*): deletion (V4) failed, less than two references were removed from list.");
+            };
+
+            if (numberOfDeletions>2)
+            {
+                msgBox.setText("Warning: Deletion failed, too many references to this Subnet found.");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setDetailedText("You tried to delete a subnet (V6) which was stored multiple times in the data backend. This should not happen and is most probably a bad bug in this software.");
+                msgBox.exec();
+                qDebug("SM_ModelBAckend::removeSubnet(Subnet*): deletion (V6) failed, more than two references were removed from list.");
+            };
+
+
+        } else {
+
+            int numberOfDeletions=SubnetList.removeAll(subnet)+Subnet6List.removeAll(subnet);
             delete subnet;
-            emit dataChanged();
-            emit data4Changed();
             emit data6Changed();
-            return;
+            emit dataChanged();
+
+            if (numberOfDeletions<2)
+            {
+                msgBox.setText("Warning: Deletion failed, no reference to this Subnet found.");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setDetailedText("You tried to delete a subnet which was not found in the data backend. This should not happen and is most probably a bad bug in this software. It would be wise not to save this file.");
+                msgBox.exec();
+                qDebug("SM_ModelBAckend::removeSubnet(Subnet*): deletion failed, less than two references were removed from list.");
+            };
+
+            if (numberOfDeletions>2)
+            {
+                msgBox.setText("Warning: Deletion failed, too many references to this Subnet found.");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setDetailedText("You tried to delete a subnet which was stored multiple times in the data backend. This should not happen and is most probably a bad bug in this software. It would be wise not to save this file.");
+                msgBox.exec();
+                qDebug("SM_ModelBAckend::removeSubnet(Subnet*): deletion failed, more than two references were removed from list.");
+            };
+
         }
+
     };
 
 }
@@ -135,6 +169,8 @@ void SM_ModelBackend::addSubnet(Subnet *subnet)
         Subnet6List.append(subnet);
         emit data6Changed();
     };
+
+    sortData();
 }
 
 void SM_ModelBackend::changedData()
@@ -420,4 +456,24 @@ void SM_ModelBackend::dumpAllSubnets()
     for (int i=0;i<Subnet6List.count();i++) qDebug("%s",qPrintable(Subnet6List.at(i)->toString()));
     qDebug("---IPv6 ^^ | END  ------------------------------------------------> dumpAllSubnets() <---");
 
+}
+
+// sets subnet with index as selected. returns false if no valid selection possible.
+bool SM_ModelBackend::selectIndex(int index)
+{
+    int currentSelection=getSelectedIndex();
+
+    if ((currentSelection!=index)&(currentSelection<SubnetList.count())) {
+        getSubnet(getSelectedIndex())->setSelected(false);
+        emit dataChanged();
+    };
+
+    if (index<SubnetList.count()) {
+        getSubnet(index)->setSelected(true);
+        emit dataChanged();
+    } else {
+        return false;
+    };
+
+    return true;
 }

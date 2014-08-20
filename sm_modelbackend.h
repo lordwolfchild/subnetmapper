@@ -47,6 +47,7 @@ public:
     void clearData(bool noEmit = false);
 
     int getSelectedIndex();
+    bool selectIndex(int index);
 
     void changedData();
     void changedData4();

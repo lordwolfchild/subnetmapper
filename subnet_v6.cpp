@@ -243,7 +243,7 @@ QPair<quint64,quint64> Subnet_v6::getFirstUsableIP()
     }
     else
         return getIP();
- }
+}
 
 
 QPair<quint64,quint64> Subnet_v6::getWildcard()

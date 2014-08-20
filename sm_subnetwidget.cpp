@@ -400,14 +400,14 @@ void SM_SubnetWidget::mousePressEvent(QMouseEvent *event)
             if ((rectCache1_v4.at(i)->contains(event->x(),event->y()))|
                     (rectCache2_v4.at(i)->contains(event->x(),event->y())))
             {
-                (modelBackend->getSubnet(i))->setSelected(true);
+                modelBackend->selectIndex(i);
                 foundClickedSubnet=true;
-            } else (modelBackend->getSubnet(i))->setSelected(false);
+            };
         }
 
         // missed all of them, so kill all selections
         if (!foundClickedSubnet) {
-            for (int i=0;i<modelBackend->count();i++) (modelBackend->getSubnet(i))->setSelected(false);
+            modelBackend->selectIndex(modelBackend->count()+1);
         }
 
         repaint();

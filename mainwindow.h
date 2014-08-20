@@ -26,7 +26,7 @@
 #include <QAbstractTableModel>
 #include "sm_subnetwidget.h"
 #include "sm_subnet6widget.h"
-#include <QTableView>
+#include <QTableWidget>
 #include <QTabWidget>
 #include "sm_infodockwidget.h"
 #include "sm_modelbackend.h"
@@ -78,6 +78,9 @@ private slots:
 public slots:
 
     void mapWasAltered();
+    void updateSubnetTable();
+    void subnetTableItemChanged(QTableWidgetItem * current, QTableWidgetItem * previous);
+    void subnetTableSelectRow(int index);
 
 private:
     void resetTitle();
@@ -98,7 +101,7 @@ private:
     SM_ModelBackend *modelBackend;
     SM_SubnetWidget *map;
     SM_Subnet6Widget *map6;
-    QTableView *table;
+    QTableWidget *table;
     QLineEdit *searchField;
     QSpinBox *ipv6Scale;
     SM_InfoDockWidget *infoDock;

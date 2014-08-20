@@ -307,6 +307,7 @@ void MainWindow::setupModel()
         openFile(qApp->arguments().at(1));
     }
     else if (settings.value("mainwindow/autoload_map",0)!=0) openFile(settings.value("mainwindow/autoload_map_path","").toString());
+
 }
 
 void MainWindow::setupViews()
@@ -316,7 +317,7 @@ void MainWindow::setupViews()
     splitter->setOrientation(Qt::Vertical);
     tabArea=new QTabWidget(this);
 
-    table = new QTableView;
+    table = new QTableWidget;
     QScrollArea *scroller = new QScrollArea;
     map = new SM_SubnetWidget(scroller);
 
@@ -400,12 +401,13 @@ void MainWindow::setupViews()
     connect(modelBackend,SIGNAL(data6Changed()),infoDock,SLOT(updateSubnet()));
     connect(modelBackend,SIGNAL(data4Changed()),map,SLOT(dataHasChanged()));
     connect(modelBackend,SIGNAL(dataChanged()),map,SLOT(dataHasChanged()));
+    connect(table,SIGNAL(currentItemChanged(QTableWidgetItem*,QTableWidgetItem*)),this,SLOT(subnetTableItemChanged(QTableWidgetItem*,QTableWidgetItem*)));
 
     // bind our model to the views
 
     table->setSortingEnabled(false);
-    table->setSelectionBehavior(QAbstractItemView::SelectRows);
-    table->setSelectionMode(QAbstractItemView::SingleSelection);
+    table->setSelectionBehavior(QTableWidget::SelectRows);
+    table->setSelectionMode(QTableWidget::SingleSelection);
 
     map->setModelBackend(modelBackend);
 
@@ -422,6 +424,7 @@ void MainWindow::setupViews()
 
     setCentralWidget(splitter);
 
+    modelDataHasChanged();
 }
 
 void MainWindow::addRecentDocument(QString filename)
@@ -543,6 +546,60 @@ void MainWindow::openFile(const QString &path)
     }
 }
 
+void MainWindow::updateSubnetTable()
+{
+    table->clear();
+
+    table->setRowCount(modelBackend->count());
+    table->setColumnCount(5);
+
+    QStringList headers;
+    headers.append("kgkih");
+    headers.append("Identifier");
+    headers.append("IP Address");
+    headers.append("Netmask");
+    headers.append("Description");
+    table->setHorizontalHeaderLabels(headers);
+
+    QTableWidgetItem *tableHeaderItem1 = new QTableWidgetItem(tr(""));
+    tableHeaderItem1->setIcon(QIcon(QPixmap(":info.svg")));
+    tableHeaderItem1->setTextAlignment(Qt::AlignHCenter);
+    table->setHorizontalHeaderItem(0,tableHeaderItem1);
+
+    int selectedItem=modelBackend->getSelectedIndex();
+
+    //qDebug("MainWindow::updateSubnetTable(): %d subnets found. adding to table...",modelBackend->count());
+
+    for (int i=0;i<modelBackend->count();i++) {
+        QTableWidgetItem *itemColColor=new QTableWidgetItem();
+        itemColColor->setBackgroundColor(modelBackend->getSubnet(i)->getColor());
+        if (modelBackend->getSubnet(i)->getNotes()!="") itemColColor->setIcon(QIcon(QPixmap(":info.svg")));
+        itemColColor->setTextAlignment(Qt::AlignHCenter);
+        QTableWidgetItem *itemColIdentifier=new QTableWidgetItem(modelBackend->getSubnet(i)->getIdentifier());
+        QTableWidgetItem *itemColIPAddress=new QTableWidgetItem(modelBackend->getSubnet(i)->toString());
+        QTableWidgetItem *itemColNetmask=new QTableWidgetItem(modelBackend->getSubnet(i)->getStrNM());
+        QTableWidgetItem *itemColDescription=new QTableWidgetItem(modelBackend->getSubnet(i)->getDescription());
+        table->setItem(i,0,itemColColor);
+        table->setItem(i,1,itemColIdentifier);
+        table->setItem(i,2,itemColIPAddress);
+        table->setItem(i,3,itemColNetmask);
+        table->setItem(i,4,itemColDescription);
+        //qDebug("MainWindow::updateSubnetTable(): %d. item of %d added.",i,modelBackend->count());
+        if (i==selectedItem) itemColColor->setSelected(true);
+        if (i==selectedItem) itemColIdentifier->setSelected(true);
+        if (i==selectedItem) itemColIPAddress->setSelected(true);
+        if (i==selectedItem) itemColNetmask->setSelected(true);
+        if (i==selectedItem) itemColDescription->setSelected(true);
+    };
+
+
+    table->scrollToItem(table->item(selectedItem,0),QAbstractItemView::PositionAtCenter);
+
+
+    //qDebug("MainWindow::updateSubnetTable(): finished.");
+
+};
+
 void MainWindow::saveFile()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
@@ -610,8 +667,10 @@ void MainWindow::addIPv4Subnet()
                     isNotOverlappingWithAnything=false;
         }
 
-        if (isNotOverlappingWithAnything) modelBackend->addSubnet(newSubnet);
-        else {
+        if (isNotOverlappingWithAnything) {
+            modelBackend->addSubnet(newSubnet);
+            mapWasAltered();
+        } else {
             QMessageBox msgBox;
             msgBox.setText("The Subnet you specified overlaps with an existing subnet.");
             msgBox.setIcon(QMessageBox::Critical);
@@ -650,8 +709,10 @@ void MainWindow::addIPv6Subnet()
                     isNotOverlappingWithAnything=false;
         }
 
-        if (isNotOverlappingWithAnything) modelBackend->addSubnet(newSubnet);
-        else {
+        if (isNotOverlappingWithAnything) {
+            modelBackend->addSubnet(newSubnet);
+            mapWasAltered();
+        } else {
             QMessageBox msgBox;
             msgBox.setText("The Subnet you specified overlaps with an existing subnet.");
             msgBox.setIcon(QMessageBox::Critical);
@@ -688,12 +749,14 @@ void MainWindow::deleteCurrentSubnet()
     int selection=modelBackend->getSelectedIndex();
     if (selection<=modelBackend->count()) {
         modelBackend->removeSubnet(selection);
+        mapWasAltered();
     };
 }
 
 void MainWindow::editCurrentSubnet()
 {
     if (map) map->editCurrentSubnet();
+    mapWasAltered();
 }
 
 void MainWindow::showInfoPane()
@@ -717,8 +780,8 @@ void MainWindow::showConfigDialog()
 
 void MainWindow::modelDataHasChanged()
 {
-    std::cout << "TEST" << std::endl;
-    table->reset();
+    std::cout << "MainWindow::modelDataHasChanged() called..." << std::endl;
+    updateSubnetTable();
 }
 
 void MainWindow::selectionChanged()
@@ -739,6 +802,27 @@ void MainWindow::autoResizeClicked()
         map->upscale();
     } else
         settings.setValue("mainwindow/autoresize",0);
+}
+
+void MainWindow::subnetTableItemChanged(QTableWidgetItem * current, QTableWidgetItem * previous)
+{
+    // if nothing changes, just quit, because we wuld fall in an endless loop otherwise
+    if (current==previous) return;
+
+    // if no selection available, do nothing. if else, select the item.
+    if (current!=NULL)
+    {
+        qDebug("MainWindow::subnetTableItemChanged(): new selection in subnetTable detected, row %d...",current->row());
+        modelBackend->selectIndex(current->row());
+        selectionChanged();
+    };
+}
+
+void MainWindow::subnetTableSelectRow(int index)
+{
+    if ((index>=0)&(index<modelBackend->count())){
+        modelBackend->selectIndex(index);
+    }
 }
 
 void MainWindow::killAutoResize()
@@ -763,3 +847,4 @@ void MainWindow::resetTitle()
 {
     setWindowTitle(tr("SubnetMapper V")+qApp->applicationVersion());
 }
+
