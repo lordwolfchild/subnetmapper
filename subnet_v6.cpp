@@ -706,7 +706,12 @@ bool Subnet_v6::isLessThan(Subnet *subnet)
 
     if (subnet->isV4()) return false;
 
-    return (toString()<(subnet->toString()));
+    QString momMe=toString();
+    momMe=normalizeIP(momMe);
+    QString momHe=subnet->toString();
+    momHe=normalizeIP(momHe);
+
+    return (momMe<momHe);
 }
 
 QString Subnet_v6::getStrWC()

@@ -586,7 +586,9 @@ void MainWindow::updateSubnetTable()
         itemColColor->setTextAlignment(Qt::AlignHCenter);
         QTableWidgetItem *itemColIdentifier=new QTableWidgetItem(modelBackend->getSubnet(i)->getIdentifier());
         QTableWidgetItem *itemColIPAddress=new QTableWidgetItem(modelBackend->getSubnet(i)->toString());
-        QTableWidgetItem *itemColNetmask=new QTableWidgetItem(modelBackend->getSubnet(i)->getStrNM());
+        QTableWidgetItem *itemColNetmask;
+        if (modelBackend->getSubnet(i)->isV4()) itemColNetmask=new QTableWidgetItem(modelBackend->getSubnet(i)->getStrNM());
+        else itemColNetmask=new QTableWidgetItem(Subnet_v6::reduceIP(modelBackend->getSubnet(i)->getStrNM()));
         QTableWidgetItem *itemColDescription=new QTableWidgetItem(modelBackend->getSubnet(i)->getDescription());
         table->setItem(i,0,itemColColor);
         table->setItem(i,1,itemColIdentifier);
