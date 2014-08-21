@@ -126,6 +126,12 @@ Subnet_v6::Subnet_v6(QString cidr, QString id, QString description, QString note
 
 }
 
+Subnet_v6::Subnet_v6(unsigned char *ip, unsigned char *nm, QString id, QString description, QString notes, QObject *parent)
+{
+    // TODO: implement this
+}
+
+
 Subnet_v6::~Subnet_v6()
 {
     delete(_ip_address_lo);
@@ -465,6 +471,7 @@ QString Subnet_v6::normalizeIP(QString &ip)
     // If not, just return a zeroed address (no address, ::/128, http://de.wikipedia.org/wiki/IPv6#Besondere_Adressen)
     if (!preinp.contains(QRegExp("^([0-9a-f]{0,4}[:]){2,7}[0-9a-f]{0,4}(/[1-9][0-9]{0,2}){0,1}$",Qt::CaseSensitive)))
     {
+        qDebug("Subnet_v6::normalize(): invalid input, returning ::0/128...");
         outp="0000:0000:0000:0000:0000:0000:0000:0000";
         return outp;
     }
@@ -481,7 +488,7 @@ QString Subnet_v6::normalizeIP(QString &ip)
 
     } else inp=preinp;
 
-    // fetch the number of valid syllables, we will overwrite this later with a mor ecomplete set of syllables.
+    // fetch the number of valid syllables, we will overwrite this later with a more complete set of syllables.
     QStringList tokens = inp.split(":",QString::SkipEmptyParts,Qt::CaseSensitive);
 
     QString expansionHelper=":";
@@ -521,7 +528,6 @@ QString Subnet_v6::normalizeIP(QString &ip)
 // reduces zero repetitions according to standard. At least tries to be efficient in doing so.
 QString Subnet_v6::reduceIP(QString ip)
 {
-
     // take the input string, cut off the trailing/prepending whitespaces and convert to lowercase.
     QString inp=ip.trimmed().toLower();
 
@@ -554,50 +560,58 @@ QString Subnet_v6::reduceIP(QString ip)
 
     };
 
-    // Ok, we have a valid address without CIDR now. time to reduce it. first we have to split it up.
-    QStringList syllables = inp.split(":",QString::KeepEmptyParts,Qt::CaseSensitive);
+    // at this point we can assume that we have a valid ipv6 address at our hands inside inp.
+    // now we split everything up at ':' and store the syllables inside a stringlist.
+    QStringList syllables = inp.split(":",QString::SkipEmptyParts,Qt::CaseSensitive);
 
-    for (int i=0;i<syllables.count();i++) {
-        QString syllable=syllables.at(i);
+    for (int i=0;i<syllables.length();i++) {
+        QString momSyllable=syllables.at(i);
+        //qDebug("Subnet_v6::reduceIP(): Syllable %s found...",qPrintable(momSyllable.toUtf8()));
 
-        while ((syllable.at(0)=='0')&(syllable.length()>1)) syllable.remove(0,1);
+        QRegExp reZero=QRegExp("^0*",Qt::CaseSensitive);
+        reZero.setPatternSyntax(QRegExp::RegExp2);
+        momSyllable.replace(reZero,QString(""));
 
-        outp+=syllable;
-        if (i<7) outp+=":";
+        //qDebug("Subnet_v6::reduceIP(): Syllable reduced to %s",qPrintable(momSyllable.toUtf8()));
 
+        if (i==0) outp+=momSyllable;
+        else outp+=":"+momSyllable;
     }
 
-    QRegExp re = QRegExp("(0[:]){1,7}[0]{0,1}");
-    bool foundSome = outp.contains(re);
+    // again, we have a string, containing the address with all the leading zeros stripped and
+    // some empty syllables..
+    //qDebug("Subnet_v6::reduceIP(): IP zero-reduced to %s",qPrintable(outp.toUtf8()));
 
+    // now we use the power of regular expressions again to remove the recurring colons.
+    QRegExp re=QRegExp("([:]{3,})",Qt::CaseSensitive);
+    re.setPatternSyntax(QRegExp::RegExp2);
+    if (outp.contains(re)) {
+        //qDebug("Subnet_v6::reduceIP(): found a colon group > 3...");
+        // we have found at least one group of colons which is longer than three.
+        // we have greedy matching, so we got all the groups in our caps. lets see, which is the largest one.
+        int largestGroupCount=0;
 
-    uint indexOfLongestMatch=0;
-    uint lengthOfLongestMatch=0;
-    bool foundReducableString=false;
-
-    QStringList matches = re.capturedTexts();
-    if (foundSome) {
-
-        foundReducableString=true;
-
-        for (int i=0;i<matches.count();i++) {
-            if ((matches.at(i).length())>lengthOfLongestMatch) {
-                lengthOfLongestMatch=matches.at(i).length();
-                indexOfLongestMatch=i;
+        // iterate all the occurences, isolate the largest one and save its length.
+        for (int cnt=0;cnt<re.captureCount();cnt++) {
+            if (re.cap(cnt).length()>largestGroupCount) {
+                largestGroupCount=re.cap(cnt).length();
             }
-        }
-    }
+        };
 
-    if (foundReducableString) {
-        outp.replace(matches.at(indexOfLongestMatch),"::");
-    }
+        // prepare a pattern which matches only the longest colon-group
+        QString searchPattern="[:]{"+QString::number(largestGroupCount)+"}";
+        //qDebug("Subnet_v6::reduceIP(): found a colon group > 3 (%u). Pattern:\"%s\"",re.captureCount(),qPrintable(searchPattern.toUtf8()));
 
-    if (outp==":") outp="::";
+        // and replace it with '::'
+        if (largestGroupCount>0) outp.replace(QRegExp(searchPattern,Qt::CaseSensitive),"::");
+    };
+    //qDebug("Subnet_v6::reduceIP(): IP colon-reduced to %s",qPrintable(outp.toUtf8()));
 
     // now append the cidr part if there is one.
     if (isCIDR) outp+=(QString("/")+QString::number(CIDR));
 
     return outp;
+
 
 }
 

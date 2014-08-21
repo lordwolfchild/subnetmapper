@@ -63,6 +63,7 @@ public:
     explicit Subnet_v6(QObject *parent = 0);
     ~Subnet_v6();
 
+    explicit Subnet_v6(unsigned char *ip, unsigned char *nm, QString id = "n/a", QString description = "n/a", QString notes = "n/a", QObject *parent = 0);
     explicit Subnet_v6(QPair<quint64,quint64> ip, QPair<quint64,quint64> nm, QString id = "n/a", QString description = "n/a", QString notes = "n/a", QObject *parent = 0);
     explicit Subnet_v6(QString cidr = "::/128", QString id = "n/a", QString description = "n/a", QString notes = "n/a", QObject *parent = 0);
 

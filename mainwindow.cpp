@@ -414,6 +414,15 @@ void MainWindow::setupViews()
     map6->setSortingEnabled(false);
     map6->setSelectionBehavior(QAbstractItemView::SelectRows);
     map6->setSelectionMode(QAbstractItemView::SingleSelection);
+    map6->setUniformRowHeights(true);
+
+    QStringList headers;
+    headers.append("");
+    headers.append("Identifier");
+    headers.append("IP Address");
+    headers.append("Netmask");
+    headers.append("Description");
+    map6->setHeaderLabels(headers);
 
     QHeaderView *headerView = table->horizontalHeader();
     headerView->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -858,9 +867,9 @@ void MainWindow::updateIPv6Map()
 
     //qDebug("MainWindow::updateSubnetTable(): %d subnets found. adding to table...",modelBackend->count());
 
-    for (int i=0;i<modelBackend->count();i++) {
+    for (int i=0;i<modelBackend->count6();i++) {
         QStringList mom;
-        mom.append(modelBackend->getSubnet(i)->getIdentifier());
+        mom.append(modelBackend->getSubnet6(i)->getIdentifier());
         QTreeWidgetItem *itemColIdentifier=new QTreeWidgetItem(mom);
         map6->addTopLevelItem(itemColIdentifier);
         //qDebug("MainWindow::updateSubnetTable(): %d. item of %d added.",i,modelBackend->count());
@@ -874,4 +883,20 @@ void MainWindow::updateIPv6Map()
     qDebug("MainWindow::updateIPv6Map(): finished.");
 
 
+}
+
+// call with an empty string and receive the top-level object for map6 (recursion inside)
+QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
+{
+    if (prefix.count()<=0) {
+        // empty input. we have to start the recursion.
+        QStringList prefixList;
+
+        for (int i=0;i<modelBackend->count6();i++) {
+            prefixList.append(modelBackend->getSubnet6(i)->toString());
+        }
+
+    } else {
+        // we already have some prefixes, so lets deal with them and recurse.
+    }
 }

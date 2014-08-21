@@ -89,6 +89,8 @@ private:
     void setupModel();
     void setupViews();
 
+    QTreeWidgetItem* map6RecursivePopulator(QString prefix);
+
     void addRecentDocument(QString filename);
     void parseRecentDocuments();
     void generateRecentDocsMenu();
