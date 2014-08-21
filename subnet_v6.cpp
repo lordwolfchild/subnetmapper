@@ -726,4 +726,33 @@ QString Subnet_v6::getStrNM()
     return IP2String(momNM);
 }
 
+QString Subnet_v6::getNormalizedStrNM()
+{
+    QString mom=getStrNM();
+    return normalizeIP(mom);
+}
+
+QString Subnet_v6::getNormalizedStrWC()
+{
+    QString mom=getStrWC();
+    return normalizeIP(mom);
+}
+
+QString Subnet_v6::getReducedStrNM()
+{
+    QString mom=getStrNM();
+    return reduceIP(mom);
+}
+
+QString Subnet_v6::getReducedStrWC()
+{
+    QString mom=getStrWC();
+    return reduceIP(mom);
+}
+
+QString Subnet_v6::toNormalizedString()
+{
+    QString mom=toString();
+    return normalizeIP(mom);
+}
 

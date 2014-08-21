@@ -228,12 +228,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     toolbar->addSeparator();
 
-    ipv6Scale = new QSpinBox(this);
-    ipv6Scale->setMaximumWidth(100);
-    ipv6Scale->setMinimum(32);
-    ipv6Scale->setMaximum(64);
-    ipv6toolbar->addWidget(new QLabel("IPv6 Display: /",this));
-    ipv6toolbar->addWidget(ipv6Scale);
+//    ipv6Scale = new QSpinBox(this);
+//    ipv6Scale->setMaximumWidth(100);
+//    ipv6Scale->setMinimum(32);
+//    ipv6Scale->setMaximum(64);
+//    ipv6toolbar->addWidget(new QLabel("IPv6 Display: /",this));
+    ipv6toolbar->addWidget(new QLabel("IPv6 Toolbar empty...",this));
+//    ipv6toolbar->addWidget(ipv6Scale);
 
     ipv4toolbar->addSeparator();
     ipv4toolbar->addWidget(autoResizeOption);
@@ -348,8 +349,6 @@ void MainWindow::setupViews()
     QVBoxLayout *ipv6layout=new QVBoxLayout;
     map6 = new QTreeWidget();
     ipv6layout->addWidget(ipv6toolbar);
-    // TODO: Add real map here
-    //ipv6layout->addWidget(new QWidget());
     ipv6layout->addWidget(map6);
     QWidget *momipv6widget= new QWidget;
     momipv6widget->setLayout(ipv6layout);
@@ -588,7 +587,7 @@ void MainWindow::updateSubnetTable()
         QTableWidgetItem *itemColIPAddress=new QTableWidgetItem(modelBackend->getSubnet(i)->toString());
         QTableWidgetItem *itemColNetmask;
         if (modelBackend->getSubnet(i)->isV4()) itemColNetmask=new QTableWidgetItem(modelBackend->getSubnet(i)->getStrNM());
-        else itemColNetmask=new QTableWidgetItem(Subnet_v6::reduceIP(modelBackend->getSubnet(i)->getStrNM()));
+        else itemColNetmask=new QTableWidgetItem(((Subnet_v6*)modelBackend->getSubnet(i))->getReducedStrNM());
         QTableWidgetItem *itemColDescription=new QTableWidgetItem(modelBackend->getSubnet(i)->getDescription());
         table->setItem(i,0,itemColColor);
         table->setItem(i,1,itemColIdentifier);
@@ -871,7 +870,11 @@ void MainWindow::updateIPv6Map()
 
     for (int i=0;i<modelBackend->count6();i++) {
         QStringList mom;
+        mom.append(QString());
         mom.append(modelBackend->getSubnet6(i)->getIdentifier());
+        mom.append(modelBackend->getSubnet6(i)->toString());
+        mom.append(((Subnet_v6*)modelBackend->getSubnet6(i))->getReducedStrNM());
+        mom.append(modelBackend->getSubnet6(i)->getDescription());
         QTreeWidgetItem *itemColIdentifier=new QTreeWidgetItem(mom);
         map6->addTopLevelItem(itemColIdentifier);
         //qDebug("MainWindow::updateSubnetTable(): %d. item of %d added.",i,modelBackend->count());

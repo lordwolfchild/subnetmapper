@@ -93,6 +93,10 @@ public:
 
     QString getStrNM();
     QString getStrWC();
+    QString getNormalizedStrNM();
+    QString getNormalizedStrWC();
+    QString getReducedStrNM();
+    QString getReducedStrWC();
 
     static QString IP2String(QPair<quint64,quint64> &ip);
     static QPair<quint64,quint64> String2IP(QString &str_ip);
@@ -100,6 +104,7 @@ public:
     static QString reduceIP(QString ip);
 
     QString toString();
+    QString toNormalizedString();
 
     bool    containsHost(QPair<quint64,quint64> &host);
 
