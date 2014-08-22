@@ -451,6 +451,7 @@ QString Subnet_v6::normalizeIP(QString &ip)
     // parts of the ip and makes sure everything is in order with the ip. returns a
     // normalized zeroed ip in string representation if anything goes wrong.
 
+    //qDebug("Subnet_v6::normalizeIP(): normalizing %s",qPrintable(ip.trimmed().toLower().toUtf8()));
 
     // take the input string, cut off the trailing/prepending whitespaces and convert to lowercase.
     QString preinp=ip.trimmed().toLower();
@@ -471,7 +472,7 @@ QString Subnet_v6::normalizeIP(QString &ip)
     // If not, just return a zeroed address (no address, ::/128, http://de.wikipedia.org/wiki/IPv6#Besondere_Adressen)
     if (!preinp.contains(QRegExp("^([0-9a-f]{0,4}[:]){2,7}[0-9a-f]{0,4}(/[1-9][0-9]{0,2}){0,1}$",Qt::CaseSensitive)))
     {
-        qDebug("Subnet_v6::normalize(): invalid input, returning ::0/128...");
+        //qDebug("Subnet_v6::normalizeIP(): invalid input, returning ::0/128...");
         outp="0000:0000:0000:0000:0000:0000:0000:0000";
         return outp;
     }
@@ -521,6 +522,8 @@ QString Subnet_v6::normalizeIP(QString &ip)
     // Check for consistency a last time
     if (!(outp.count(':')==7)) outp="0000:0000:0000:0000:0000:0000:0000:0000";
 
+    //qDebug("Subnet_v6::normalizeIP(): normalized \"%s\" to \"%s\"",qPrintable(ip.trimmed().toLower().toUtf8()),qPrintable(outp.toUtf8()));
+
     // ...finished!
     return outp;
 }
@@ -568,7 +571,7 @@ QString Subnet_v6::reduceIP(QString ip)
         QString momSyllable=syllables.at(i);
         //qDebug("Subnet_v6::reduceIP(): Syllable %s found...",qPrintable(momSyllable.toUtf8()));
 
-        QRegExp reZero=QRegExp("^0*",Qt::CaseSensitive);
+        QRegExp reZero=QRegExp("^0{1,3}",Qt::CaseSensitive);
         reZero.setPatternSyntax(QRegExp::RegExp2);
         momSyllable.replace(reZero,QString(""));
 
@@ -578,28 +581,30 @@ QString Subnet_v6::reduceIP(QString ip)
         else outp+=":"+momSyllable;
     }
 
-    // again, we have a string, containing the address with all the leading zeros stripped and
-    // some empty syllables..
+    // again, we have a string, containing the address with all the leading zeros.
     //qDebug("Subnet_v6::reduceIP(): IP zero-reduced to %s",qPrintable(outp.toUtf8()));
 
     // now we use the power of regular expressions again to remove the recurring colons.
-    QRegExp re=QRegExp("([:]{3,})",Qt::CaseSensitive);
+    QRegExp re=QRegExp("((?:[:]0){2,})",Qt::CaseSensitive);
     re.setPatternSyntax(QRegExp::RegExp2);
     if (outp.contains(re)) {
-        //qDebug("Subnet_v6::reduceIP(): found a colon group > 3...");
+        //qDebug("Subnet_v6::reduceIP(): found a :0 group > 2 (%u)...",re.captureCount());
         // we have found at least one group of colons which is longer than three.
         // we have greedy matching, so we got all the groups in our caps. lets see, which is the largest one.
         int largestGroupCount=0;
 
+        // prepare a pattern for the longest colon-group
+        QString searchPattern="";
+
         // iterate all the occurences, isolate the largest one and save its length.
-        for (int cnt=0;cnt<re.captureCount();cnt++) {
+        for (int cnt=1;cnt<re.captureCount()+1;cnt++) {
             if (re.cap(cnt).length()>largestGroupCount) {
                 largestGroupCount=re.cap(cnt).length();
+                searchPattern=re.cap(cnt);
+                //qDebug("Subnet_v6::reduceIP(): found cap(%u): %s",cnt,qPrintable(re.cap(cnt).toUtf8()));
             }
         };
 
-        // prepare a pattern which matches only the longest colon-group
-        QString searchPattern="[:]{"+QString::number(largestGroupCount)+"}";
         //qDebug("Subnet_v6::reduceIP(): found a colon group > 3 (%u). Pattern:\"%s\"",re.captureCount(),qPrintable(searchPattern.toUtf8()));
 
         // and replace it with '::'

@@ -307,11 +307,11 @@ bool SM_ModelBackend::loadFromDomDoc (QDomDocument &doc)
                 Subnet_v6 *newSubnet = new Subnet_v6(this);
 
                 QString mom=netmaskNode.text();
-                qDebug("SM_ModelBackend::loadFromDomDoc(): parsed IPv6 Netmask: %s",qPrintable(mom.toUtf8()));
+                //qDebug("SM_ModelBackend::loadFromDomDoc(): parsed IPv6 Netmask: %s",qPrintable(mom.toUtf8()));
                 newSubnet->setNM(mom);
 
                 mom=addressNode.text();
-                qDebug("SM_ModelBackend::loadFromDomDoc(): parsed IPv6 IP: %s",qPrintable(mom.toUtf8()));
+                //qDebug("SM_ModelBackend::loadFromDomDoc(): parsed IPv6 IP: %s",qPrintable(mom.toUtf8()));
                 newSubnet->setIP(mom);
 
                 mom=identifierNode.text();

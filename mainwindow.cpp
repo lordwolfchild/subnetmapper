@@ -881,6 +881,7 @@ void MainWindow::updateIPv6Map()
         if (i==selectedItem) itemColIdentifier->setSelected(true);
     };
 
+    map6->addTopLevelItem(map6RecursivePopulator(QString()));
 
     //map6->scrollToItem(table->item(selectedItem,0),QAbstractItemView::PositionAtCenter);
 
