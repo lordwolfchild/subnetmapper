@@ -414,12 +414,13 @@ void MainWindow::setupViews()
     map6->setSelectionBehavior(QAbstractItemView::SelectRows);
     map6->setSelectionMode(QAbstractItemView::SingleSelection);
     map6->setUniformRowHeights(true);
+    map6->setColumnCount(5);
 
     QStringList headers;
     headers.append("");
+    headers.append("");
     headers.append("Identifier");
     headers.append("IP Address");
-    headers.append("Netmask");
     headers.append("Description");
     map6->setHeaderLabels(headers);
 
@@ -864,45 +865,104 @@ void MainWindow::updateIPv6Map()
     map6->clear();
 
 
-    int selectedItem=modelBackend->getSelectedIndex();
+    //int selectedItem=modelBackend->getSelectedIndex();
 
-    //qDebug("MainWindow::updateSubnetTable(): %d subnets found. adding to table...",modelBackend->count());
-
-    for (int i=0;i<modelBackend->count6();i++) {
-        QStringList mom;
-        mom.append(QString());
-        mom.append(modelBackend->getSubnet6(i)->getIdentifier());
-        mom.append(modelBackend->getSubnet6(i)->toString());
-        mom.append(((Subnet_v6*)modelBackend->getSubnet6(i))->getReducedStrNM());
-        mom.append(modelBackend->getSubnet6(i)->getDescription());
-        QTreeWidgetItem *itemColIdentifier=new QTreeWidgetItem(mom);
-        map6->addTopLevelItem(itemColIdentifier);
-        //qDebug("MainWindow::updateSubnetTable(): %d. item of %d added.",i,modelBackend->count());
-        if (i==selectedItem) itemColIdentifier->setSelected(true);
-    };
-
-    //map6->addTopLevelItem(map6RecursivePopulator(QString()));
+    QTreeWidgetItem* resultingIPv6Tree = map6RecursivePopulator(QString());
+    map6->addTopLevelItem(resultingIPv6Tree);
+    map6->expandAll();
+    map6->resizeColumnToContents(0);
+    map6->resizeColumnToContents(1);
+    map6->resizeColumnToContents(2);
+    map6->resizeColumnToContents(3);
+    map6->resizeColumnToContents(4);
 
     //map6->scrollToItem(table->item(selectedItem,0),QAbstractItemView::PositionAtCenter);
 
-
     qDebug("MainWindow::updateIPv6Map(): finished.");
-
 
 }
 
 // call with an empty string and receive the top-level object for map6 (recursion inside)
 QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
 {
+    // Storage for returned Items
+    QList<QTreeWidgetItem*> itemList;
+
     if (prefix.count()<=0) {
         // empty input. we have to start the recursion.
         QStringList prefixList;
 
         for (int i=0;i<modelBackend->count6();i++) {
-            prefixList.append(modelBackend->getSubnet6(i)->toNormalizedString());
+            prefixList.append(modelBackend->getSubnet6(i)->toNormalizedString().remove(':').left(2));
         }
 
+        prefixList.sort();
+        prefixList.removeDuplicates();
+
+        for (int i=0;i<prefixList.count();i++) {
+            itemList.append(map6RecursivePopulator(prefixList.at(i)));
+        }
     } else {
-        // we already have some prefixes, so lets deal with them and recurse.
+
+        if (prefix.length()<16) {
+            // We are not finished. recurse deeper until we reach the bottom.
+            QStringList prefixList;
+
+            for (int i=0;i<modelBackend->count6();i++) {
+                QString subnetaddr=modelBackend->getSubnet6(i)->toNormalizedString().remove(':');
+                if (subnetaddr.startsWith(prefix)) prefixList.append(subnetaddr.left(prefix.length()+2));
+            }
+
+            prefixList.sort();
+            prefixList.removeDuplicates();
+
+            for (int i=0;i<prefixList.count();i++) {
+                itemList.append(map6RecursivePopulator(prefixList.at(i)));
+            }
+
+        } else {
+
+            for (int i=0;i<modelBackend->count6();i++) {
+                QString subnetaddr=modelBackend->getSubnet6(i)->toNormalizedString().remove(':');
+                if (subnetaddr.startsWith(prefix)) {
+                    QStringList mom;
+                    mom.append(QString());
+                    mom.append(QString("  "));
+                    mom.append(modelBackend->getSubnet6(i)->getIdentifier());
+                    mom.append(modelBackend->getSubnet6(i)->toString());
+                    mom.append(modelBackend->getSubnet6(i)->getDescription());
+                    QTreeWidgetItem* terminalNode=new QTreeWidgetItem(mom);
+                    if ((modelBackend->getSubnet6(i)->getNotes()!="")&(modelBackend->getSubnet6(i)->getNotes()!="n/a")) terminalNode->setIcon(1,QIcon(QPixmap(":info.svg")));
+                    qDebug("MainWindow::map6RecursivePopulator(): Notes of Subnet \"%s\"",qPrintable(modelBackend->getSubnet6(i)->getNotes().toUtf8()));
+                    terminalNode->setBackgroundColor(1,modelBackend->getSubnet6(i)->getColor());
+                    itemList.append(terminalNode);
+                };
+            }
+
+
+        }
+
     }
+
+    // We are not interested in all dead ends of our recursion, so lets just throw them out
+    itemList.removeAll(NULL);
+
+    if (itemList.count()==0) return NULL;
+    if ((itemList.count()==1)&(itemList.at(0)->childCount()==1)) return itemList.at(0);
+
+    prefix=prefix.left(16);
+    int prefixlength=prefix.length();
+    for (int i=1;i<prefix.length()/4;i++) prefix=prefix.insert(i*4+(i-1),':');
+    prefix.sprintf("%s::/%u",qPrintable(prefix.toUtf8()),prefixlength*4);
+    //prefix=Subnet_v6::reduceIP(Subnet_v6::normalizeIP(prefix));
+
+    QStringList mom;
+    mom.append(QString(prefix));
+    QTreeWidgetItem* newNode=new QTreeWidgetItem(mom);
+
+    newNode->addChildren(itemList);
+
+    qDebug("MainWindow::map6RecursivePopulator(): end of Recursion: %s",qPrintable(prefix.toUtf8()));
+
+    return newNode;
 }
