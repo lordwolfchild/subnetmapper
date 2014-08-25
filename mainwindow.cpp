@@ -881,7 +881,7 @@ void MainWindow::updateIPv6Map()
         if (i==selectedItem) itemColIdentifier->setSelected(true);
     };
 
-    map6->addTopLevelItem(map6RecursivePopulator(QString()));
+    //map6->addTopLevelItem(map6RecursivePopulator(QString()));
 
     //map6->scrollToItem(table->item(selectedItem,0),QAbstractItemView::PositionAtCenter);
 
@@ -899,7 +899,7 @@ QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
         QStringList prefixList;
 
         for (int i=0;i<modelBackend->count6();i++) {
-            prefixList.append(modelBackend->getSubnet6(i)->toString());
+            prefixList.append(modelBackend->getSubnet6(i)->toNormalizedString());
         }
 
     } else {

@@ -38,8 +38,8 @@ public:
     ~SM_ModelBackend();
 
     Subnet* getSubnet(int index);
-    Subnet* getSubnet4(int index);
-    Subnet* getSubnet6(int index);
+    Subnet_v4* getSubnet4(int index);
+    Subnet_v6* getSubnet6(int index);
 
     void addSubnet(Subnet *subnet);
     void removeSubnet(Subnet *subnet);

@@ -44,16 +44,16 @@ Subnet* SM_ModelBackend::getSubnet(int index)
 
 }
 
-Subnet* SM_ModelBackend::getSubnet4(int index)
+Subnet_v4 *SM_ModelBackend::getSubnet4(int index)
 {
-    if ((index>=0)&(index<Subnet4List.count())) return Subnet4List.at(index);
+    if ((index>=0)&(index<Subnet4List.count())) return (Subnet_v4*)(Subnet4List.at(index));
     return NULL;
 
 }
 
-Subnet* SM_ModelBackend::getSubnet6(int index)
+Subnet_v6* SM_ModelBackend::getSubnet6(int index)
 {
-    if ((index>=0)&(index<Subnet6List.count())) return Subnet6List.at(index);
+    if ((index>=0)&(index<Subnet6List.count())) return (Subnet_v6*)(Subnet6List.at(index));
     return NULL;
 
 }
