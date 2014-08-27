@@ -21,7 +21,6 @@ SOURCES += main.cpp\
     sm_aboutdialog.cpp \
     sm_infodockwidget.cpp \
     sm_configdialog.cpp \
-    sm_subnet6widget.cpp \
     sm_modelbackend.cpp
 
 HEADERS  += mainwindow.h \
@@ -35,7 +34,6 @@ HEADERS  += mainwindow.h \
     sm_aboutdialog.h \
     sm_infodockwidget.h \
     sm_configdialog.h \
-    sm_subnet6widget.h \
     sm_modelbackend.h
 
 FORMS    += \

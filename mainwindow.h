@@ -25,7 +25,6 @@
 #include <QMainWindow>
 #include <QAbstractTableModel>
 #include "sm_subnetwidget.h"
-#include "sm_subnet6widget.h"
 #include <QTableWidget>
 #include <QTreeWidget>
 #include <QTabWidget>

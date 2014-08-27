@@ -36,7 +36,6 @@
 #include "sm_ipv4editdialog.h"
 #include "sm_ipv6editdialog.h"
 #include "sm_subnetwidget.h"
-#include "sm_subnet6widget.h"
 #include <QScrollArea>
 #include <QMessageBox>
 #include <QSlider>
@@ -299,7 +298,6 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::setupModel()
 {
-    qDebug("Setting up Models...");
     QSettings settings;
 
     // initialize the new model backend
@@ -319,7 +317,6 @@ void MainWindow::setupModel()
 
 void MainWindow::setupViews()
 {
-    qDebug("Setting up Views...");
     QSplitter *splitter = new QSplitter;
     splitter->setOrientation(Qt::Vertical);
     tabArea=new QTabWidget(this);
@@ -365,39 +362,6 @@ void MainWindow::setupViews()
     splitter->addWidget(table);
     splitter->setStretchFactor(0, 2);
     splitter->setStretchFactor(1, 1);
-
-//    QPushButton *buttonXplus  = new QPushButton("+",this);
-//    QPushButton *buttonXminus = new QPushButton("-",this);
-//    QPushButton *buttonYplus  = new QPushButton("+",this);
-//    QPushButton *buttonYminus = new QPushButton("-",this);
-//    QPushButton *buttonUpscale = new QPushButton("o",this);
-//    buttonXplus->setMaximumWidth(30);
-//    buttonXminus->setMaximumWidth(30);
-//    buttonYplus->setMaximumWidth(30);
-//    buttonYminus->setMaximumWidth(30);
-//    buttonUpscale->setMaximumWidth(15);
-
-//    scroller->addScrollBarWidget(buttonXplus,Qt::AlignRight);
-//    scroller->addScrollBarWidget(buttonXminus,Qt::AlignRight);
-//    scroller->addScrollBarWidget(buttonUpscale,Qt::AlignBottom);
-//    scroller->addScrollBarWidget(buttonYplus,Qt::AlignBottom);
-//    scroller->addScrollBarWidget(buttonYminus,Qt::AlignBottom);
-
-//    (scroller->horizontalScrollBar())->setMinimumWidth(width());
-//    (scroller->verticalScrollBar())->setMinimumHeight(height());
-//    (scroller->verticalScrollBar())->setBaseSize(200,20);
-//    (scroller->horizontalScrollBar())->setBaseSize(20,200);
-
-//    connect(buttonXplus,SIGNAL(clicked()),map,SLOT(xWidthPlus()));
-//    connect(buttonXminus,SIGNAL(clicked()),map,SLOT(xWidthMinus()));
-//    connect(buttonYplus,SIGNAL(clicked()),map,SLOT(line_heightPlus()));
-//    connect(buttonYminus,SIGNAL(clicked()),map,SLOT(line_heightMinus()));
-//    connect(buttonUpscale,SIGNAL(clicked()),map,SLOT(upscale()));
-
-//    connect(buttonXplus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
-//    connect(buttonXminus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
-//    connect(buttonYplus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
-//    connect(buttonYminus,SIGNAL(clicked()),this,SLOT(killAutoResize()));
 
     connect(autoResizeOption,SIGNAL(clicked()),this,SLOT(autoResizeClicked()));
 
@@ -567,29 +531,35 @@ void MainWindow::openFile(const QString &path)
 
 void MainWindow::updateSubnetTable()
 {
+    // clear the current table
     table->clear();
 
+    // set the dimensions of the table
     table->setRowCount(modelBackend->count());
     table->setColumnCount(5);
 
+    // prepare headers
     QStringList headers;
-    headers.append("kgkih");
+    headers.append("");
     headers.append("Identifier");
     headers.append("IP Address");
     headers.append("Netmask");
     headers.append("Description");
     table->setHorizontalHeaderLabels(headers);
 
+    // item for the icon display in the header
     QTableWidgetItem *tableHeaderItem1 = new QTableWidgetItem(tr(""));
     tableHeaderItem1->setIcon(QIcon(QPixmap(":info.svg")));
     tableHeaderItem1->setTextAlignment(Qt::AlignHCenter);
     table->setHorizontalHeaderItem(0,tableHeaderItem1);
 
+    // store the selected subnet
     int selectedItem=modelBackend->getSelectedIndex();
 
-    //qDebug("MainWindow::updateSubnetTable(): %d subnets found. adding to table...",modelBackend->count());
-
+    // iterate all subnets
     for (int i=0;i<modelBackend->count();i++) {
+
+        // create the item and populate it. pretty straightforward.
         QTableWidgetItem *itemColColor=new QTableWidgetItem();
         itemColColor->setBackgroundColor(modelBackend->getSubnet(i)->getColor());
         if (modelBackend->getSubnet(i)->getNotes()!="") itemColColor->setIcon(QIcon(QPixmap(":info.svg")));
@@ -605,15 +575,17 @@ void MainWindow::updateSubnetTable()
         table->setItem(i,2,itemColIPAddress);
         table->setItem(i,3,itemColNetmask);
         table->setItem(i,4,itemColDescription);
-        //qDebug("MainWindow::updateSubnetTable(): %d. item of %d added.",i,modelBackend->count());
-        if (i==selectedItem) itemColColor->setSelected(true);
-        if (i==selectedItem) itemColIdentifier->setSelected(true);
-        if (i==selectedItem) itemColIPAddress->setSelected(true);
-        if (i==selectedItem) itemColNetmask->setSelected(true);
-        if (i==selectedItem) itemColDescription->setSelected(true);
+        // if subnet is selected, select Item, too.
+        if (i==selectedItem) {
+            itemColColor->setSelected(true);
+            itemColIdentifier->setSelected(true);
+            itemColIPAddress->setSelected(true);
+            itemColNetmask->setSelected(true);
+            itemColDescription->setSelected(true);
+        };
     };
 
-
+    // scroll there to show it off
     table->scrollToItem(table->item(selectedItem,0),QAbstractItemView::PositionAtCenter);
 
 
@@ -933,14 +905,20 @@ void MainWindow::resetTitle()
 
 void MainWindow::updateIPv6Map()
 {
+    // clear the map for repopulation
     map6->clear();
 
     // store the current scale setting to presets
     QSettings settings;
     settings.setValue("mainwindow/ipv6scale",ipv6Scale->value());
 
+    // recurse through out data to get the whole subtree
     QTreeWidgetItem* resultingIPv6Tree = map6RecursivePopulator(QString());
+
+    // and add it to the map
     map6->addTopLevelItem(resultingIPv6Tree);
+
+    // tidy up display.
     map6->expandAll();
     map6->resizeColumnToContents(0);
     map6->resizeColumnToContents(1);
@@ -948,16 +926,12 @@ void MainWindow::updateIPv6Map()
     map6->resizeColumnToContents(3);
     map6->resizeColumnToContents(4);
 
-    //map6->scrollToItem(table->item(selectedItem,0),QAbstractItemView::PositionAtCenter);
-
+    // take care of selection.
     if ((modelBackend->getSelectedIndex()<=modelBackend->count())&&(modelBackend->getSubnet(modelBackend->getSelectedIndex())->isV6())) {
         Subnet_v6* subnet=modelBackend->getSubnet6(modelBackend->indexAllto6(modelBackend->getSelectedIndex()));
         QList<QTreeWidgetItem*> result=map6->findItems(subnet->toString(),Qt::MatchFixedString|Qt::MatchCaseSensitive|Qt::MatchRecursive,3);
         if (result.count()==1) map6->setCurrentItem(result.at(0));
-        //qDebug("found selected IPv6 Item: %s, result size %u.",qPrintable(subnet->toString().toUtf8()),result.count());
     }
-
-    //qDebug("MainWindow::updateIPv6Map(): finished.");
 
 }
 
@@ -971,36 +945,49 @@ QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
         // empty input. we have to start the recursion.
         QStringList prefixList;
 
+        // lets iterate through all nets and add them to our String List. But we only add the first two characters,
+        // as we only want to start the recursion here. the colons are not necessary anymore, too.
         for (int i=0;i<modelBackend->count6();i++) {
             prefixList.append(modelBackend->getSubnet6(i)->toNormalizedString().remove(':').left(2));
         }
 
+        // sort and dupe kill all the prefixes.
         prefixList.sort();
         prefixList.removeDuplicates();
 
+        // now recurse over our prefix list!
         for (int i=0;i<prefixList.count();i++) {
             itemList.append(map6RecursivePopulator(prefixList.at(i)));
         }
     } else {
-
+        // if the prefix is longer than zero, we are already in a running recursion,
+        // so lets search for all nets in our datamodel which start with our prefix,
+        // and recurse deeper. but only as far as we configured via out ipv6Scale Spinbox.
         if (prefix.length()<(ipv6Scale->value()/4)) {
-            // We are not finished. recurse deeper until we reach the bottom.
+
             QStringList prefixList;
 
+            // principle stays the same, iterate over all nets, check if they
+            // are part of the prefix, if yes, append them to the list.
             for (int i=0;i<modelBackend->count6();i++) {
                 QString subnetaddr=modelBackend->getSubnet6(i)->toNormalizedString().remove(':');
                 if (subnetaddr.startsWith(prefix)) prefixList.append(subnetaddr.left(prefix.length()+2));
             }
 
+            // sort and dupekill the prefixes.
             prefixList.sort();
             prefixList.removeDuplicates();
 
+            // recurse deeper and deeper...
             for (int i=0;i<prefixList.count();i++) {
                 itemList.append(map6RecursivePopulator(prefixList.at(i)));
             }
 
         } else {
 
+            // we reached the end/leaf of our recursion. So iterate all nets again. Check if they are part
+            // of our prefix. If yes, create a node and append them to the node list (itemList) for later
+            // tree integration.
             for (int i=0;i<modelBackend->count6();i++) {
                 QString subnetaddr=modelBackend->getSubnet6(i)->toNormalizedString().remove(':');
                 if (subnetaddr.startsWith(prefix)) {
@@ -1012,41 +999,52 @@ QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
                     mom.append(modelBackend->getSubnet6(i)->getDescription());
                     QTreeWidgetItem* terminalNode=new QTreeWidgetItem(mom);
                     if ((modelBackend->getSubnet6(i)->getNotes()!="")&(modelBackend->getSubnet6(i)->getNotes()!="n/a")) terminalNode->setIcon(1,QIcon(QPixmap(":info.svg")));
-                    //qDebug("MainWindow::map6RecursivePopulator(): Notes of Subnet \"%s\"",qPrintable(modelBackend->getSubnet6(i)->getNotes().toUtf8()));
                     terminalNode->setBackgroundColor(1,modelBackend->getSubnet6(i)->getColor());
                     itemList.append(terminalNode);
                 };
             }
-
-
         }
-
     }
 
-    // We are not interested in all dead ends of our recursion, so lets just throw them out
+    // This is it. We have iterated enough, now we create the tree data structure. All begins
+    // at the leafs. there we create the real Items with subnets in them. These Items are
+    // integrated into subtrees via their common subnets, as long until we reach the top level
+    // node.
+
+    // We are not interested in all possible dead ends of our recursion, so lets just throw them out
     itemList.removeAll(NULL);
 
+    // Only return valid objects or NULL.
     if (itemList.count()==0) return NULL;
+
+    // if we only would create a node which only carries a single child, return the child to
+    // save unecessary redundant structure, we would not gain any more information from it anyway.
     if ((itemList.count()==1)&(itemList.at(0)->childCount()==1)) return itemList.at(0);
 
-    prefix=prefix.left(16);
+    // lets fix up the display of our shared subnet nodes to only display the relevant address data.
+    prefix=prefix.left((ipv6Scale->value()/4));
     int prefixlength=prefix.length();
     QString newPrefix="";
+    // reinsert colons
     for (int i=0;i<prefixlength/4;i++) newPrefix+=prefix.mid(i*4,4)+":";
+    // cut the last colon
     prefix=newPrefix.left(newPrefix.length()-1);
+    // add CIDR info
     prefix.sprintf("%s::/%u",qPrintable(prefix.toUtf8()),prefixlength*4);
+    // reduce IP
     prefix=Subnet_v6::reduceIP(Subnet_v6::normalizeIP(prefix));
 
+    // prepare the TreeItem for our structure.
     QStringList mom;
     mom.append(QString(prefix));
     QTreeWidgetItem* newNode=new QTreeWidgetItem(mom);
     newNode->setForeground(0,QBrush(Qt::darkGray));
     newNode->setFlags(Qt::ItemIsEnabled);
 
+    // add the returned nodes to our structure item
     newNode->addChildren(itemList);
 
-    //qDebug("MainWindow::map6RecursivePopulator(): end of Recursion: %s",qPrintable(prefix.toUtf8()));
-
+    // return our subtree.
     return newNode;
 }
 
