@@ -952,13 +952,16 @@ QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
 
     prefix=prefix.left(16);
     int prefixlength=prefix.length();
-    for (int i=1;i<prefix.length()/4;i++) prefix=prefix.insert(i*4+(i-1),':');
+    QString newPrefix="";
+    for (int i=0;i<prefixlength/4;i++) newPrefix+=prefix.mid(i*4,4)+":";
+    prefix=newPrefix.left(newPrefix.length()-1);
     prefix.sprintf("%s::/%u",qPrintable(prefix.toUtf8()),prefixlength*4);
-    //prefix=Subnet_v6::reduceIP(Subnet_v6::normalizeIP(prefix));
+    prefix=Subnet_v6::reduceIP(Subnet_v6::normalizeIP(prefix));
 
     QStringList mom;
     mom.append(QString(prefix));
     QTreeWidgetItem* newNode=new QTreeWidgetItem(mom);
+    newNode->setForeground(0,QBrush(Qt::darkGray));
 
     newNode->addChildren(itemList);
 
