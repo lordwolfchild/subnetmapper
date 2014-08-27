@@ -68,6 +68,16 @@ MainWindow::MainWindow(QWidget *parent) :
     QMenu *helpMenu = new QMenu(tr("&Help"), this);
     recentDocsMenu = new QMenu(tr("&Recent Documents"), this);
 
+    // prepare scaling control for ipv6 map
+    ipv6Scale = new QSpinBox(this);
+    ipv6Scale->setMaximumWidth(100);
+    ipv6Scale->setMinimum(8);
+    ipv6Scale->setMaximum(120);
+    ipv6Scale->setSingleStep(8);
+    int scalePreset=settings.value("mainwindow/ipv6scale",64).toUInt();
+    if ((scalePreset%8==0)&(scalePreset<=120)&(scalePreset>=8)) ipv6Scale->setValue(settings.value("mainwindow/ipv6scale",64).toUInt());
+    else ipv6Scale->setValue(settings.value("mainwindow/ipv6scale",64).toUInt());
+
     // Open File
     QAction *openAction = fileMenu->addAction(tr("&Open..."));
     openAction->setShortcuts(QKeySequence::Open);
@@ -147,6 +157,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(modelBackend,SIGNAL(dataChanged()),this,SLOT(modelDataHasChanged()));
     connect(modelBackend,SIGNAL(data4Changed()),this,SLOT(modelDataHasChanged()));
     connect(modelBackend,SIGNAL(data6Changed()),this,SLOT(modelDataHasChanged()));
+    connect(ipv6Scale,SIGNAL(valueChanged(int)),this,SLOT(updateIPv6Map()));
     connect(editAction, SIGNAL(triggered()),this,SLOT(editCurrentSubnet()));
     connect(deleteAction,SIGNAL(triggered()),this,SLOT(deleteCurrentSubnet()));
     connect(showInfoAction,SIGNAL(triggered()),this,SLOT(showInfoPane()));
@@ -228,13 +239,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     toolbar->addSeparator();
 
-//    ipv6Scale = new QSpinBox(this);
-//    ipv6Scale->setMaximumWidth(100);
-//    ipv6Scale->setMinimum(32);
-//    ipv6Scale->setMaximum(64);
-//    ipv6toolbar->addWidget(new QLabel("IPv6 Display: /",this));
-    ipv6toolbar->addWidget(new QLabel("IPv6 Toolbar empty...",this));
-//    ipv6toolbar->addWidget(ipv6Scale);
+    ipv6toolbar->addWidget(new QLabel("IPv6 tree generation margin: /",this));
+    ipv6toolbar->addWidget(ipv6Scale);
 
     ipv4toolbar->addSeparator();
     ipv4toolbar->addWidget(autoResizeOption);
@@ -864,8 +870,9 @@ void MainWindow::updateIPv6Map()
 {
     map6->clear();
 
-
-    //int selectedItem=modelBackend->getSelectedIndex();
+    // store the current scale setting to presets
+    QSettings settings;
+    settings.setValue("mainwindow/ipv6scale",ipv6Scale->value());
 
     QTreeWidgetItem* resultingIPv6Tree = map6RecursivePopulator(QString());
     map6->addTopLevelItem(resultingIPv6Tree);
@@ -878,7 +885,14 @@ void MainWindow::updateIPv6Map()
 
     //map6->scrollToItem(table->item(selectedItem,0),QAbstractItemView::PositionAtCenter);
 
-    qDebug("MainWindow::updateIPv6Map(): finished.");
+    if ((modelBackend->getSelectedIndex()<=modelBackend->count())&&(modelBackend->getSubnet(modelBackend->getSelectedIndex())->isV6())) {
+        Subnet_v6* subnet=modelBackend->getSubnet6(modelBackend->indexAllto6(modelBackend->getSelectedIndex()));
+        QList<QTreeWidgetItem*> result=map6->findItems(subnet->toString(),Qt::MatchFixedString|Qt::MatchCaseSensitive|Qt::MatchRecursive,3);
+        if (result.count()==1) map6->setCurrentItem(result.at(0));
+        qDebug("found selected IPv6 Item: %s, result size %u.",qPrintable(subnet->toString().toUtf8()),result.count());
+    }
+
+    //qDebug("MainWindow::updateIPv6Map(): finished.");
 
 }
 
@@ -904,7 +918,7 @@ QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
         }
     } else {
 
-        if (prefix.length()<16) {
+        if (prefix.length()<(ipv6Scale->value()/4)) {
             // We are not finished. recurse deeper until we reach the bottom.
             QStringList prefixList;
 
@@ -933,7 +947,7 @@ QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
                     mom.append(modelBackend->getSubnet6(i)->getDescription());
                     QTreeWidgetItem* terminalNode=new QTreeWidgetItem(mom);
                     if ((modelBackend->getSubnet6(i)->getNotes()!="")&(modelBackend->getSubnet6(i)->getNotes()!="n/a")) terminalNode->setIcon(1,QIcon(QPixmap(":info.svg")));
-                    qDebug("MainWindow::map6RecursivePopulator(): Notes of Subnet \"%s\"",qPrintable(modelBackend->getSubnet6(i)->getNotes().toUtf8()));
+                    //qDebug("MainWindow::map6RecursivePopulator(): Notes of Subnet \"%s\"",qPrintable(modelBackend->getSubnet6(i)->getNotes().toUtf8()));
                     terminalNode->setBackgroundColor(1,modelBackend->getSubnet6(i)->getColor());
                     itemList.append(terminalNode);
                 };
@@ -965,7 +979,7 @@ QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
 
     newNode->addChildren(itemList);
 
-    qDebug("MainWindow::map6RecursivePopulator(): end of Recursion: %s",qPrintable(prefix.toUtf8()));
+    //qDebug("MainWindow::map6RecursivePopulator(): end of Recursion: %s",qPrintable(prefix.toUtf8()));
 
     return newNode;
 }

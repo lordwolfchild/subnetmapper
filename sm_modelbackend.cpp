@@ -58,6 +58,34 @@ Subnet_v6* SM_ModelBackend::getSubnet6(int index)
 
 }
 
+// converts global index to specific index, returns -1 if unsuccessful (should never be the case!!)
+int SM_ModelBackend::index6toAll(int index)
+{
+    Subnet* subnet=getSubnet6(index);
+    return SubnetList.indexOf(subnet);
+}
+
+// converts global index to specific index, returns -1 if unsuccessful (should never be the case!!)
+int SM_ModelBackend::index4toAll(int index)
+{
+    Subnet* subnet=getSubnet4(index);
+    return SubnetList.indexOf(subnet);
+}
+
+// converts ipv6 index to global index, returns -1 if unsuccessful (should never be the case!!)
+int SM_ModelBackend::indexAllto6(int index)
+{
+    Subnet* subnet=getSubnet(index);
+    return Subnet6List.indexOf(subnet);
+}
+
+// converts ipv4 index to global index, returns -1 if unsuccessful (should never be the case!!)
+int SM_ModelBackend::indexAllto4(int index)
+{
+    Subnet* subnet=getSubnet(index);
+    return Subnet4List.indexOf(subnet);
+}
+
 // returns selected Index or subnetList.count+1
 int SM_ModelBackend::getSelectedIndex()
 {

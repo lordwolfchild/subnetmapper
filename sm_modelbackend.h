@@ -49,6 +49,12 @@ public:
     int getSelectedIndex();
     bool selectIndex(int index);
 
+    int index6toAll(int index);
+    int index4toAll(int index);
+
+    int indexAllto6(int index);
+    int indexAllto4(int index);
+
     void changedData();
     void changedData4();
     void changedData6();
