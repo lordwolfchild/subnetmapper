@@ -126,12 +126,6 @@ Subnet_v6::Subnet_v6(QString cidr, QString id, QString description, QString note
 
 }
 
-Subnet_v6::Subnet_v6(unsigned char *ip, unsigned char *nm, QString id, QString description, QString notes, QObject *parent)
-{
-    // TODO: implement this
-}
-
-
 Subnet_v6::~Subnet_v6()
 {
     delete(_ip_address_lo);

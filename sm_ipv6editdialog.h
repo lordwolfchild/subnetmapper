@@ -50,7 +50,7 @@ public:
     void setIdentifier(QString identifier);
 
     QColor getColor();
-    void setColor(QColor &color);
+    void setColor(QColor color);
 
 public slots:
     void updateFields();

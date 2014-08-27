@@ -410,6 +410,7 @@ void SM_SubnetWidget::mousePressEvent(QMouseEvent *event)
             modelBackend->selectIndex(modelBackend->count()+1);
         }
 
+        ((MainWindow*)window())->selectionChanged();
         repaint();
     }
 

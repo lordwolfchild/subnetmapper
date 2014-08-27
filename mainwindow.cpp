@@ -421,6 +421,8 @@ void MainWindow::setupViews()
     map6->setSelectionMode(QAbstractItemView::SingleSelection);
     map6->setUniformRowHeights(true);
     map6->setColumnCount(5);
+    map6->setExpandsOnDoubleClick(false);
+    map6->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     QStringList headers;
     headers.append("");
@@ -429,6 +431,8 @@ void MainWindow::setupViews()
     headers.append("IP Address");
     headers.append("Description");
     map6->setHeaderLabels(headers);
+
+    connect(map6,SIGNAL(itemClicked(QTreeWidgetItem*,int)),this,SLOT(map6ItemClicked(QTreeWidgetItem*,int)));
 
     QHeaderView *headerView = table->horizontalHeader();
     headerView->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -772,8 +776,65 @@ void MainWindow::deleteCurrentSubnet()
 
 void MainWindow::editCurrentSubnet()
 {
-    if (map) map->editCurrentSubnet();
-    mapWasAltered();
+    int selection=modelBackend->getSelectedIndex();
+
+    if (modelBackend->getSubnet(selection)->isV4())
+    {
+        if (map) map->editCurrentSubnet();
+        mapWasAltered();
+    } else {
+
+        Subnet_v6* subnet6=modelBackend->getSubnet6(modelBackend->indexAllto6(selection));
+
+        SM_IPv6EditDialog editor(this);
+
+        editor.setModal(true);
+
+        editor.setDescription(subnet6->getDescription());
+        editor.setIdentifier(subnet6->getIdentifier());
+        editor.setNM(subnet6->getNormalizedStrNM());
+        editor.setIP(subnet6->toNormalizedString());
+        editor.setColor(subnet6->getColor());
+        editor.updateFields();
+
+        if (editor.exec()==QDialog::Accepted) {
+
+            QString momdesc = editor.getDescription();
+            QString momid = editor.getIdentifier();
+
+            Subnet *newSubnet = new Subnet_v6(editor.getIP(),editor.getNM());
+            newSubnet->setDescription(momdesc);
+            newSubnet->setIdentifier(momid);
+
+            bool isNotOverlappingWithAnything=true;
+
+            for (int i=0;i<modelBackend->count();i++) {
+                if (modelBackend->getSubnet(i)->isV6())
+                    if (((Subnet_v6*)(modelBackend->getSubnet(i)))->overlapsWith(*((Subnet_v6*)newSubnet)))
+                        isNotOverlappingWithAnything=false;
+            }
+
+            if (isNotOverlappingWithAnything) {
+                subnet6->setDescription(momdesc);
+                subnet6->setIdentifier(momid);
+                subnet6->setColor(editor.getColor());
+                QString momIP=editor.getIP();
+                QString momNM=editor.getNM();
+                subnet6->setIP(momIP);
+                subnet6->setNM(momNM);
+                mapWasAltered();
+            } else {
+                QMessageBox msgBox;
+                msgBox.setText("The Subnet you specified overlaps with an existing subnet.");
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setDetailedText("The overlapping of subnets in a single map is not allowed in SubnetMapper. The author of this program cannot think of a situation in the real world where this could be an advisable situation. If you find yourself in a mess like this, please think it over, stuff like that always catches up with you at a later point in time, when you are actually least expecting it.");
+                msgBox.exec();
+            }
+
+        }
+
+
+    }
 }
 
 void MainWindow::showInfoPane()
@@ -797,14 +858,18 @@ void MainWindow::showConfigDialog()
 
 void MainWindow::modelDataHasChanged()
 {
-    std::cout << "MainWindow::modelDataHasChanged() called..." << std::endl;
+    //qDebug("MainWindow::modelDataHasChanged() called...");
     updateSubnetTable();
     updateIPv6Map();
 }
 
 void MainWindow::selectionChanged()
 {
+    //qDebug("MainWindow::selectionChanged() called...");
     int selection=modelBackend->getSelectedIndex();
+
+    if (modelBackend->getSubnet(selection)->isV4()) tabArea->setCurrentIndex(0);
+    else tabArea->setCurrentIndex(1);
 
     if (selection<=modelBackend->count()) {
         infoDock->setSubnet(modelBackend->getSubnet(selection));
@@ -824,7 +889,7 @@ void MainWindow::autoResizeClicked()
 
 void MainWindow::subnetTableItemChanged(QTableWidgetItem * current, QTableWidgetItem * previous)
 {
-    // if nothing changes, just quit, because we wuld fall in an endless loop otherwise
+    // if nothing changes, just quit, because we would fall in an endless loop otherwise
     if (current==previous) return;
 
     // if no selection available, do nothing. if else, select the item.
@@ -889,7 +954,7 @@ void MainWindow::updateIPv6Map()
         Subnet_v6* subnet=modelBackend->getSubnet6(modelBackend->indexAllto6(modelBackend->getSelectedIndex()));
         QList<QTreeWidgetItem*> result=map6->findItems(subnet->toString(),Qt::MatchFixedString|Qt::MatchCaseSensitive|Qt::MatchRecursive,3);
         if (result.count()==1) map6->setCurrentItem(result.at(0));
-        qDebug("found selected IPv6 Item: %s, result size %u.",qPrintable(subnet->toString().toUtf8()),result.count());
+        //qDebug("found selected IPv6 Item: %s, result size %u.",qPrintable(subnet->toString().toUtf8()),result.count());
     }
 
     //qDebug("MainWindow::updateIPv6Map(): finished.");
@@ -976,6 +1041,7 @@ QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
     mom.append(QString(prefix));
     QTreeWidgetItem* newNode=new QTreeWidgetItem(mom);
     newNode->setForeground(0,QBrush(Qt::darkGray));
+    newNode->setFlags(Qt::ItemIsEnabled);
 
     newNode->addChildren(itemList);
 
@@ -983,3 +1049,19 @@ QTreeWidgetItem* MainWindow::map6RecursivePopulator(QString prefix)
 
     return newNode;
 }
+
+void MainWindow::map6ItemClicked(QTreeWidgetItem * item, int)
+{
+    if (item!=NULL) {
+        QString selectedItemText=item->text(3);
+        bool foundSelectedSubnet=false;
+        for (int i=0;i<modelBackend->count6();i++) {
+            if (modelBackend->getSubnet6(i)->toString()==selectedItemText) {
+                foundSelectedSubnet=true;
+                modelBackend->selectIndex(modelBackend->index6toAll(i));
+            }
+        };
+        if (foundSelectedSubnet) selectionChanged();
+    }
+}
+

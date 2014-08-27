@@ -48,7 +48,7 @@ public:
 protected:
     void resizeEvent ( QResizeEvent * event );
 
-private slots:
+public slots:
     void openFile(const QString &path = QString());
     void saveFile();
 
@@ -75,14 +75,13 @@ private slots:
 
     void recentDocsMenuTrigger();
 
-
-public slots:
-
     void mapWasAltered();
     void updateSubnetTable();
     void updateIPv6Map();
     void subnetTableItemChanged(QTableWidgetItem * current, QTableWidgetItem * previous);
     void subnetTableSelectRow(int index);
+
+    void map6ItemClicked(QTreeWidgetItem * item, int column);
 
 private:
     void resetTitle();

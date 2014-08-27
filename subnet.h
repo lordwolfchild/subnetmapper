@@ -49,7 +49,7 @@ public:
     virtual QString& getNotes() = 0;
 
     QColor getColor();
-    void setColor(QColor &color);
+    void setColor(QColor color);
 
     virtual void dumpAll() = 0;
     virtual QString toString() = 0;

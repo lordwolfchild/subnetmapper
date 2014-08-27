@@ -87,7 +87,7 @@ QColor SM_IPv6EditDialog::getColor()
     return selectedColor;
 }
 
-void SM_IPv6EditDialog::setColor(QColor &color)
+void SM_IPv6EditDialog::setColor(QColor color)
 {
     selectedColor=color;
     ui->colorBox->setStyleSheet("QFrame { background-color: "+selectedColor.name()+" }");

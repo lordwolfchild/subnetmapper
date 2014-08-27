@@ -113,7 +113,10 @@ void SM_InfoDockWidget::updateSubnet()
         ui->sn_name->setText(momnet->getIdentifier());
         ui->sn_nm->setText(momnet->reduceIP(momnet->IP2String(netmask)));
         ui->sn_notes->setText(momnet->getNotes());
-        ui->sn_size->setText(QString::number(wildcard.second));
+        if (wildcard.second>1000000) ui->sn_size->setText("big. (>1Mill.)");
+        if (wildcard.second>1000000000) ui->sn_size->setText("BIG. (>1 Bill.)");
+        if (wildcard.second>1000000000000) ui->sn_size->setText("REALLY big...");
+        if (wildcard.second<100000) ui->sn_size->setText(QString::number(wildcard.second));
         ui->sn_wc->setText(momnet->reduceIP(momnet->IP2String(wildcard)));
         ui->sn_ipver->setText("6");
         ui->sn_color->setStyleSheet("QLabel { background:"

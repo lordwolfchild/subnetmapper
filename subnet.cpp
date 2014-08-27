@@ -34,7 +34,7 @@ QColor Subnet::getColor()
     return *_color;
 }
 
-void Subnet::setColor(QColor &color)
+void Subnet::setColor(QColor color)
 {
     *_color=color;
 }
