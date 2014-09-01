@@ -840,8 +840,10 @@ void MainWindow::selectionChanged()
     //qDebug("MainWindow::selectionChanged() called...");
     int selection=modelBackend->getSelectedIndex();
 
-    if (modelBackend->getSubnet(selection)->isV4()) tabArea->setCurrentIndex(0);
-    else tabArea->setCurrentIndex(1);
+    if (modelBackend->getSubnet(selection)) {
+        if (modelBackend->getSubnet(selection)->isV4()) tabArea->setCurrentIndex(0);
+        else tabArea->setCurrentIndex(1);
+    };
 
     if (selection<=modelBackend->count()) {
         infoDock->setSubnet(modelBackend->getSubnet(selection));
